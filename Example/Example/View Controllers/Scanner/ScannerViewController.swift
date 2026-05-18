@@ -44,6 +44,8 @@ final class ScannerViewController: UITableViewController, CBCentralManagerDelega
         // Default to true to filter devices by name
         filterByName = UserDefaults.standard.object(forKey: "filterByName") != nil ? UserDefaults.standard.bool(forKey: "filterByName") : true
         filterByRssi = UserDefaults.standard.bool(forKey: "filterByRssi")
+        
+        tableView.register(ScannerTableViewCell.self, forCellReuseIdentifier: ScannerTableViewCell.reuseIdentifier)
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -157,9 +159,9 @@ final class ScannerViewController: UITableViewController, CBCentralManagerDelega
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let aCell = tableView.dequeueReusableCell(withIdentifier: ScannerTableViewCell.reuseIdentifier, for: indexPath) as! ScannerTableViewCell
-        aCell.setupViewWithPeripheral(filteredPeripherals[indexPath.row])
-        return aCell
+        let cell: ScannerTableViewCell! = tableView.dequeueReusableCell(withIdentifier: ScannerTableViewCell.reuseIdentifier, for: indexPath) as? ScannerTableViewCell
+        cell.setupViewWithPeripheral(filteredPeripherals[indexPath.row])
+        return cell
     }
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {

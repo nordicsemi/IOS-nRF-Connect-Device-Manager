@@ -194,45 +194,6 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" systemColor="groupTableViewBackgroundColor"/>
                         <inset key="separatorInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
-                        <prototypes>
-                            <tableViewCell clipsSubviews="YES" contentMode="scaleAspectFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" accessoryType="disclosureIndicator" indentationWidth="10" reuseIdentifier="deviceItem" id="fwW-dh-uj8" userLabel="Device Item" customClass="ScannerTableViewCell" customModule="nRF_Connect_Device_Manager" customModuleProvider="target">
-                                <rect key="frame" x="0.0" y="55.333332061767578" width="375" height="50"/>
-                                <autoresizingMask key="autoresizingMask"/>
-                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" tableViewCell="fwW-dh-uj8" id="6bp-sO-eho">
-                                    <rect key="frame" x="0.0" y="0.0" width="348.66666666666669" height="50"/>
-                                    <autoresizingMask key="autoresizingMask"/>
-                                    <subviews>
-                                        <imageView userInteractionEnabled="NO" alpha="0.80000001192092896" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="rssi_4" translatesAutoresizingMaskIntoConstraints="NO" id="Lao-ZO-8YE" userLabel="RSSI Icon">
-                                            <rect key="frame" x="302.66666666666669" y="8" width="38" height="34"/>
-                                            <color key="tintColor" systemColor="labelColor"/>
-                                            <constraints>
-                                                <constraint firstAttribute="width" constant="38" id="TXE-XI-NBX"/>
-                                            </constraints>
-                                        </imageView>
-                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="&lt;Peripheral Name&gt;" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="lR8-aS-dEm">
-                                            <rect key="frame" x="16" y="14.666666666666664" width="147" height="21"/>
-                                            <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                            <nil key="textColor"/>
-                                            <nil key="highlightedColor"/>
-                                        </label>
-                                    </subviews>
-                                    <constraints>
-                                        <constraint firstItem="Lao-ZO-8YE" firstAttribute="top" secondItem="6bp-sO-eho" secondAttribute="top" constant="8" id="9CH-R1-EN1"/>
-                                        <constraint firstItem="lR8-aS-dEm" firstAttribute="leading" secondItem="6bp-sO-eho" secondAttribute="leading" constant="16" id="HLb-1T-4g6"/>
-                                        <constraint firstAttribute="trailing" secondItem="Lao-ZO-8YE" secondAttribute="trailing" constant="8" id="cYT-ci-0tV"/>
-                                        <constraint firstItem="lR8-aS-dEm" firstAttribute="centerY" secondItem="6bp-sO-eho" secondAttribute="centerY" id="deo-99-rOg"/>
-                                        <constraint firstItem="Lao-ZO-8YE" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="lR8-aS-dEm" secondAttribute="trailing" constant="10" id="sd0-Cr-5Mf"/>
-                                        <constraint firstAttribute="bottom" secondItem="Lao-ZO-8YE" secondAttribute="bottom" constant="8" id="tBm-2w-Oc4"/>
-                                    </constraints>
-                                </tableViewCellContentView>
-                                <viewLayoutGuide key="safeArea" id="hGV-SQ-uMI"/>
-                                <color key="backgroundColor" systemColor="tableCellGroupedBackgroundColor"/>
-                                <connections>
-                                    <outlet property="peripheralName" destination="lR8-aS-dEm" id="sPt-9d-6Df"/>
-                                    <outlet property="peripheralRSSIIcon" destination="Lao-ZO-8YE" id="hiF-OH-trC"/>
-                                </connections>
-                            </tableViewCell>
-                        </prototypes>
                         <connections>
                             <outlet property="dataSource" destination="brr-jW-Ynb" id="VfV-uG-kZR"/>
                             <outlet property="delegate" destination="brr-jW-Ynb" id="uy9-2g-OV5"/>
@@ -3026,34 +2987,30 @@
         <image name="ic_recents" width="30" height="30"/>
         <image name="ic_send" width="30" height="30"/>
         <image name="info.circle" catalog="system" width="128" height="123"/>
-        <image name="rssi_4" width="170.66667175292969" height="170.66667175292969"/>
         <image name="switch.2" catalog="system" width="128" height="115"/>
         <systemColor name="groupTableViewBackgroundColor">
             <color red="0.94901960784313721" green="0.94901960784313721" blue="0.96862745098039216" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
-        <systemColor name="labelColor">
-            <color white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-        </systemColor>
         <systemColor name="secondaryLabelColor">
-            <color red="0.23529411759999999" green="0.23529411759999999" blue="0.26274509800000001" alpha="0.59999999999999998" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.23529411764705882" green="0.23529411764705882" blue="0.2627450980392157" alpha="0.59999999999999998" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
         <systemColor name="secondarySystemBackgroundColor">
-            <color red="0.94901960780000005" green="0.94901960780000005" blue="0.96862745100000003" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.94901960784313721" green="0.94901960784313721" blue="0.96862745098039216" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
         <systemColor name="separatorColor">
-            <color red="0.23529411759999999" green="0.23529411759999999" blue="0.26274509800000001" alpha="0.12" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.23529411764705882" green="0.23529411764705882" blue="0.2627450980392157" alpha="0.12" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>
         <systemColor name="systemRedColor">
-            <color red="1" green="0.21960784310000001" blue="0.23529411759999999" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="1" green="0.2196078431372549" blue="0.23529411764705882" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
         <systemColor name="tableCellGroupedBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>
         <systemColor name="tintColor">
-            <color red="0.0" green="0.53333333329999999" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.0" green="0.53333333333333333" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
     </resources>
 </document>
