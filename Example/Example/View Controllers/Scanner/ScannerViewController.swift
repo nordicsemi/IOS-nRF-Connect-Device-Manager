@@ -31,14 +31,10 @@ final class ScannerViewController: UITableViewController, CBCentralManagerDelega
     // MARK: onFilterTapped
     
     @objc func onFilterTapped(_ sender: UIBarButtonItem) {
-        guard let filterController = storyboard?.instantiateViewController(withIdentifier: "filterVC") as? ScannerFilterViewController else { return }
-            
+        let filterController = ScannerFilterViewController(style: .plain)
+        filterController.preferredContentSize = CGSize(width: 320, height: 98)
         filterController.modalPresentationStyle = .popover
-        filterController.popoverPresentationController?.delegate = self
-        filterController.filterByNameEnabled = filterByName
-        filterController.filterByRssiEnabled = filterByRssi
         filterController.delegate = self
-        
         filterController.popoverPresentationController?.delegate = self
         filterController.popoverPresentationController?.permittedArrowDirections = [.any]
         filterController.popoverPresentationController?.barButtonItem = sender
