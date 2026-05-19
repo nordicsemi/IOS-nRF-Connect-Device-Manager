@@ -201,13 +201,6 @@
                     </tableView>
                     <navigationItem key="navigationItem" title="Device Manager" id="JgL-aj-vMP">
                         <barButtonItem key="backBarButtonItem" title="Scanner" id="XAL-Mr-ksZ"/>
-                        <barButtonItem key="leftBarButtonItem" image="switch.2" catalog="system" id="59U-yJ-RRu">
-                            <connections>
-                                <segue destination="Gmt-mw-TXu" kind="popoverPresentation" identifier="showFilter" popoverAnchorBarButtonItem="59U-yJ-RRu" id="HHO-mt-Vl4">
-                                    <popoverArrowDirection key="popoverArrowDirection" up="YES" down="YES" left="YES" right="YES"/>
-                                </segue>
-                            </connections>
-                        </barButtonItem>
                         <rightBarButtonItems>
                             <barButtonItem title="About" id="aWy-Ct-4js">
                                 <connections>
@@ -1637,32 +1630,32 @@
         <!--Filter-->
         <scene sceneID="Vyr-7A-LFt">
             <objects>
-                <viewController title="Filter" id="Gmt-mw-TXu" customClass="ScannerFilterViewController" customModule="nRF_Connect_Device_Manager" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="filterVC" title="Filter" id="Gmt-mw-TXu" customClass="ScannerFilterViewController" customModule="nRF_Connect_Device_Manager" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="01s-A2-QUR">
                         <rect key="frame" x="0.0" y="0.0" width="320" height="106"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Show only named devices" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Xte-Te-n8c" userLabel="Show only named devices">
-                                <rect key="frame" x="16" y="70" width="167.33333333333334" height="17"/>
+                                <rect key="frame" x="16" y="120" width="167.33333333333334" height="17"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="tTw-of-mRp" userLabel="Switch UUID">
-                                <rect key="frame" x="243" y="64.666666666666671" width="63" height="28"/>
+                                <rect key="frame" x="243" y="114.66666666666669" width="63" height="28"/>
                                 <color key="onTintColor" red="0.0" green="0.54800000000000004" blue="0.82499999999999996" alpha="1" colorSpace="calibratedRGB"/>
                                 <connections>
                                     <action selector="filterValueChanged:" destination="Gmt-mw-TXu" eventType="valueChanged" id="hjE-gp-1oL"/>
                                 </connections>
                             </switch>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Only nearby devices" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="QlI-lV-eZ5">
-                                <rect key="frame" x="16" y="109" width="131" height="17"/>
+                                <rect key="frame" x="16" y="159" width="131" height="17"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="g3p-1R-czM" userLabel="Switch Only Nearby">
-                                <rect key="frame" x="243" y="103.66666666666667" width="63" height="28.000000000000014"/>
+                                <rect key="frame" x="243" y="153.66666666666666" width="63" height="28"/>
                                 <color key="onTintColor" red="0.0" green="0.54800000000000004" blue="0.82499999999999996" alpha="1" colorSpace="calibratedRGB"/>
                                 <connections>
                                     <action selector="filterValueChanged:" destination="Gmt-mw-TXu" eventType="valueChanged" id="Mxa-7i-FO2"/>
@@ -2566,7 +2559,7 @@
         <scene sceneID="OqD-0B-QPm">
             <objects>
                 <viewController title="Upload" id="ZG1-GB-bgc" customClass="FileUploadViewController" customModule="nRF_Connect_Device_Manager" customModuleProvider="target" sceneMemberID="viewController">
-                    <view key="view" contentMode="scaleToFill" ambiguous="YES" id="yVO-JE-3UU">
+                    <view key="view" contentMode="scaleToFill" id="yVO-JE-3UU">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="271"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
@@ -2966,7 +2959,6 @@
         <image name="ic_recents" width="30" height="30"/>
         <image name="ic_send" width="30" height="30"/>
         <image name="info.circle" catalog="system" width="128" height="123"/>
-        <image name="switch.2" catalog="system" width="128" height="115"/>
         <systemColor name="groupTableViewBackgroundColor">
             <color red="0.94901960784313721" green="0.94901960784313721" blue="0.96862745098039216" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
