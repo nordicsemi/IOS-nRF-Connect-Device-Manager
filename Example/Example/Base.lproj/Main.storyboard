@@ -329,7 +329,7 @@
         <!--Device-->
         <scene sceneID="iYa-Ku-3q1">
             <objects>
-                <tableViewController title="Device" id="JPt-7E-9lH" customClass="DeviceController" customModule="nRF_Connect_Device_Manager" customModuleProvider="target" sceneMemberID="viewController">
+                <tableViewController storyboardIdentifier="deviceVC" title="Device" id="JPt-7E-9lH" customClass="DeviceController" customModule="nRF_Connect_Device_Manager" customModuleProvider="target" sceneMemberID="viewController">
                     <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="static" style="grouped" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="18" sectionFooterHeight="18" id="e6F-6W-hpD">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -631,7 +631,7 @@
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="CmZ-9g-PQn" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="2350" y="-612"/>
+            <point key="canvasLocation" x="2350" y="-479"/>
         </scene>
         <!--Base View Controller-->
         <scene sceneID="kvH-Bp-M1y">
@@ -643,12 +643,6 @@
                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <color key="barTintColor" systemColor="secondarySystemBackgroundColor"/>
                     </tabBar>
-                    <connections>
-                        <segue destination="JPt-7E-9lH" kind="relationship" relationship="viewControllers" id="iw3-ns-kWG"/>
-                        <segue destination="SO7-PQ-cvq" kind="relationship" relationship="viewControllers" id="FcY-IS-Ces"/>
-                        <segue destination="LfJ-Od-S9L" kind="relationship" relationship="viewControllers" id="FAE-HY-6Og"/>
-                        <segue destination="HbD-Bf-mkl" kind="relationship" relationship="viewControllers" id="GKl-4o-SUO"/>
-                    </connections>
                 </tabBarController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="d5b-LC-i65" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
@@ -657,7 +651,7 @@
         <!--Image-->
         <scene sceneID="URt-ni-pll">
             <objects>
-                <tableViewController title="Image" id="SO7-PQ-cvq" customClass="ImageController" customModule="nRF_Connect_Device_Manager" customModuleProvider="target" sceneMemberID="viewController">
+                <tableViewController storyboardIdentifier="imageVC" title="Image" id="SO7-PQ-cvq" customClass="ImageController" customModule="nRF_Connect_Device_Manager" customModuleProvider="target" sceneMemberID="viewController">
                     <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="static" style="grouped" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="18" sectionFooterHeight="18" id="jkl-Te-ecj">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -1014,7 +1008,7 @@
         <!--Files-->
         <scene sceneID="rQ6-65-8EL">
             <objects>
-                <tableViewController title="Files" id="LfJ-Od-S9L" customClass="FilesController" customModule="nRF_Connect_Device_Manager" customModuleProvider="target" sceneMemberID="viewController">
+                <tableViewController storyboardIdentifier="filesVC" title="Files" id="LfJ-Od-S9L" customClass="FilesController" customModule="nRF_Connect_Device_Manager" customModuleProvider="target" sceneMemberID="viewController">
                     <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="static" style="grouped" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="18" sectionFooterHeight="18" id="zUC-67-YRk">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -1293,7 +1287,7 @@
         <!--Diagnostics-->
         <scene sceneID="5iX-Tj-0q4">
             <objects>
-                <tableViewController title="Diagnostics" id="HbD-Bf-mkl" customClass="DiagnosticsController" customModule="nRF_Connect_Device_Manager" customModuleProvider="target" sceneMemberID="viewController">
+                <tableViewController storyboardIdentifier="diagnosticsVC" title="Diagnostics" id="HbD-Bf-mkl" customClass="DiagnosticsController" customModule="nRF_Connect_Device_Manager" customModuleProvider="target" sceneMemberID="viewController">
                     <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="static" style="grouped" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="18" sectionFooterHeight="18" id="Xnv-fZ-89I">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -1653,7 +1647,7 @@
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="TnA-I8-BN5" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="2349.5999999999999" y="1760.8374384236454"/>
+            <point key="canvasLocation" x="1430" y="993"/>
         </scene>
         <!--Filter-->
         <scene sceneID="Vyr-7A-LFt">
@@ -2587,7 +2581,7 @@
         <scene sceneID="OqD-0B-QPm">
             <objects>
                 <viewController title="Upload" id="ZG1-GB-bgc" customClass="FileUploadViewController" customModule="nRF_Connect_Device_Manager" customModuleProvider="target" sceneMemberID="viewController">
-                    <view key="view" contentMode="scaleToFill" ambiguous="YES" id="yVO-JE-3UU">
+                    <view key="view" contentMode="scaleToFill" id="yVO-JE-3UU">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="271"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
