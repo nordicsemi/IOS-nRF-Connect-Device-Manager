@@ -169,10 +169,7 @@ final class ScannerViewController: UITableViewController, CBCentralManagerDelega
         centralManager.stopScan()
         activityIndicator.stopAnimating()
         
-        let storyboard = UIStoryboard(name: "Main", bundle: Bundle.main)
-        guard let baseViewController = storyboard.instantiateViewController(identifier: "baseVC") as? BaseViewController else { return }
-        
-        baseViewController.peripheral = filteredPeripherals[indexPath.row]
+        let baseViewController = BaseViewController(filteredPeripherals[indexPath.row])
         navigationController?.pushViewController(baseViewController, animated: true)
     }
     

@@ -71,13 +71,22 @@ final class BaseViewController: UITabBarController {
      */
     var transport: McuMgrTransport!
     
-    var peripheral: DiscoveredPeripheral! {
-        didSet {
-            let bleTransport = McuMgrBleTransport(peripheral.basePeripheral)
-            bleTransport.logDelegate = UIApplication.shared.delegate as? McuMgrLogDelegate
-            bleTransport.delegate = self
-            transport = bleTransport
-        }
+    var peripheral: DiscoveredPeripheral!
+    
+    // MARK: init
+    
+    init(_ peripheral: DiscoveredPeripheral) {
+        let bleTransport = McuMgrBleTransport(peripheral.basePeripheral)
+        bleTransport.logDelegate = UIApplication.shared.delegate as? McuMgrLogDelegate
+        transport = bleTransport
+        self.peripheral = peripheral
+        super.init(nibName: nil, bundle: nil)
+        
+        (transport as? McuMgrBleTransport)?.delegate = self
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
     
     // MARK: Private Properties
