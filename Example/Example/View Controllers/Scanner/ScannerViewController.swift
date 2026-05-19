@@ -27,14 +27,31 @@ final class ScannerViewController: UITableViewController, CBCentralManagerDelega
     private var filterByName: Bool!
     private var filterByRssi: Bool!
     
-    // MARK: @IBAction
+    // MARK: aboutTapped
     
     @IBAction func aboutTapped(_ sender: UIBarButtonItem) {
         let rootViewController = navigationController as? RootViewController
         rootViewController?.showIntro(animated: true)
     }
     
-    // MARK: UIViewController
+    // MARK: onFilterTapped
+    
+    @objc func onFilterTapped(_ sender: UIBarButtonItem) {
+        guard let filterController = storyboard?.instantiateViewController(withIdentifier: "filterVC") as? ScannerFilterViewController else { return }
+            
+        filterController.modalPresentationStyle = .popover
+        filterController.popoverPresentationController?.delegate = self
+        filterController.filterByNameEnabled = filterByName
+        filterController.filterByRssiEnabled = filterByRssi
+        filterController.delegate = self
+        
+        filterController.popoverPresentationController?.delegate = self
+        filterController.popoverPresentationController?.permittedArrowDirections = [.any]
+        filterController.popoverPresentationController?.barButtonItem = sender
+        present(filterController, animated: true)
+    }
+    
+    // MARK: viewDidLoad
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -48,16 +65,22 @@ final class ScannerViewController: UITableViewController, CBCentralManagerDelega
         tableView.register(ScannerTableViewCell.self, forCellReuseIdentifier: ScannerTableViewCell.reuseIdentifier)
     }
     
+    // MARK: viewWillAppear
+    
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         discoveredPeripherals.removeAll()
         tableView.reloadData()
+        
+        navigationItem.leftBarButtonItem = UIBarButtonItem(image: UIImage(systemName: "switch.2"), style: .plain, target: self, action: #selector(onFilterTapped(_:)))
         
         guard pullToRefreshControl == nil else { return }
         pullToRefreshControl = UIRefreshControl()
         pullToRefreshControl.addTarget(self, action: #selector(onPullToRefresh(_:)), for: .valueChanged)
         tableView.refreshControl = pullToRefreshControl
     }
+    
+    // MARK: viewDidAppear
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
@@ -66,6 +89,8 @@ final class ScannerViewController: UITableViewController, CBCentralManagerDelega
             startScanner()
         }
     }
+    
+    // MARK: viewWillTransition
     
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransition(to: size, with: coordinator)
@@ -85,25 +110,6 @@ final class ScannerViewController: UITableViewController, CBCentralManagerDelega
                                                              height: height)
                 }
             })
-        }
-    }
-    
-    // MARK: Segue
-    
-    private enum Segue: String {
-        case showFilter
-    }
-    
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        let identifier = segue.identifier!
-        guard let selectedSegue = Segue(rawValue: identifier) else { return }
-        switch selectedSegue {
-        case .showFilter:
-            let filterController = segue.destination as! ScannerFilterViewController
-            filterController.popoverPresentationController?.delegate = self
-            filterController.filterByNameEnabled = filterByName
-            filterController.filterByRssiEnabled = filterByRssi
-            filterController.delegate = self
         }
     }
     
