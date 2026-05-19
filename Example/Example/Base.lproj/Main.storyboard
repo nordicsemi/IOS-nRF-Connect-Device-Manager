@@ -201,32 +201,8 @@
                     </tableView>
                     <navigationItem key="navigationItem" title="Device Manager" id="JgL-aj-vMP">
                         <barButtonItem key="backBarButtonItem" title="Scanner" id="XAL-Mr-ksZ"/>
-                        <rightBarButtonItems>
-                            <barButtonItem title="About" id="aWy-Ct-4js">
-                                <connections>
-                                    <action selector="aboutTapped:" destination="brr-jW-Ynb" id="gBH-Vq-fZn"/>
-                                </connections>
-                            </barButtonItem>
-                            <barButtonItem id="9n2-3j-DCY">
-                                <view key="customView" contentMode="scaleToFill" id="X9s-eL-VOJ">
-                                    <rect key="frame" x="180.66666666666666" y="4.0000000000000009" width="82.999999999999972" height="36"/>
-                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                    <subviews>
-                                        <activityIndicatorView hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" hidesWhenStopped="YES" style="white" translatesAutoresizingMaskIntoConstraints="NO" id="X3v-MD-Kn9">
-                                            <rect key="frame" x="47" y="8" width="20" height="20"/>
-                                        </activityIndicatorView>
-                                    </subviews>
-                                    <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                    <constraints>
-                                        <constraint firstAttribute="trailing" secondItem="X3v-MD-Kn9" secondAttribute="trailing" constant="16" id="Awa-yx-ax6"/>
-                                        <constraint firstItem="X3v-MD-Kn9" firstAttribute="centerY" secondItem="X9s-eL-VOJ" secondAttribute="centerY" id="FiM-5k-1qL"/>
-                                    </constraints>
-                                </view>
-                            </barButtonItem>
-                        </rightBarButtonItems>
                     </navigationItem>
                     <connections>
-                        <outlet property="activityIndicator" destination="X3v-MD-Kn9" id="8Yg-MV-JhD"/>
                         <outlet property="emptyPeripheralsView" destination="7nf-Dp-LTI" id="jIn-r0-Jql"/>
                     </connections>
                 </tableViewController>
