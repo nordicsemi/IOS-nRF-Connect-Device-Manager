@@ -128,6 +128,28 @@ final class BaseViewController: UITabBarController {
             tabBar.tintColor = .nordic
             tabBar.isTranslucent = false
         }
+        
+        setupViewControllers()
+    }
+    
+    // MARK: setupViewControllers()
+    
+    private func setupViewControllers() {
+        let storyboard = UIStoryboard(name: "Main", bundle: Bundle.main)
+        
+        let deviceViewController: DeviceController! = storyboard.instantiateViewController(identifier: "deviceVC")
+        deviceViewController.tabBarItem = UITabBarItem(title: "Device", image: UIImage(systemName: "cpu"), selectedImage: nil)
+        
+        let imageViewController: ImageController! = storyboard.instantiateViewController(identifier: "imageVC")
+        imageViewController.tabBarItem = UITabBarItem(title: "Image", image: UIImage(systemName: "arrow.down.to.line"), selectedImage: nil)
+        
+        let filesViewController: FilesController! = storyboard.instantiateViewController(identifier: "filesVC")
+        filesViewController.tabBarItem = UITabBarItem(title: "Files", image: UIImage(systemName: "document"), selectedImage: nil)
+        
+        let diagnosticsViewController: DiagnosticsController! = storyboard.instantiateViewController(identifier: "diagnosticsVC")
+        diagnosticsViewController.tabBarItem = UITabBarItem(title: "Diagnostics", image: UIImage(systemName: "chart.bar.horizontal.page"), selectedImage: nil)
+        
+        viewControllers = [deviceViewController, imageViewController, filesViewController, diagnosticsViewController]
     }
     
     // MARK: viewWillDisappear()
