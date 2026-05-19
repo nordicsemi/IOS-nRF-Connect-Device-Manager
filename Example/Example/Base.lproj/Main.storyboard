@@ -1603,67 +1603,6 @@
             </objects>
             <point key="canvasLocation" x="1430" y="993"/>
         </scene>
-        <!--Filter-->
-        <scene sceneID="Vyr-7A-LFt">
-            <objects>
-                <viewController storyboardIdentifier="filterVC" title="Filter" id="Gmt-mw-TXu" customClass="ScannerFilterViewController" customModule="nRF_Connect_Device_Manager" customModuleProvider="target" sceneMemberID="viewController">
-                    <view key="view" contentMode="scaleToFill" id="01s-A2-QUR">
-                        <rect key="frame" x="0.0" y="0.0" width="320" height="106"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <subviews>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Show only named devices" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Xte-Te-n8c" userLabel="Show only named devices">
-                                <rect key="frame" x="16" y="120" width="167.33333333333334" height="17"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                                <nil key="textColor"/>
-                                <nil key="highlightedColor"/>
-                            </label>
-                            <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="tTw-of-mRp" userLabel="Switch UUID">
-                                <rect key="frame" x="243" y="114.66666666666669" width="63" height="28"/>
-                                <color key="onTintColor" red="0.0" green="0.54800000000000004" blue="0.82499999999999996" alpha="1" colorSpace="calibratedRGB"/>
-                                <connections>
-                                    <action selector="filterValueChanged:" destination="Gmt-mw-TXu" eventType="valueChanged" id="hjE-gp-1oL"/>
-                                </connections>
-                            </switch>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Only nearby devices" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="QlI-lV-eZ5">
-                                <rect key="frame" x="16" y="159" width="131" height="17"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                                <nil key="textColor"/>
-                                <nil key="highlightedColor"/>
-                            </label>
-                            <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="g3p-1R-czM" userLabel="Switch Only Nearby">
-                                <rect key="frame" x="243" y="153.66666666666666" width="63" height="28"/>
-                                <color key="onTintColor" red="0.0" green="0.54800000000000004" blue="0.82499999999999996" alpha="1" colorSpace="calibratedRGB"/>
-                                <connections>
-                                    <action selector="filterValueChanged:" destination="Gmt-mw-TXu" eventType="valueChanged" id="Mxa-7i-FO2"/>
-                                </connections>
-                            </switch>
-                        </subviews>
-                        <viewLayoutGuide key="safeArea" id="fhn-hW-R9P"/>
-                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
-                        <constraints>
-                            <constraint firstItem="tTw-of-mRp" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="Xte-Te-n8c" secondAttribute="trailing" constant="9" id="2c4-e8-JiZ"/>
-                            <constraint firstItem="Xte-Te-n8c" firstAttribute="top" secondItem="fhn-hW-R9P" secondAttribute="top" constant="20" id="3Vv-NK-MzO"/>
-                            <constraint firstItem="QlI-lV-eZ5" firstAttribute="top" secondItem="Xte-Te-n8c" secondAttribute="bottom" constant="22" id="7xe-Tq-HQc"/>
-                            <constraint firstItem="fhn-hW-R9P" firstAttribute="trailing" secondItem="g3p-1R-czM" secondAttribute="trailing" constant="16" id="BjL-AX-45w"/>
-                            <constraint firstItem="QlI-lV-eZ5" firstAttribute="leading" secondItem="fhn-hW-R9P" secondAttribute="leading" constant="16" id="BoT-WP-xkH"/>
-                            <constraint firstItem="Xte-Te-n8c" firstAttribute="leading" secondItem="fhn-hW-R9P" secondAttribute="leading" constant="16" id="Nq6-Ar-yVJ"/>
-                            <constraint firstItem="g3p-1R-czM" firstAttribute="centerY" secondItem="QlI-lV-eZ5" secondAttribute="centerY" id="SgN-RL-Cc0"/>
-                            <constraint firstItem="tTw-of-mRp" firstAttribute="centerY" secondItem="Xte-Te-n8c" secondAttribute="centerY" id="Yad-SW-COp"/>
-                            <constraint firstItem="fhn-hW-R9P" firstAttribute="trailing" secondItem="tTw-of-mRp" secondAttribute="trailing" constant="16" id="e7K-ow-sap"/>
-                            <constraint firstItem="g3p-1R-czM" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="QlI-lV-eZ5" secondAttribute="trailing" constant="9" id="qn5-j3-Su8"/>
-                        </constraints>
-                    </view>
-                    <value key="contentSizeForViewInPopover" type="size" width="320" height="106"/>
-                    <size key="freeformSize" width="320" height="106"/>
-                    <connections>
-                        <outlet property="filterByName" destination="tTw-of-mRp" id="MKe-h6-rhK"/>
-                        <outlet property="filterByRssi" destination="g3p-1R-czM" id="Pdb-eg-LjL"/>
-                    </connections>
-                </viewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="j1V-oG-NMP" userLabel="First Responder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="568" y="811"/>
-        </scene>
         <!--Firmware Upgrade-->
         <scene sceneID="Hmk-EH-IcV">
             <objects>
