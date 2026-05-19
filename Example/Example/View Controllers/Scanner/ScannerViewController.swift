@@ -15,7 +15,6 @@ final class ScannerViewController: UITableViewController, CBCentralManagerDelega
     // MARK: @IBOutlet(s)
     
     @IBOutlet weak var emptyPeripheralsView: UIView!
-    @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
     
     // MARK: Private Properties
     
@@ -24,15 +23,10 @@ final class ScannerViewController: UITableViewController, CBCentralManagerDelega
     private var discoveredPeripherals = [DiscoveredPeripheral]()
     private var filteredPeripherals = [DiscoveredPeripheral]()
     
+    private lazy var activityIndicator = UIActivityIndicatorView()
+    
     private var filterByName: Bool!
     private var filterByRssi: Bool!
-    
-    // MARK: aboutTapped
-    
-    @IBAction func aboutTapped(_ sender: UIBarButtonItem) {
-        let rootViewController = navigationController as? RootViewController
-        rootViewController?.showIntro(animated: true)
-    }
     
     // MARK: onFilterTapped
     
@@ -49,6 +43,13 @@ final class ScannerViewController: UITableViewController, CBCentralManagerDelega
         filterController.popoverPresentationController?.permittedArrowDirections = [.any]
         filterController.popoverPresentationController?.barButtonItem = sender
         present(filterController, animated: true)
+    }
+    
+    // MARK: onInfoTapped
+    
+    @objc func onInfoTapped(_ sender: UIBarButtonItem) {
+        let rootViewController = navigationController as? RootViewController
+        rootViewController?.showIntro(animated: true)
     }
     
     // MARK: viewDidLoad
@@ -73,6 +74,10 @@ final class ScannerViewController: UITableViewController, CBCentralManagerDelega
         tableView.reloadData()
         
         navigationItem.leftBarButtonItem = UIBarButtonItem(image: UIImage(systemName: "switch.2"), style: .plain, target: self, action: #selector(onFilterTapped(_:)))
+        
+        let activityBarButtonItem = UIBarButtonItem(customView: activityIndicator)
+        let infoBarButtonItem = UIBarButtonItem(image: UIImage(systemName: "info"), style: .plain, target: self, action: #selector(onInfoTapped(_:)))
+        navigationItem.rightBarButtonItems = [infoBarButtonItem, activityBarButtonItem]
         
         guard pullToRefreshControl == nil else { return }
         pullToRefreshControl = UIRefreshControl()
