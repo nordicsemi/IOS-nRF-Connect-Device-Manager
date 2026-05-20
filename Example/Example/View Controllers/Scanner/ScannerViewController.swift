@@ -84,6 +84,8 @@ final class ScannerViewController: UITableViewController, CBCentralManagerDelega
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        title = "Device Manager"
+        
         centralManager = CBCentralManager()
         centralManager.delegate = self
         
@@ -102,10 +104,14 @@ final class ScannerViewController: UITableViewController, CBCentralManagerDelega
         tableView.reloadData()
         
         navigationItem.leftBarButtonItem = UIBarButtonItem(image: UIImage(systemName: "switch.2"), style: .plain, target: self, action: #selector(onFilterTapped(_:)))
+        navigationItem.leftBarButtonItem?.tintColor = .white
         
         let activityBarButtonItem = UIBarButtonItem(customView: activityIndicator)
         let infoBarButtonItem = UIBarButtonItem(image: UIImage(systemName: "info"), style: .plain, target: self, action: #selector(onInfoTapped(_:)))
         navigationItem.rightBarButtonItems = [infoBarButtonItem, activityBarButtonItem]
+        for rightBarButtonItem in navigationItem.rightBarButtonItems ?? [] {
+            rightBarButtonItem.tintColor = .white
+        }
         
         guard pullToRefreshControl == nil else { return }
         pullToRefreshControl = UIRefreshControl()
