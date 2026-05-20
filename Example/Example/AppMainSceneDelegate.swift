@@ -29,10 +29,7 @@ final class AppMainSceneDelegate: UIResponder, UIWindowSceneDelegate {
         ])
         
         window = UIWindow(windowScene: windowScene)
-        
-        let storyboard = UIStoryboard(name: "Main", bundle: Bundle.main)
-        let controller = storyboard.instantiateViewController(identifier: "rootVC")
-        window?.rootViewController = controller
+        window?.rootViewController = RootViewController(rootViewController: ScannerViewController(style: .grouped))
         window?.tintColor = .dynamicColor(light: .accent, dark: .nordic)
         window?.makeKeyAndVisible()
     }
