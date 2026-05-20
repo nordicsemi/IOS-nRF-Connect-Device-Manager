@@ -202,96 +202,8 @@
                     <navigationItem key="navigationItem" title="Device Manager" id="JgL-aj-vMP">
                         <barButtonItem key="backBarButtonItem" title="Scanner" id="XAL-Mr-ksZ"/>
                     </navigationItem>
-                    <connections>
-                        <outlet property="emptyPeripheralsView" destination="7nf-Dp-LTI" id="jIn-r0-Jql"/>
-                    </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="rUF-vB-gzY" userLabel="First Responder" sceneMemberID="firstResponder"/>
-                <view contentMode="scaleToFill" id="7nf-Dp-LTI" userLabel="Empty Peripherals View">
-                    <rect key="frame" x="0.0" y="0.0" width="370" height="300"/>
-                    <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                    <subviews>
-                        <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="ic_bluetooth_searching_48pt" translatesAutoresizingMaskIntoConstraints="NO" id="8FC-8x-sSX">
-                            <rect key="frame" x="161" y="116" width="48" height="48"/>
-                            <color key="tintColor" systemColor="secondaryLabelColor"/>
-                        </imageView>
-                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="CAN'T SEE YOUR DEVICE?" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumScaleFactor="0.5" translatesAutoresizingMaskIntoConstraints="NO" id="4h3-lH-fnx">
-                            <rect key="frame" x="90.333333333333329" y="180" width="189.33333333333337" height="18"/>
-                            <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="15"/>
-                            <color key="textColor" red="0.0" green="0.54800000000000004" blue="0.82499999999999996" alpha="1" colorSpace="calibratedRGB"/>
-                            <nil key="highlightedColor"/>
-                        </label>
-                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="1. Make sure the device is switched on" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="xTr-s9-keB">
-                            <rect key="frame" x="10.333333333333343" y="218" width="349.33333333333326" height="17"/>
-                            <fontDescription key="fontDescription" type="system" weight="medium" pointSize="14"/>
-                            <color key="textColor" systemColor="secondaryLabelColor"/>
-                            <nil key="highlightedColor"/>
-                        </label>
-                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="and is connected to power source." lineBreakMode="tailTruncation" numberOfLines="3" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="2ij-nr-iY2">
-                            <rect key="frame" x="10.333333333333329" y="237" width="181" height="13.333333333333343"/>
-                            <fontDescription key="fontDescription" type="system" pointSize="11"/>
-                            <color key="textColor" systemColor="secondaryLabelColor"/>
-                            <nil key="highlightedColor"/>
-                        </label>
-                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="2. Make sure the firmware with SMP server is flashed" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="M9Q-6r-y1D">
-                            <rect key="frame" x="10.333333333333343" y="267.33333333333331" width="349.66666666666663" height="17"/>
-                            <fontDescription key="fontDescription" type="system" weight="medium" pointSize="14"/>
-                            <color key="textColor" systemColor="secondaryLabelColor"/>
-                            <nil key="highlightedColor"/>
-                        </label>
-                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="and the device is advertising." lineBreakMode="tailTruncation" numberOfLines="5" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="0Bs-kq-ufe">
-                            <rect key="frame" x="10.333333333333329" y="286.33333333333331" width="153.66666666666669" height="13.333333333333314"/>
-                            <fontDescription key="fontDescription" type="system" pointSize="11"/>
-                            <color key="textColor" systemColor="secondaryLabelColor"/>
-                            <nil key="highlightedColor"/>
-                        </label>
-                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="3. Check the filter settings." lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="PDF-WY-960">
-                            <rect key="frame" x="10.333333333333329" y="316.66666666666669" width="179.33333333333337" height="17"/>
-                            <fontDescription key="fontDescription" type="system" weight="medium" pointSize="14"/>
-                            <color key="textColor" systemColor="secondaryLabelColor"/>
-                            <nil key="highlightedColor"/>
-                        </label>
-                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="By default, the scanner displays only devices that advertise SMP service UUID (8D53DC1D-1DB7-4CD3-868B-8A527460AA84)." lineBreakMode="tailTruncation" numberOfLines="5" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="bLy-1h-z92" userLabel="By default, the Scanner displays only named devices.">
-                            <rect key="frame" x="10.333333333333343" y="335.66666666666669" width="341.66666666666663" height="26.333333333333314"/>
-                            <fontDescription key="fontDescription" type="system" pointSize="11"/>
-                            <color key="textColor" systemColor="secondaryLabelColor"/>
-                            <nil key="highlightedColor"/>
-                        </label>
-                    </subviews>
-                    <viewLayoutGuide key="safeArea" id="bzo-wp-swC"/>
-                    <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                    <constraints>
-                        <constraint firstItem="bLy-1h-z92" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="bzo-wp-swC" secondAttribute="leading" constant="10" id="1qr-Ou-Mpi"/>
-                        <constraint firstItem="PDF-WY-960" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="bzo-wp-swC" secondAttribute="leading" constant="10" id="2Sk-h6-7nc"/>
-                        <constraint firstItem="bzo-wp-swC" firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="PDF-WY-960" secondAttribute="trailing" constant="10" id="5bI-bG-Ypz"/>
-                        <constraint firstItem="PDF-WY-960" firstAttribute="leading" secondItem="xTr-s9-keB" secondAttribute="leading" id="6KQ-uy-oNQ"/>
-                        <constraint firstItem="M9Q-6r-y1D" firstAttribute="leading" secondItem="xTr-s9-keB" secondAttribute="leading" id="F1W-f6-Xug"/>
-                        <constraint firstItem="bzo-wp-swC" firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="2ij-nr-iY2" secondAttribute="trailing" constant="10" id="GsO-QL-Xgw"/>
-                        <constraint firstItem="8FC-8x-sSX" firstAttribute="centerX" secondItem="bzo-wp-swC" secondAttribute="centerX" id="MPN-tr-RBW"/>
-                        <constraint firstItem="bLy-1h-z92" firstAttribute="top" secondItem="PDF-WY-960" secondAttribute="bottom" constant="2" id="NaI-ON-I7a"/>
-                        <constraint firstItem="4h3-lH-fnx" firstAttribute="top" secondItem="8FC-8x-sSX" secondAttribute="bottom" constant="16" id="U6N-ee-8oA"/>
-                        <constraint firstItem="2ij-nr-iY2" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="bzo-wp-swC" secondAttribute="leading" constant="10" id="Vij-sV-XfZ"/>
-                        <constraint firstItem="bLy-1h-z92" firstAttribute="top" secondItem="PDF-WY-960" secondAttribute="bottom" constant="2" id="ZaS-FI-Vlf"/>
-                        <constraint firstItem="bzo-wp-swC" firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="M9Q-6r-y1D" secondAttribute="trailing" constant="10" id="a5i-15-6qp"/>
-                        <constraint firstItem="2ij-nr-iY2" firstAttribute="top" secondItem="xTr-s9-keB" secondAttribute="bottom" constant="2" id="afo-Kd-QXW"/>
-                        <constraint firstItem="bzo-wp-swC" firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="0Bs-kq-ufe" secondAttribute="trailing" constant="10" id="aj6-of-wJ9"/>
-                        <constraint firstItem="M9Q-6r-y1D" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="bzo-wp-swC" secondAttribute="leading" constant="10" id="bPJ-M6-GPb"/>
-                        <constraint firstItem="0Bs-kq-ufe" firstAttribute="leading" secondItem="xTr-s9-keB" secondAttribute="leading" id="beI-JE-a8n"/>
-                        <constraint firstItem="8FC-8x-sSX" firstAttribute="top" secondItem="bzo-wp-swC" secondAttribute="top" constant="16" id="ceO-bA-GYp"/>
-                        <constraint firstItem="M9Q-6r-y1D" firstAttribute="top" secondItem="2ij-nr-iY2" secondAttribute="bottom" constant="17" id="deh-K6-lV2"/>
-                        <constraint firstItem="4h3-lH-fnx" firstAttribute="centerX" secondItem="bzo-wp-swC" secondAttribute="centerX" id="fSJ-Ob-fx4"/>
-                        <constraint firstItem="xTr-s9-keB" firstAttribute="centerX" secondItem="bzo-wp-swC" secondAttribute="centerX" id="gvR-8h-JF1"/>
-                        <constraint firstItem="xTr-s9-keB" firstAttribute="top" secondItem="4h3-lH-fnx" secondAttribute="bottom" constant="20" id="gvW-7c-cgP"/>
-                        <constraint firstItem="2ij-nr-iY2" firstAttribute="leading" secondItem="xTr-s9-keB" secondAttribute="leading" id="iXY-I6-hoj"/>
-                        <constraint firstItem="xTr-s9-keB" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="bzo-wp-swC" secondAttribute="leading" constant="10" id="krm-XK-BHb"/>
-                        <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="bLy-1h-z92" secondAttribute="trailing" constant="10" id="n9d-kN-R38"/>
-                        <constraint firstItem="bzo-wp-swC" firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="xTr-s9-keB" secondAttribute="trailing" constant="10" id="qFs-fJ-oS6"/>
-                        <constraint firstItem="bLy-1h-z92" firstAttribute="leading" secondItem="xTr-s9-keB" secondAttribute="leading" id="rQh-ln-dS4"/>
-                        <constraint firstItem="0Bs-kq-ufe" firstAttribute="top" secondItem="M9Q-6r-y1D" secondAttribute="bottom" constant="2" id="xAs-Gb-5co"/>
-                        <constraint firstItem="PDF-WY-960" firstAttribute="top" secondItem="0Bs-kq-ufe" secondAttribute="bottom" constant="17" id="xSd-lF-N7q"/>
-                        <constraint firstItem="0Bs-kq-ufe" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="bzo-wp-swC" secondAttribute="leading" constant="10" id="y13-9y-VqA"/>
-                    </constraints>
-                </view>
             </objects>
             <point key="canvasLocation" x="569" y="252"/>
         </scene>
@@ -2869,7 +2781,6 @@
         <image name="baseline_open_in_new_black_18dp" width="18" height="18"/>
         <image name="baseline_poll_black_24dp" width="24" height="24"/>
         <image name="device_manager" width="180" height="180"/>
-        <image name="ic_bluetooth_searching_48pt" width="48" height="48"/>
         <image name="ic_download" width="30" height="30"/>
         <image name="ic_recents" width="30" height="30"/>
         <image name="ic_send" width="30" height="30"/>

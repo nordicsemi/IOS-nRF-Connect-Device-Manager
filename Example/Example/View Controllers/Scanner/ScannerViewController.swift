@@ -12,9 +12,41 @@ import iOSMcuManagerLibrary
 
 final class ScannerViewController: UITableViewController, CBCentralManagerDelegate, UIPopoverPresentationControllerDelegate, ScannerFilterDelegate {
     
-    // MARK: @IBOutlet(s)
+    // MARK: emptyPeripheralsView
     
-    @IBOutlet weak var emptyPeripheralsView: UIView!
+    private lazy var emptyPeripheralsView: UIView = {
+        let footerView = UIStackView()
+        footerView.axis = .vertical
+        footerView.distribution = .fillProportionally
+        footerView.alignment = .center
+        footerView.spacing = 12.0
+        footerView.frame.size.height = 300
+        
+        let imageView = UIImageView(image: UIImage(named: "ic_bluetooth_searching_48pt"))
+        imageView.contentMode = .scaleAspectFit
+        footerView.addArrangedSubview(imageView)
+        
+        let title = UILabel()
+        title.text = "CAN'T SEE YOUR DEVICE?"
+        title.textColor = .nordic
+        footerView.addArrangedSubview(title)
+        
+        let content = UILabel()
+        content.setContentHuggingPriority(.defaultHigh, for: .vertical)
+        content.text = """
+        1. Make sure the device is switched on, and connected to a power source.
+        
+        2. Make sure firmware advertising SMP Server is flashed, and the device is advertising.
+          
+        3. Check the filter settings.
+        By default, the Scanner only shows devices that advertise SMP Service UUID (8D53DC1D-1DB7-4CD3-868B-8A527460AA84).
+        """
+        content.font = UIFont.preferredFont(forTextStyle: .footnote)
+        content.numberOfLines = 0
+        content.textColor = .secondary
+        footerView.addArrangedSubview(content)
+        return footerView
+    }()
     
     // MARK: Private Properties
     
@@ -88,29 +120,6 @@ final class ScannerViewController: UITableViewController, CBCentralManagerDelega
         
         if centralManager.state == .poweredOn {
             startScanner()
-        }
-    }
-    
-    // MARK: viewWillTransition
-    
-    override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
-        super.viewWillTransition(to: size, with: coordinator)
-        if view.subviews.contains(emptyPeripheralsView) {
-            coordinator.animate(alongsideTransition: { (context) in
-                let width = self.emptyPeripheralsView.frame.size.width
-                let height = self.emptyPeripheralsView.frame.size.height
-                if context.containerView.frame.size.height > context.containerView.frame.size.width {
-                    self.emptyPeripheralsView.frame = CGRect(x: 0,
-                                                             y: (context.containerView.frame.size.height / 2) - (height / 2),
-                                                             width: width,
-                                                             height: height)
-                } else {
-                    self.emptyPeripheralsView.frame = CGRect(x: 0,
-                                                             y: 16,
-                                                             width: width,
-                                                             height: height)
-                }
-            })
         }
     }
     
@@ -250,30 +259,19 @@ final class ScannerViewController: UITableViewController, CBCentralManagerDelega
     
     /// Shows the No Peripherals view.
     private func showEmptyPeripheralsView() {
-        if !view.subviews.contains(emptyPeripheralsView) {
-            view.addSubview(emptyPeripheralsView)
-            emptyPeripheralsView.alpha = 0
-            emptyPeripheralsView.frame = CGRect(x: 0,
-                                                y: (view.frame.height / 2) - (emptyPeripheralsView.frame.size.height / 2),
-                                                width: view.frame.width,
-                                                height: emptyPeripheralsView.frame.height)
-            view.bringSubviewToFront(emptyPeripheralsView)
-            UIView.animate(withDuration: 0.5, animations: {
-                self.emptyPeripheralsView.alpha = 1
-            })
-        }
+        guard tableView.tableFooterView == nil else { return }
+        UIView.animate(withDuration: 0.5, animations: { [unowned self] in
+            self.tableView.tableFooterView = emptyPeripheralsView
+        })
     }
     
     /// Hides the No Peripherals view. This method should be
     /// called when a first peripheral was found.
     private func hideEmptyPeripheralsView() {
-        if view.subviews.contains(emptyPeripheralsView) {
-            UIView.animate(withDuration: 0.5, animations: {
-                self.emptyPeripheralsView.alpha = 0
-            }, completion: { (completed) in
-                self.emptyPeripheralsView.removeFromSuperview()
-            })
-        }
+        guard tableView.tableFooterView != nil else { return }
+        UIView.animate(withDuration: 0.5, animations: { [unowned self] in
+            self.tableView.tableFooterView = nil
+        })
     }
     
     /// Returns true if the discovered peripheral matches
