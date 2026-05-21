@@ -29,6 +29,7 @@
 		5274C2622796CEC40043D7CA /* SettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5274C2612796CEC40043D7CA /* SettingsViewController.swift */; };
 		AA12B3A02E79885600378F1E /* DeviceInfoManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA12B39F2E79885600378F1E /* DeviceInfoManager.swift */; };
 		AA12B3A62E7993F000378F1E /* iOS-BLE-Library-Mock in Frameworks */ = {isa = PBXBuildFile; productRef = AA12B3A52E7993F000378F1E /* iOS-BLE-Library-Mock */; };
+		AA141AA52FBF2FBC002DFD86 /* CoreBluetoothMock in Frameworks */ = {isa = PBXBuildFile; productRef = AA141AA42FBF2FBC002DFD86 /* CoreBluetoothMock */; };
 		AA5710112E829DD4001544D0 /* ObservabilityStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA5710102E829DD4001544D0 /* ObservabilityStatus.swift */; };
 		AA5710132E829E0D001544D0 /* OTAStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA5710122E829E0D001544D0 /* OTAStatus.swift */; };
 		AA7145062F6D9FF800AF4BE7 /* AppMainSceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA7145052F6D9FF800AF4BE7 /* AppMainSceneDelegate.swift */; };
@@ -89,6 +90,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AA141AA52FBF2FBC002DFD86 /* CoreBluetoothMock in Frameworks */,
 				AA7799F82E785BA800CAA1C3 /* iOSMcuManagerLibrary in Frameworks */,
 				AA12B3A62E7993F000378F1E /* iOS-BLE-Library-Mock in Frameworks */,
 				AAC0F0362E670D38006E0ADD /* iOSOtaLibrary in Frameworks */,
@@ -284,6 +286,7 @@
 			packageReferences = (
 				AA7799F62E785BA800CAA1C3 /* XCLocalSwiftPackageReference "../../IOS-nRF-Connect-Device-Manager" */,
 				AA12B3A42E7993F000378F1E /* XCRemoteSwiftPackageReference "IOS-BLE-Library" */,
+				AA141AA32FBF2FBC002DFD86 /* XCRemoteSwiftPackageReference "IOS-CoreBluetooth-Mock" */,
 			);
 			productRefGroup = BD5A285520CB44AF0061F0EE /* Products */;
 			projectDirPath = "";
@@ -594,6 +597,14 @@
 				kind = branch;
 			};
 		};
+		AA141AA32FBF2FBC002DFD86 /* XCRemoteSwiftPackageReference "IOS-CoreBluetooth-Mock" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/nordicsemi/IOS-CoreBluetooth-Mock.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.5;
+			};
+		};
 		AAC0F0322E670D38006E0ADD /* XCRemoteSwiftPackageReference "IOS-nRF-Connect-Device-Manager" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/NordicSemiconductor/IOS-nRF-Connect-Device-Manager";
@@ -609,6 +620,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = AA12B3A42E7993F000378F1E /* XCRemoteSwiftPackageReference "IOS-BLE-Library" */;
 			productName = "iOS-BLE-Library-Mock";
+		};
+		AA141AA42FBF2FBC002DFD86 /* CoreBluetoothMock */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AA141AA32FBF2FBC002DFD86 /* XCRemoteSwiftPackageReference "IOS-CoreBluetooth-Mock" */;
+			productName = CoreBluetoothMock;
 		};
 		AA7799F72E785BA800CAA1C3 /* iOSMcuManagerLibrary */ = {
 			isa = XCSwiftPackageProductDependency;
