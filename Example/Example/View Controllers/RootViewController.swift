@@ -43,8 +43,7 @@ final class RootViewController: UINavigationController {
     // MARK: showIntro
     
     func showIntro(animated: Bool) {
-        let storyboard = UIStoryboard(name: "Main", bundle: Bundle.main)
-        let introVC = storyboard.instantiateViewController(withIdentifier: "intro")
+        let introVC = IntroViewController(style: .insetGrouped)
         introVC.modalPresentationStyle = .fullScreen
         present(introVC, animated: animated)
     }
