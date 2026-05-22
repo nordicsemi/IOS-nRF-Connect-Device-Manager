@@ -76,7 +76,7 @@ final class BaseViewController: UITabBarController {
     // MARK: init
     
     init(_ peripheral: DiscoveredPeripheral) {
-        let bleTransport = McuMgrBleTransport(peripheral.basePeripheral)
+        let bleTransport = McuMgrBleTransport(peripheral.basePeripheral.identifier)
         bleTransport.logDelegate = UIApplication.shared.delegate as? McuMgrLogDelegate
         transport = bleTransport
         self.peripheral = peripheral

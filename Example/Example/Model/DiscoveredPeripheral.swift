@@ -4,17 +4,24 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import CoreBluetooth
+import Foundation
+import CoreBluetoothMock
 
-class DiscoveredPeripheral: NSObject {
-    //MARK: - Properties
-    public private(set) var basePeripheral      : CBPeripheral
-    public private(set) var advertisedName      : String
-    public private(set) var RSSI                : NSNumber = -127
-    public private(set) var highestRSSI         : NSNumber = -127
-    public private(set) var advertisedServices  : [CBUUID]?
+// MARK: - DiscoveredPeripheral
+
+final class DiscoveredPeripheral: NSObject {
     
-    init(_ aPeripheral: CBPeripheral) {
+    //MARK: Properties
+    
+    public private(set) var basePeripheral : CBMPeripheral
+    public private(set) var advertisedName : String
+    public private(set) var RSSI : NSNumber = -127
+    public private(set) var highestRSSI : NSNumber = -127
+    public private(set) var advertisedServices : [CBMUUID]?
+    
+    // MARK: init
+    
+    init(_ aPeripheral: CBMPeripheral) {
         basePeripheral = aPeripheral
         advertisedName = ""
         super.init()
@@ -32,16 +39,16 @@ class DiscoveredPeripheral: NSObject {
         }
     }
     
-    private func parseAdvertisementData(_ anAdvertisementDictionary: [String : Any]) -> (String, [CBUUID]?) {
+    private func parseAdvertisementData(_ anAdvertisementDictionary: [String : Any]) -> (String, [CBMUUID]?) {
         var advertisedName: String
-        var advertisedServices: [CBUUID]?
+        var advertisedServices: [CBMUUID]?
         
-        if let name = anAdvertisementDictionary[CBAdvertisementDataLocalNameKey] as? String {
+        if let name = anAdvertisementDictionary[CBMAdvertisementDataLocalNameKey] as? String {
             advertisedName = name
         } else {
             advertisedName = "N/A"
         }
-        if let services = anAdvertisementDictionary[CBAdvertisementDataServiceUUIDsKey] as? [CBUUID] {
+        if let services = anAdvertisementDictionary[CBMAdvertisementDataServiceUUIDsKey] as? [CBMUUID] {
             advertisedServices = services
         } else {
             advertisedServices = nil
@@ -55,8 +62,8 @@ class DiscoveredPeripheral: NSObject {
         if object is DiscoveredPeripheral {
             let peripheralObject = object as! DiscoveredPeripheral
             return peripheralObject.basePeripheral.identifier == basePeripheral.identifier
-        } else if object is CBPeripheral {
-            let peripheralObject = object as! CBPeripheral
+        } else if object is CBMPeripheral {
+            let peripheralObject = object as! CBMPeripheral
             return peripheralObject.identifier == basePeripheral.identifier
         } else {
             return false
