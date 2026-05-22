@@ -5,12 +5,12 @@
  */
 
 import UIKit
-import CoreBluetooth
+import CoreBluetoothMock
 import iOSMcuManagerLibrary
 
 // MARK: - ScannerViewController
 
-final class ScannerViewController: UITableViewController, CBCentralManagerDelegate, UIPopoverPresentationControllerDelegate, ScannerFilterDelegate {
+final class ScannerViewController: UITableViewController, CBMCentralManagerDelegate, UIPopoverPresentationControllerDelegate, ScannerFilterDelegate {
     
     // MARK: emptyPeripheralsView
     
@@ -51,7 +51,7 @@ final class ScannerViewController: UITableViewController, CBCentralManagerDelega
     // MARK: Private Properties
     
     private var pullToRefreshControl: UIRefreshControl!
-    private var centralManager: CBCentralManager!
+    private var centralManager: CBMCentralManager!
     private var discoveredPeripherals = [DiscoveredPeripheral]()
     private var filteredPeripherals = [DiscoveredPeripheral]()
     
@@ -86,7 +86,8 @@ final class ScannerViewController: UITableViewController, CBCentralManagerDelega
         super.viewDidLoad()
         title = "Device Manager"
         
-        centralManager = CBCentralManager()
+        centralManager = CBMCentralManagerFactory.instance(delegate: self, queue: .main,
+                                                          forceMock: false)
         centralManager.delegate = self
         
         // Default to true to filter devices by name
@@ -207,7 +208,7 @@ final class ScannerViewController: UITableViewController, CBCentralManagerDelega
     
     // MARK: CBCentralManagerDelegate
     
-    func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {
+    func centralManager(_ central: CBMCentralManager, didDiscover peripheral: CBMPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {
         // Find peripheral among already discovered ones, or create a new
         // object if it is a new one.
         var discoveredPeripheral: DiscoveredPeripheral! = discoveredPeripherals.first(where: {
@@ -239,7 +240,7 @@ final class ScannerViewController: UITableViewController, CBCentralManagerDelega
         }
     }
     
-    func centralManagerDidUpdateState(_ central: CBCentralManager) {
+    func centralManagerDidUpdateState(_ central: CBMCentralManager) {
         if central.state != .poweredOn {
             print("Central is not powered on")
             activityIndicator.stopAnimating()
@@ -252,15 +253,15 @@ final class ScannerViewController: UITableViewController, CBCentralManagerDelega
     
     private func startScanner() {
         activityIndicator.startAnimating()
-        let hidService: CBUUID! = CBUUID(string: "1812")
+        let hidService: CBMUUID! = CBMUUID(string: "1812")
         let defaultTransportConfiguration = DefaultTransportConfiguration()
         let connectedPeripherals = centralManager.retrieveConnectedPeripherals(withServices: [defaultTransportConfiguration.serviceUUID, hidService])
         for peripheral in connectedPeripherals {
             var advertisementData = [String: Any]()
-            advertisementData[CBAdvertisementDataLocalNameKey] = peripheral.name ?? ""
+            advertisementData[CBMAdvertisementDataLocalNameKey] = peripheral.name ?? ""
             centralManager(centralManager, didDiscover: peripheral, advertisementData: advertisementData, rssi: -127)
         }
-        centralManager.scanForPeripherals(withServices: nil, options: [CBCentralManagerScanOptionAllowDuplicatesKey : true])
+        centralManager.scanForPeripherals(withServices: nil, options: [CBMCentralManagerScanOptionAllowDuplicatesKey : true])
     }
     
     /// Shows the No Peripherals view.
