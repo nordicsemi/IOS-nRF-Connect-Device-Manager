@@ -98,8 +98,10 @@ final class ScannerViewController: UITableViewController, CBMCentralManagerDeleg
         #if targetEnvironment(simulator)
         CBMCentralManagerMock.simulateInitialState(.poweredOn)
         let uart = UART()
+        let blinky = Blinky()
         CBMCentralManagerMock.simulatePeripherals([
             uart.spec,
+            blinky.spec
         ])
         #endif
     }
