@@ -86,8 +86,7 @@ final class ScannerViewController: UITableViewController, CBMCentralManagerDeleg
         super.viewDidLoad()
         title = "Device Manager"
         
-        centralManager = CBMCentralManagerFactory.instance(delegate: self, queue: .main,
-                                                          forceMock: false)
+        centralManager = CBMCentralManagerFactory.instance(delegate: self, queue: .main)
         centralManager.delegate = self
         
         // Default to true to filter devices by name
@@ -95,6 +94,14 @@ final class ScannerViewController: UITableViewController, CBMCentralManagerDeleg
         filterByRssi = UserDefaults.standard.bool(forKey: "filterByRssi")
         
         tableView.register(ScannerTableViewCell.self, forCellReuseIdentifier: ScannerTableViewCell.reuseIdentifier)
+        
+        #if targetEnvironment(simulator)
+        CBMCentralManagerMock.simulateInitialState(.poweredOn)
+        let uart = UART()
+        CBMCentralManagerMock.simulatePeripherals([
+            uart.spec,
+        ])
+        #endif
     }
     
     // MARK: viewWillAppear
