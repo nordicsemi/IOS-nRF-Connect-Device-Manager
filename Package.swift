@@ -30,7 +30,7 @@ let package = Package(
         ),
         .package(
             url: "https://github.com/nordicsemi/IOS-Common-Libraries",
-            .upToNextMajor(from: "0.2.3")
+            .upToNextMajor(from: "0.2.4")
         )
     ],
     targets: [
