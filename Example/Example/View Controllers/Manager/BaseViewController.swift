@@ -9,40 +9,6 @@ import CoreBluetooth
 import iOSMcuManagerLibrary
 import iOSOtaLibrary
 
-// MARK: - DeviceStatusRow
-
-enum DeviceStatusRow: Int, CustomStringConvertible {
-    case connection
-    case mcuMgrParameters
-    case bootloaderName
-    case bootloaderMode
-    case bootloaderSlot
-    case kernel
-    case otaStatus
-    case observabilityStatus
-    
-    var description: String {
-        switch self {
-        case .connection:
-            return "Connection"
-        case .mcuMgrParameters:
-            return "MCU Manager Parameters / Buffer Details"
-        case .bootloaderName:
-            return "Bootloader Name"
-        case .bootloaderMode:
-            return "Bootloader Mode"
-        case .bootloaderSlot:
-            return "Bootlaoder Slot"
-        case .kernel:
-            return "Kernel"
-        case .otaStatus:
-            return "OTA"
-        case .observabilityStatus:
-            return "Observability"
-        }
-    }
-}
-
 // MARK: - BaseViewController
 
 final class BaseViewController: UITabBarController {
@@ -146,7 +112,7 @@ final class BaseViewController: UITabBarController {
     private func setupViewControllers() {
         let storyboard = UIStoryboard(name: "Main", bundle: Bundle.main)
         
-        let deviceViewController: DeviceController! = storyboard.instantiateViewController(identifier: "deviceVC")
+        let deviceViewController = DeviceController(style: .grouped)
         deviceViewController.tabBarItem = UITabBarItem(title: "Device", image: UIImage(systemName: "cpu"), selectedImage: nil)
         
         let imageViewController: ImageController! = storyboard.instantiateViewController(identifier: "imageVC")
@@ -175,9 +141,106 @@ final class BaseViewController: UITabBarController {
     }
 }
 
-// MARK: Device Status
+// MARK: - DeviceStatusRow
+
+enum DeviceStatusRow: Int, RawRepresentable, CaseIterable, CustomStringConvertible {
+    case connection
+    case mcuMgrParameters
+    case bootloaderName
+    case bootloaderMode
+    case bootloaderSlot
+    case kernel
+    case otaStatus
+    case observabilityStatus
+    
+    var description: String {
+        switch self {
+        case .connection:
+            return "Connection Status"
+        case .mcuMgrParameters:
+            return "Buffer Details"
+        case .bootloaderName:
+            return "Bootloader Name"
+        case .bootloaderMode:
+            return "Bootloader Mode"
+        case .bootloaderSlot:
+            return "Bootlaoder Slot"
+        case .kernel:
+            return "Kernel"
+        case .otaStatus:
+            return "OTA"
+        case .observabilityStatus:
+            return "Observability"
+        }
+    }
+}
+
+// MARK: - Device Status
 
 extension BaseViewController {
+    
+    // MARK: tableView(_:cellForRowAt:)
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let row = DeviceStatusRow(rawValue: indexPath.row)
+        let cell = UITableViewCell(style: .value1, reuseIdentifier: "DeviceStatusRow")
+        cell.textLabel?.text = row?.description
+        cell.detailTextLabel?.text = "UNKNOWN"
+        cell.accessoryType = .detailButton
+        update(cell, asDeviceStatusRow: row)
+        return cell
+    }
+    
+    // MARK: update(_:asDeviceStatusRow:)
+    
+    func update(_ cell: UITableViewCell, asDeviceStatusRow row: DeviceStatusRow?) {
+        switch row {
+        case .connection:
+            cell.detailTextLabel?.text = peripheralState?.description
+        case .mcuMgrParameters:
+            if let buffers = statusInfo?.bufferCount, let size = statusInfo?.bufferSize {
+                cell.detailTextLabel?.text = "\(buffers) x \(size) bytes"
+            } else {
+                cell.detailTextLabel?.text = "UNKNOWN"
+            }
+        case .bootloaderName:
+            cell.detailTextLabel?.text = (statusInfo?.bootloader ?? .unknown).description
+        case .bootloaderMode:
+            if let mode = statusInfo?.bootloaderMode {
+                cell.detailTextLabel?.text = mode.description
+            } else {
+                cell.detailTextLabel?.text = "UNKNOWN"
+            }
+        case .bootloaderSlot:
+            if let slot = statusInfo?.bootloaderSlot {
+                cell.detailTextLabel?.text = "\(slot)"
+            } else {
+                cell.detailTextLabel?.text = "UNKNOWN"
+            }
+        case .kernel:
+            if let appInfo = statusInfo?.appInfoOutput {
+                cell.detailTextLabel?.text = appInfo
+            } else {
+                cell.detailTextLabel?.text = "UNKNOWN"
+            }
+        case .otaStatus:
+            if let otaStatus {
+                cell.detailTextLabel?.text = otaStatus.description
+            } else {
+                cell.detailTextLabel?.text = "UNKNOWN"
+            }
+        case .observabilityStatus:
+            if let observabilityStatusInfo {
+                cell.detailTextLabel?.text = observabilityStatusInfo.status.description
+            } else {
+                cell.detailTextLabel?.text = "UNKNOWN"
+            }
+        case .none:
+            break
+        }
+    }
+    
+    // MARK: onDeviceStatusReady(_:)
     
     func onDeviceStatusReady(_ callback: @escaping () -> Void) {
         statusInfoCallback = callback
