@@ -118,7 +118,7 @@ final class BaseViewController: UITabBarController {
         let imageViewController: ImageController! = storyboard.instantiateViewController(identifier: "imageVC")
         imageViewController.tabBarItem = UITabBarItem(title: "Image", image: UIImage(systemName: "arrow.down.to.line"), selectedImage: nil)
         
-        let filesViewController: FilesController! = storyboard.instantiateViewController(identifier: "filesVC")
+        let filesViewController = FilesController(style: .grouped)
         filesViewController.tabBarItem = UITabBarItem(title: "Files", image: UIImage(systemName: "document"), selectedImage: nil)
         
         let diagnosticsViewController = DiagnosticsController(style: .grouped)
