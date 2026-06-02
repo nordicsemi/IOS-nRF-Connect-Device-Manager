@@ -55,7 +55,7 @@ final class DiagnosticsController: UITableViewController {
     @objc func refreshTapped(_ sender: UIResponder) {
         guard let baseViewController = parent as? BaseViewController else { return }
         baseViewController.onDeviceStatusReady { [unowned self] in
-            statsManager.list(callback: statsCallback)
+            requestStats()
         }
     }
     
@@ -80,33 +80,6 @@ final class DiagnosticsController: UITableViewController {
         }
         baseViewController.present(alertController, addingCancelAction: true,
                                    cancelActionTitle: "OK")
-    }
-    
-    // MARK: statsCallback
-    
-    private lazy var statsCallback: McuMgrCallback<McuMgrStatsListResponse> = { [weak self] response, error in
-        guard let self else { return }
-        guard let response else {
-            statsLabel.textColor = .systemRed
-            statsLabel.text = error?.localizedDescription ?? "Unknown Error"
-            return
-        }
-        
-        statsLabel.text = ""
-        statsLabel.textColor = .primary
-        guard let modules = response.names, !modules.isEmpty else {
-            statsLabel.text = "No stats found"
-            return
-        }
-        
-        for module in modules {
-            statsManager.read(module: module) { [weak self] (moduleStats, moduleError) in
-                guard let label = self?.statsLabel, let labelText = label.text else { return }
-                label.text = labelText
-                    + (self?.moduleStatsString(module, stats: moduleStats, error: moduleError) ?? "")
-                self?.tableView.reloadSections(IndexSet([Section.stats.rawValue]), with: .none)
-            }
-        }
     }
     
     // MARK: Private Properties
@@ -332,19 +305,44 @@ final class DiagnosticsController: UITableViewController {
 // MARK: - Private
 
 private extension DiagnosticsController {
+ 
+    // MARK: requestStats
     
-    func showObservabilityActivityIndicator(_ isVisible: Bool) {
-        observabilitySectionStatusActivityIndicator.hidesWhenStopped = true
-        if isVisible {
-            observabilitySectionStatusActivityIndicator.isHidden = false
-            if !observabilitySectionStatusActivityIndicator.isAnimating {
-                observabilitySectionStatusActivityIndicator.startAnimating()
+    func requestStats() {
+        Task { @MainActor in
+            do {
+                let response = try await statsManager.list()
+                statsLabel.text = ""
+                statsLabel.textColor = .primary
+                
+                guard let modules = response.names, !modules.isEmpty else {
+                    statsLabel.text = "No stats found"
+                    return
+                }
+                
+                var output: String = ""
+                for module in modules {
+                    do {
+                        let moduleStats = try await statsManager.read(module: module)
+                        output += moduleStatsString(module, stats: moduleStats, error: nil)
+                    } catch let statsError {
+                        output += moduleStatsString(module, stats: nil, error: statsError)
+                    }
+                }
+                
+                statsLabel.text = output
+                tableView.reloadSections(IndexSet([Section.stats.rawValue]), with: .none)
+            } catch {
+                statsLabel.textColor = .systemRed
+                statsLabel.text = error.localizedDescription
+                tableView.reloadSections(IndexSet([Section.stats.rawValue]), with: .none)
             }
-        } else {
-            observabilitySectionStatusActivityIndicator.stopAnimating()
         }
     }
     
+    // MARK: moduleStatsString(_:stats:error:)
+    
+    nonisolated
     func moduleStatsString(_ module: String, stats: McuMgrStatsResponse?, error: (any Error)?) -> String {
         var resultString = "\(module)"
         if let stats {
@@ -365,6 +363,20 @@ private extension DiagnosticsController {
         
         resultString += "\n"
         return resultString
+    }
+    
+    // MARK: showObservabilityActivityIndicator(_:)
+    
+    func showObservabilityActivityIndicator(_ isVisible: Bool) {
+        observabilitySectionStatusActivityIndicator.hidesWhenStopped = true
+        if isVisible {
+            observabilitySectionStatusActivityIndicator.isHidden = false
+            if !observabilitySectionStatusActivityIndicator.isAnimating {
+                observabilitySectionStatusActivityIndicator.startAnimating()
+            }
+        } else {
+            observabilitySectionStatusActivityIndicator.stopAnimating()
+        }
     }
 }
 
