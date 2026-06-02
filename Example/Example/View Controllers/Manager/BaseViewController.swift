@@ -121,7 +121,7 @@ final class BaseViewController: UITabBarController {
         let filesViewController: FilesController! = storyboard.instantiateViewController(identifier: "filesVC")
         filesViewController.tabBarItem = UITabBarItem(title: "Files", image: UIImage(systemName: "document"), selectedImage: nil)
         
-        let diagnosticsViewController: DiagnosticsController! = storyboard.instantiateViewController(identifier: "diagnosticsVC")
+        let diagnosticsViewController = DiagnosticsController(style: .grouped)
         diagnosticsViewController.tabBarItem = UITabBarItem(title: "Diagnostics", image: UIImage(systemName: "chart.bar.horizontal.page"), selectedImage: nil)
         
         viewControllers = [deviceViewController, imageViewController, filesViewController, diagnosticsViewController]
@@ -184,6 +184,7 @@ extension BaseViewController {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let row = DeviceStatusRow(rawValue: indexPath.row)
         let cell = UITableViewCell(style: .value1, reuseIdentifier: "DeviceStatusRow")
+        cell.selectionStyle = .none
         cell.textLabel?.text = row?.description
         cell.detailTextLabel?.text = "UNKNOWN"
         cell.accessoryType = .detailButton
