@@ -16,6 +16,11 @@ class DeviceController: UITableViewController, UITextFieldDelegate {
     private lazy var message: UITextField = {
         let textField = UITextField(frame: .zero)
         textField.text = "Hello!"
+        textField.placeholder = "Type your message here"
+        textField.borderStyle = .roundedRect
+        textField.keyboardType = .default
+        textField.returnKeyType = .done
+        textField.delegate = self
         textField.translatesAutoresizingMaskIntoConstraints = false
         return textField
     }()
@@ -145,12 +150,6 @@ class DeviceController: UITableViewController, UITextFieldDelegate {
             if message.superview != nil {
                 message.removeFromSuperview()
             }
-            message.placeholder = "Type your message here"
-            message.borderStyle = .roundedRect
-            message.keyboardType = .default
-            message.returnKeyType = .done
-            message.delegate = self
-            message.translatesAutoresizingMaskIntoConstraints = false
             inputCell.contentView.addSubview(message)
             NSLayoutConstraint.activate([
                 button.topAnchor.constraint(equalTo: inputCell.contentView.safeAreaLayoutGuide.topAnchor, constant: 8.0),
@@ -175,6 +174,7 @@ class DeviceController: UITableViewController, UITextFieldDelegate {
             
             let label = UILabel(frame: .zero)
             label.translatesAutoresizingMaskIntoConstraints = false
+            label.textColor = .white
             label.textAlignment = .right
             label.numberOfLines = 0
             label.lineBreakMode = .byWordWrapping
@@ -215,6 +215,7 @@ class DeviceController: UITableViewController, UITextFieldDelegate {
             
             let label = UILabel(frame: .zero)
             label.translatesAutoresizingMaskIntoConstraints = false
+            label.textColor = .white
             label.textAlignment = .natural
             label.numberOfLines = 0
             label.lineBreakMode = .byWordWrapping
