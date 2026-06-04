@@ -6,99 +6,234 @@
 
 import UIKit
 import iOSMcuManagerLibrary
+import UniformTypeIdentifiers
 
 // MARK: - FilesController
 
 final class FilesController: UITableViewController {
-    static let partitionKey = "partition"
+    
+    internal static let partitionKey = "partition"
+    internal static let recentsKey = "recents"
+    
     /**
-    [LittleFS GitHub Project](https://github.com/ARMmbed/littlefs)
+     Source: [LittleFS GitHub Project](https://github.com/ARMmbed/littlefs)
      */
-    static let defaultPartition = "lfs1"
+    internal static let defaultPartition = "lfs1"
     
-    // MARK: - @IBOutlet(s)
+    // MARK: Logic Properties
     
-    @IBOutlet weak var connectionStatus: UILabel!
-    @IBOutlet weak var mcuMgrParams: UILabel!
-    @IBOutlet weak var bootloaderName: UILabel!
-    @IBOutlet weak var bootloaderMode: UILabel!
-    @IBOutlet weak var bootloaderSlot: UILabel!
-    @IBOutlet weak var kernel: UILabel!
-    @IBOutlet weak var otaStatus: UILabel!
-    @IBOutlet weak var observabilityStatus: UILabel!
+    internal enum FsManagerOpState {
+        case selectFile
+        case ready
+        case inProgress(percentage: Float, speedInKbps: Double?)
+        case paused
+        case cancelled
+        case error(_ error: Error)
+        case completed
+    }
     
-    var fileDownloadViewController: FileDownloadViewController!
+    internal var uploadFilename: String?
+    internal var uploadDestination: String?
+    internal var uploadData: Data?
+    internal var uploadBytesSent: Int!
+    internal var uploadTimestamp: Date!
+    internal var uploadState: FsManagerOpState = .selectFile
+    
+    internal var downloadFilename: String?
+    internal var downloadDestination: String?
+    internal var downloadState: FsManagerOpState = .selectFile
+    
+    internal var fsManager: FileSystemManager!
+    
+    // MARK: UI Properties
+    
+    internal weak var uploadStatus: UILabel?
+    internal var uploadProgress: UIProgressView = {
+        let progressView = UIProgressView(progressViewStyle: .bar)
+        progressView.progress = 0.0
+        progressView.tintColor = .nordic
+        progressView.translatesAutoresizingMaskIntoConstraints = false
+        return progressView
+    }()
+    
+    internal lazy var uploadButton: UIButton = {
+        let button = UIButton()
+        button.setTitle("Start", for: .normal)
+        button.setTitleColor(.nordic, for: .normal)
+        button.setTitleColor(.secondary, for: .disabled)
+        button.addTarget(self, action: #selector(onUploadButtonTapped), for: .touchUpInside)
+        button.titleLabel?.font = .preferredFont(forTextStyle: .callout)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.isEnabled = false
+        return button
+    }()
+    
+    internal lazy var uploadCancelButton: UIButton = {
+        let button = UIButton()
+        button.setTitle("Cancel", for: .normal)
+        button.setTitleColor(.red, for: .normal)
+        button.addTarget(self, action: #selector(onUploadCancelButtonTapped), for: .touchUpInside)
+        if #available(iOS 14.0, *) {
+            button.role = .destructive
+        }
+        button.titleLabel?.font = .preferredFont(forTextStyle: .callout)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.isHidden = true
+        return button
+    }()
+    
+    internal lazy var downloadTextField: UITextField = {
+        let textField = UITextField()
+        textField.addTarget(self, action: #selector(onDownloadInputChanged), for: .valueChanged)
+        textField.addTarget(self, action: #selector(onDownloadInputChanged), for: .editingChanged)
+        textField.placeholder = "Type file name here."
+        textField.borderStyle = .roundedRect
+        textField.keyboardType = .default
+        textField.returnKeyType = .done
+        textField.delegate = self
+        textField.autocapitalizationType = .none
+        textField.autocorrectionType = .no
+        textField.translatesAutoresizingMaskIntoConstraints = false
+        return textField
+    }()
+    
+    internal lazy var downloadRecentsButton: UIButton = {
+        let button = UIButton()
+        button.setImage(UIImage(named: "ic_recents"), for: .normal)
+        button.addTarget(self, action: #selector(openRecentDownloads), for: .touchUpInside)
+        button.titleLabel?.font = .preferredFont(forTextStyle: .callout)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.tintColor = .secondary
+        button.isEnabled = false
+        return button
+    }()
+    
+    internal lazy var downloadActionButton: UIButton = {
+        let button = UIButton()
+        button.setImage(UIImage(named: "ic_download"), for: .normal)
+        button.addTarget(self, action: #selector(onDownloadButtonTapped), for: .touchUpInside)
+        button.titleLabel?.font = .preferredFont(forTextStyle: .callout)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        return button
+    }()
+    
+    internal var downloadProgress: UIProgressView = {
+        let progressView = UIProgressView(progressViewStyle: .bar)
+        progressView.progress = 0.0
+        progressView.tintColor = .nordic
+        progressView.translatesAutoresizingMaskIntoConstraints = false
+        return progressView
+    }()
+    
+    internal weak var downloadDestinationLabel: UILabel?
+    internal var downloadResultLabel: UILabel = {
+        let label = UILabel()
+        label.font = .preferredFont(forTextStyle: .callout)
+        label.numberOfLines = 0
+        label.lineBreakMode = .byWordWrapping
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    
+    // MARK: UIViewController API
     
     override func viewDidAppear(_ animated: Bool) {
         showPartitionControl()
         
         let baseController = parent as? BaseViewController
         baseController?.deviceStatusDelegate = self
+        
+        let transport: McuMgrTransport! = baseController?.transport
+        fsManager = FileSystemManager(transport: transport)
+        fsManager.logDelegate = UIApplication.shared.delegate as? McuMgrLogDelegate
     }
     
     override func viewWillDisappear(_ animated: Bool) {
         tabBarController?.navigationItem.rightBarButtonItem = nil
     }
     
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        let baseController = parent as! BaseViewController
-        let transport = baseController.transport!
+    // MARK: UITableView
+    
+    enum Section: Int, RawRepresentable, CaseIterable {
+        case deviceStatus
+        case upload
+        case download
         
-        var destination = segue.destination as? McuMgrViewController
-        destination?.transport = transport
+        var title: String {
+            switch self {
+            case .deviceStatus:
+                return "Device Status"
+            case .upload:
+                return "Upload"
+            case .download:
+                return "Download"
+            }
+        }
+    }
+    
+    enum UploadSectionRow: Int, RawRepresentable, CaseIterable {
+        case selectFile
+        case fileSize
+        case fileDestination
+        case uploadState
+        case uploadStart
+    }
+    
+    enum DownloadSectionRow: Int, RawRepresentable, CaseIterable {
+        case downloadInput
+        case downloadPath
+        case downloadOutput
+    }
+    
+    override func numberOfSections(in tableView: UITableView) -> Int {
+        return Section.allCases.count
+    }
+    
+    override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+        guard let section = Section(rawValue: section) else { return nil }
+        return section.title
+    }
+    
+    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        switch Section(rawValue: section) {
+        case .deviceStatus:
+            return DeviceStatusRow.allCases.count
+        case .upload:
+            return UploadSectionRow.allCases.count
+        case .download:
+            return DownloadSectionRow.allCases.count
+        default:
+            return 0
+        }
+    }
+    
+    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let section = Section(rawValue: indexPath.section)
+        switch section {
+        case .deviceStatus:
+            return (parent as? BaseViewController)?.tableView(tableView, cellForRowAt: indexPath)
+                ?? UITableViewCell()
+        case .upload:
+            return uploadSectionCell(for: UploadSectionRow(rawValue: indexPath.row))
+        case .download:
+            return downloadSectionCell(for: DownloadSectionRow(rawValue: indexPath.row))
+        default:
+            return UITableViewCell()
+        }
+    }
+    
+    override func tableView(_ tableView: UITableView, accessoryButtonTappedForRowWith indexPath: IndexPath) {
+        let section = Section(rawValue: indexPath.section)
+        switch section {
+        case .deviceStatus:
+            (parent as? BaseViewController)?.onDeviceStatusAccessoryTapped(at: indexPath)
+        default:
+            break
+        }
     }
     
     override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return UITableView.automaticDimension
-    }
-    
-    override func tableView(_ tableView: UITableView, accessoryButtonTappedForRowWith indexPath: IndexPath) {
-        (parent as? BaseViewController)?.onDeviceStatusAccessoryTapped(at: indexPath)
-    }
-    
-    func innerViewReloaded() {
-        tableView.beginUpdates()
-        tableView.setNeedsDisplay()
-        tableView.endUpdates()
-    }
-    
-    // MARK: Partition settings
-    private func showPartitionControl() {
-        let navItem = tabBarController?.navigationItem
-        navItem?.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .edit, target: self,
-                                                      action: #selector(presentPartitionSettings))
-    }
-    
-    @objc func presentPartitionSettings() {
-        let alert = UIAlertController(title: "Settings",
-                                      message: "Specify the mount point,\ne.g. \"lfs1\" or \"nffs\":",
-                                      preferredStyle: .alert)
-        alert.addTextField { field in
-            field.placeholder = "Partition"
-            field.autocorrectionType = .no
-            field.autocapitalizationType = .none
-            field.returnKeyType = .done
-            field.clearButtonMode = .always
-            field.text = UserDefaults.standard
-                .string(forKey: FilesController.partitionKey)
-                ?? FilesController.defaultPartition
-        }
-        alert.addAction(UIAlertAction(title: "OK", style: .default) { _ in
-            let newName = alert.textFields![0].text
-            if let newName = newName, !newName.isEmpty {
-                UserDefaults.standard.set(alert.textFields![0].text,
-                                          forKey: FilesController.partitionKey)
-                self.tableView.reloadData()
-            }
-        })
-        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
-        alert.addAction(UIAlertAction(title: "Default (\(FilesController.defaultPartition))",
-                                      style: .default) { _ in
-            UserDefaults.standard.set(FilesController.defaultPartition,
-                                      forKey: FilesController.partitionKey)
-            self.tableView.reloadData()
-        })
-        present(alert, animated: true)
     }
 }
 
@@ -107,30 +242,18 @@ final class FilesController: UITableViewController {
 extension FilesController: DeviceStatusManager.Delegate {
     
     func connectionStateDidChange(_ state: PeripheralState) {
-        connectionStatus.text = state.description
+        tableView.reloadSections(IndexSet([Section.deviceStatus.rawValue]), with: .none)
     }
     
     func statusInfoDidChange(_ info: DeviceStatusInfo) {
-        if let buffers = info.bufferCount, let size = info.bufferSize {
-            mcuMgrParams.text = "\(buffers) x \(size) bytes"
-        }
-        if let appInfo = info.appInfoOutput {
-            kernel.text = appInfo
-        }
-        bootloaderName.text = (info.bootloader ?? .unknown).description
-        if let mode = info.bootloaderMode {
-            bootloaderMode.text = mode.description
-        }
-        if let slot = info.bootloaderSlot {
-            bootloaderSlot.text = "\(slot)"
-        }
+        tableView.reloadSections(IndexSet([Section.deviceStatus.rawValue]), with: .none)
     }
     
     func otaStatusChanged(_ status: OTAStatus) {
-        otaStatus.text = status.description
+        tableView.reloadSections(IndexSet([Section.deviceStatus.rawValue]), with: .none)
     }
     
     func observabilityStatusChanged(_ statusInfo: ObservabilityStatusInfo) {
-        observabilityStatus.text = statusInfo.status.description
+        tableView.reloadSections(IndexSet([Section.deviceStatus.rawValue]), with: .none)
     }
 }
