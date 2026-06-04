@@ -26,6 +26,7 @@ final class RootViewController: UINavigationController {
         navBarAppearance.largeTitleTextAttributes = [.foregroundColor: UIColor.white]
         navigationBar.standardAppearance = navBarAppearance
         navigationBar.scrollEdgeAppearance = navBarAppearance
+        navigationBar.tintColor = .white
     }
     
     // MARK: viewDidAppear
