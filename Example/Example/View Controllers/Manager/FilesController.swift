@@ -41,6 +41,7 @@ final class FilesController: UITableViewController {
     
     internal var downloadFilename: String?
     internal var downloadDestination: String?
+    internal var downloadedFileURL: URL?
     internal var downloadState: FsManagerOpState = .selectFile
     
     internal var fsManager: FileSystemManager!
@@ -129,10 +130,34 @@ final class FilesController: UITableViewController {
     internal var downloadResultLabel: UILabel = {
         let label = UILabel()
         label.font = .preferredFont(forTextStyle: .callout)
-        label.numberOfLines = 0
-        label.lineBreakMode = .byWordWrapping
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
+    }()
+    
+    internal lazy var downloadPreviewButton: UIButton = {
+        let button = UIButton()
+        button.setTitle("Preview", for: .normal)
+        button.setTitleColor(.nordic, for: .normal)
+        button.setTitleColor(.secondary, for: .disabled)
+        button.addTarget(self, action: #selector(onPreviewButtonTapped), for: .touchUpInside)
+        button.setContentHuggingPriority(.required, for: .horizontal)
+        button.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        button.titleLabel?.font = .preferredFont(forTextStyle: .callout)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        return button
+    }()
+    
+    internal lazy var downloadExportButton: UIButton = {
+        let button = UIButton()
+        button.setTitle("Export", for: .normal)
+        button.setTitleColor(.nordic, for: .normal)
+        button.setTitleColor(.secondary, for: .disabled)
+        button.addTarget(self, action: #selector(onExportButtonTapped), for: .touchUpInside)
+        button.setContentHuggingPriority(.required, for: .horizontal)
+        button.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        button.titleLabel?.font = .preferredFont(forTextStyle: .callout)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        return button
     }()
     
     // MARK: UIViewController API

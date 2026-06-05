@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import QuickLook
 import iOSMcuManagerLibrary
 
 extension FilesController {
@@ -70,8 +71,16 @@ extension FilesController {
             if downloadResultLabel.superview != nil {
                 downloadResultLabel.removeFromSuperview()
             }
+            if downloadExportButton.superview != nil {
+                downloadExportButton.removeFromSuperview()
+            }
+            if downloadPreviewButton.superview != nil {
+                downloadPreviewButton.removeFromSuperview()
+            }
             cell.contentView.addSubview(downloadProgress)
             cell.contentView.addSubview(downloadResultLabel)
+            cell.contentView.addSubview(downloadExportButton)
+            cell.contentView.addSubview(downloadPreviewButton)
             
             switch downloadState {
             case .selectFile:
@@ -98,16 +107,25 @@ extension FilesController {
                 downloadProgress.setProgress(0.0, animated: false)
             }
             
+            downloadPreviewButton.isEnabled = downloadedFileURL != nil
+            downloadExportButton.isEnabled = downloadedFileURL != nil
+            
             NSLayoutConstraint.activate([
                 downloadProgress.topAnchor.constraint(equalTo: cell.contentView.topAnchor),
                 downloadProgress.leadingAnchor.constraint(equalTo: cell.contentView.leadingAnchor),
                 downloadProgress.trailingAnchor.constraint(equalTo: cell.contentView.trailingAnchor),
                 
-                downloadResultLabel.topAnchor.constraint(equalTo: downloadProgress.bottomAnchor, constant: 8.0),
-                downloadResultLabel.leadingAnchor.constraint(equalTo: cell.contentView.safeAreaLayoutGuide.leadingAnchor, constant: 14.0),
-                downloadResultLabel.trailingAnchor.constraint(equalTo: cell.contentView.safeAreaLayoutGuide.trailingAnchor, constant: -14.0),
+                downloadExportButton.topAnchor.constraint(equalTo: cell.contentView.topAnchor, constant: 8.0),
+                downloadExportButton.trailingAnchor.constraint(equalTo: cell.contentView.safeAreaLayoutGuide.trailingAnchor, constant: -14.0),
                 
-                cell.contentView.bottomAnchor.constraint(equalTo: downloadResultLabel.bottomAnchor, constant: 8.0)
+                downloadPreviewButton.topAnchor.constraint(equalTo: downloadExportButton.topAnchor),
+                downloadPreviewButton.trailingAnchor.constraint(equalTo: downloadExportButton.leadingAnchor, constant: -12.0),
+                
+                downloadResultLabel.firstBaselineAnchor.constraint(equalTo: downloadPreviewButton.firstBaselineAnchor),
+                downloadResultLabel.leadingAnchor.constraint(equalTo: cell.contentView.safeAreaLayoutGuide.leadingAnchor, constant: 14.0),
+                downloadResultLabel.trailingAnchor.constraint(equalTo: downloadPreviewButton.leadingAnchor, constant: -14.0),
+                
+                cell.contentView.bottomAnchor.constraint(equalTo: downloadPreviewButton.bottomAnchor, constant: 8.0)
             ])
             return cell
         default:
@@ -177,12 +195,39 @@ extension FilesController {
         downloadTextField.resignFirstResponder()
         guard let downloadFilename, let downloadDestination else { return }
         
+        downloadedFileURL = nil
         downloadState = .inProgress(percentage: 0, speedInKbps: nil)
         addRecentDownload(downloadFilename)
         let baseController = parent as? BaseViewController
         baseController?.onDeviceStatusReady { [unowned self] in
             _ = fsManager.download(name: downloadDestination, delegate: self)
         }
+    }
+    
+    // MARK: onPreviewButtonTapped(_:)
+    
+    @objc func onPreviewButtonTapped(_ sender: UIButton) {
+        guard downloadedFileURL != nil else { return }
+        
+        let quickLookViewController = QLPreviewController()
+        if #available(iOS 15.0, *) {
+            quickLookViewController.sheetPresentationController?.sourceView = sender
+        }
+        quickLookViewController.popoverPresentationController?.sourceView = sender
+        quickLookViewController.dataSource = self
+        quickLookViewController.modalPresentationStyle = .fullScreen
+        present(quickLookViewController, animated: true)
+    }
+    
+    // MARK: onExportButtonTapped(_:)
+    
+    @objc func onExportButtonTapped(_ sender: UIButton) {
+        guard let downloadedFileURL else { return }
+        
+        let activityVC = UIActivityViewController(activityItems: [downloadedFileURL], applicationActivities: nil)
+        // On iPad, UIPopoverPresentationController must have a source or it'll crash.
+        activityVC.popoverPresentationController?.sourceView = sender
+        present(activityVC, animated: true, completion: nil)
     }
 }
 
@@ -208,6 +253,25 @@ extension FilesController: FileDownloadDelegate {
     func download(of name: String, didFinish data: Data) {
         downloadState = .completed
         tableView.reloadSections(IndexSet([Section.download.rawValue]), with: .none)
+        
+        guard let downloadFilename else { return }
+        do {
+            var tempFileURL = FileManager.default.temporaryDirectory
+            tempFileURL.appendPathComponent(downloadFilename)
+            
+            if FileManager.default.fileExists(atPath: tempFileURL.absoluteString) {
+                try FileManager.default.removeItem(at: tempFileURL)
+            }
+            try data.write(to: tempFileURL, options: [.atomic])
+            downloadedFileURL = tempFileURL
+            tableView.reloadSections(IndexSet([Section.download.rawValue]), with: .none)
+        } catch {
+            downloadedFileURL = nil
+            downloadResultLabel.text = "Error writing downloaded file."
+            downloadResultLabel.textColor = .red
+            
+            (UIApplication.shared.delegate as? McuMgrLogDelegate)?.log(error.localizedDescription, ofCategory: .filesystemManager, atLevel: .error)
+        }
     }
 }
 
@@ -218,5 +282,18 @@ extension FilesController: UITextFieldDelegate {
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         textField.resignFirstResponder()
         return true
+    }
+}
+
+// MARK: - QLPreviewControllerDataSource
+
+extension FilesController: QLPreviewControllerDataSource {
+    
+    func numberOfPreviewItems(in controller: QLPreviewController) -> Int {
+        return downloadedFileURL != nil ? 1 : 0
+    }
+    
+    func previewController(_ controller: QLPreviewController, previewItemAt index: Int) -> QLPreviewItem {
+        return downloadedFileURL! as NSURL
     }
 }
