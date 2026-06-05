@@ -331,6 +331,13 @@ public class FileSystemManager: McuManager {
     /// or cancel.
     private var cyclicReferenceHolder: (() -> FileSystemManager)?
     
+    /// Test for bridging API towards an AsyncStream
+    ///
+    /// - Warning: We don't know exactly how we're going to go about making the overall API closer
+    /// to how people are using it nowadays (i.e. 'modern Swift'). So for now, this is
+    /// an internal experiment.
+    internal var asyncDelegate: AsyncFileSystemDelegate?
+    
     // MARK: Cancel
     
     /// Cancels the current transfer.
@@ -803,6 +810,7 @@ public enum FileSystemManagerError: UInt64, Error, LocalizedError {
     case mountingPointNotFound = 14
     case readOnlyFilesystem = 15
     case emptyFile = 16
+    case operationAlreadyInProgress = 2029
     
     public var errorDescription: String? {
         switch self {
@@ -840,6 +848,8 @@ public enum FileSystemManagerError: UInt64, Error, LocalizedError {
             return "Specified mount point only supports read-only operations"
         case .emptyFile:
             return "Requested operation cannot be performed due to file being empty with no contents"
+        case .operationAlreadyInProgress:
+            return "There's already an operation in progress"
         }
     }
 }

@@ -163,6 +163,7 @@ extension FilesController {
     // MARK: onDownloadInputChanged(_:)
     
     @objc func onDownloadInputChanged(_ sender: UITextField) {
+        downloadState = .selectFile
         downloadFilename = sender.text
         let partition = UserDefaults.standard.string(forKey: FilesController.partitionKey)
             ?? FilesController.defaultPartition
@@ -178,8 +179,11 @@ extension FilesController {
         let alert = UIAlertController(title: "Recents", message: nil, preferredStyle: .actionSheet)
         let action: (UIAlertAction) -> Void = { [weak self] action in
             guard let self else { return }
+            downloadedFileURL = nil
+            downloadResultLabel.text = nil
             downloadTextField.text = action.title
             onDownloadInputChanged(downloadTextField)
+            tableView.reloadSections(IndexSet([Section.download.rawValue]), with: .none)
         }
         recents.forEach { name in
             alert.addAction(UIAlertAction(title: name, style: .default, handler: action))
@@ -193,14 +197,31 @@ extension FilesController {
     
     @objc func onDownloadButtonTapped(_ sender: UIButton) {
         downloadTextField.resignFirstResponder()
-        guard let downloadFilename, let downloadDestination else { return }
+        guard let downloadFilename, let downloadDestination,
+              let baseController = parent as? BaseViewController else { return }
         
         downloadedFileURL = nil
         downloadState = .inProgress(percentage: 0, speedInKbps: nil)
         addRecentDownload(downloadFilename)
-        let baseController = parent as? BaseViewController
-        baseController?.onDeviceStatusReady { [unowned self] in
-            _ = fsManager.download(name: downloadDestination, delegate: self)
+        
+        Task {
+            await baseController.onDeviceStatusReady()
+            
+            for await event in fsManager.download(downloadDestination) {
+                switch event {
+                case .progressDidChange(let progressSize, let fileSize, _):
+                    downloadState = .inProgress(percentage: Float(progressSize) / Float(fileSize), speedInKbps: nil)
+                    tableView.reloadSections(IndexSet([Section.download.rawValue]), with: .none)
+                case .operationDidFail(let error):
+                    downloadState = .error(error)
+                    tableView.reloadSections(IndexSet([Section.download.rawValue]), with: .none)
+                case .operationCancelled:
+                    downloadState = .cancelled
+                    tableView.reloadSections(IndexSet([Section.download.rawValue]), with: .none)
+                case .operationFinished(let filename, let data):
+                    download(of: filename, didFinish: data)
+                }
+            }
         }
     }
     
@@ -231,24 +252,9 @@ extension FilesController {
     }
 }
 
-// MARK: - FileDownloadDelegate
-
-extension FilesController: FileDownloadDelegate {
+extension FilesController {
     
-    func downloadProgressDidChange(bytesDownloaded: Int, fileSize: Int, timestamp: Date) {
-        downloadState = .inProgress(percentage: Float(bytesDownloaded) / Float(fileSize), speedInKbps: nil)
-        tableView.reloadSections(IndexSet([Section.download.rawValue]), with: .none)
-    }
-    
-    func downloadDidFail(with error: Error) {
-        downloadState = .error(error)
-        tableView.reloadSections(IndexSet([Section.download.rawValue]), with: .none)
-    }
-    
-    func downloadDidCancel() {
-        downloadState = .cancelled
-        tableView.reloadSections(IndexSet([Section.download.rawValue]), with: .none)
-    }
+    // MARK: download(of:didFinish:)
     
     func download(of name: String, didFinish data: Data) {
         downloadState = .completed
