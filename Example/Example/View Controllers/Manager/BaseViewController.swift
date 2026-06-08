@@ -269,6 +269,33 @@ extension BaseViewController {
         }
     }
     
+    // MARK: onDeviceStatusReady() async
+    
+    func onDeviceStatusReady() async {
+        // Clear because we don't want to trigger the delegate-based callback.
+        statusInfoCallback = nil
+        guard !deviceInfoRequested else {
+            onDeviceStatusFinished()
+            return
+        }
+        
+        if deviceStatusManager == nil {
+            deviceStatusManager = DeviceStatusManager(
+                transport, logDelegate: UIApplication.shared.delegate as? McuMgrLogDelegate
+            )
+        }
+        
+        guard let deviceStatusManager else { return }
+        statusInfo = await deviceStatusManager.requestStatusInfo()
+        
+        guard let peripheral = peripheral?.basePeripheral else {
+            onDeviceStatusFinished()
+            return
+        }
+        otaStatus = await deviceStatusManager.requestOTAStatus(for: peripheral.identifier)
+        onDeviceStatusFinished()
+    }
+    
     // MARK: onDeviceStatusFinished
     
     private func onDeviceStatusFinished() {
