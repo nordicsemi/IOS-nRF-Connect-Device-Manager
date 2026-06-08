@@ -115,12 +115,10 @@ final class BaseViewController: UITabBarController {
     // MARK: setupViewControllers()
     
     private func setupViewControllers() {
-        let storyboard = UIStoryboard(name: "Main", bundle: Bundle.main)
-        
         let deviceViewController = DeviceController(style: .grouped)
         deviceViewController.tabBarItem = UITabBarItem(title: "Device", image: UIImage(systemName: "cpu"), selectedImage: nil)
         
-        let imageViewController: ImageController! = storyboard.instantiateViewController(identifier: "imageVC")
+        let imageViewController = ImageController(style: .grouped)
         imageViewController.tabBarItem = UITabBarItem(title: "Image", image: UIImage(systemName: "arrow.down.to.line"), selectedImage: nil)
         
         let filesViewController = FilesController(style: .grouped)
@@ -173,7 +171,7 @@ enum DeviceStatusRow: Int, RawRepresentable, CaseIterable, CustomStringConvertib
         case .kernel:
             return "Kernel"
         case .otaStatus:
-            return "OTA"
+            return "nRF Cloud OTA"
         case .observabilityStatus:
             return "Observability"
         }
