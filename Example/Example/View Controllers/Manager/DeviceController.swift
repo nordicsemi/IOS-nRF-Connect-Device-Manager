@@ -31,6 +31,7 @@ class DeviceController: UITableViewController, UITextFieldDelegate {
                             resizingMode: .stretch)
             .withRenderingMode(.alwaysTemplate)
         let imageView = UIImageView(image: sentBackground)
+        imageView.tintColor = .nordic
         imageView.translatesAutoresizingMaskIntoConstraints = false
         imageView.isHidden = true
         return imageView
@@ -43,6 +44,7 @@ class DeviceController: UITableViewController, UITextFieldDelegate {
                             resizingMode: .stretch)
             .withRenderingMode(.alwaysTemplate)
         let imageView = UIImageView(image: receivedBackground)
+        imageView.tintColor = .zephyr
         imageView.translatesAutoresizingMaskIntoConstraints = false
         imageView.isHidden = true
         return imageView
@@ -144,6 +146,7 @@ class DeviceController: UITableViewController, UITextFieldDelegate {
             let button = UIButton(type: .custom)
             button.setImage(UIImage(named: "ic_send"), for: .normal)
             button.addTarget(self, action: #selector(sendTapped), for: .touchUpInside)
+            button.tintColor = .nordic
             button.translatesAutoresizingMaskIntoConstraints = false
             inputCell.contentView.addSubview(button)
             
@@ -289,7 +292,6 @@ class DeviceController: UITableViewController, UITextFieldDelegate {
             // it sizes itself based on its constraints. I don't know... I found this fix by
             // accident.
             self?.messageReceived?.sizeToFit()
-            self?.messageReceivedBackground.tintColor = .zephyr
         }
         
         if let error {
