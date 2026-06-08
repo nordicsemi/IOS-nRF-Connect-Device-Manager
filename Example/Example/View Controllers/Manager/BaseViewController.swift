@@ -188,6 +188,7 @@ extension BaseViewController {
         cell.textLabel?.text = row?.description
         cell.detailTextLabel?.text = "UNKNOWN"
         cell.accessoryType = .detailButton
+        cell.tintColor = .nordic
         update(cell, asDeviceStatusRow: row)
         return cell
     }
