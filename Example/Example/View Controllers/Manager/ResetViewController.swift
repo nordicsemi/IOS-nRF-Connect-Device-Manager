@@ -61,7 +61,7 @@ final class ResetViewController: UIViewController, McuMgrViewController {
         view.translatesAutoresizingMaskIntoConstraints = false
         firmwareLoaderToggleChanged(switchToFirmwareLoaderToggle)
         
-        advertisingNameTextField.placeholder = "Defaults to 'fl_[HH]_[mm]'"
+        advertisingNameTextField.placeholder = "Defaults to 'FL_[HH][mm][ss]'"
     }
     
     // MARK: callReset(mode:)
