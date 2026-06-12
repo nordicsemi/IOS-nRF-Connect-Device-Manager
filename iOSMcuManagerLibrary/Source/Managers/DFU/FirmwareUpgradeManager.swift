@@ -429,6 +429,7 @@ public class FirmwareUpgradeManager: FirmwareUpgradeController, ConnectionObserv
             return
         }
         
+        defaultManager.transport.addObserver(self)
         defaultManager.reset(bootMode: .bootloader, callback: resetIntoFirmwareLoaderCallback)
     }
     
@@ -442,16 +443,6 @@ public class FirmwareUpgradeManager: FirmwareUpgradeController, ConnectionObserv
         }
         
         log(msg: "Reset into Firmware Loader Mode Command successful.", atLevel: .info)
-        
-        guard let bleTransport = imageManager.transport as? McuMgrBleTransport else {
-            log(msg: "Reset into Firmware Loader Mode is only supported for Bluetooth LE Transport.", atLevel: .error)
-            fail(error: FirmwareUpgradeError.unknown("Reset into Firmware Loader Mode is only supported for Bluetooth LE."))
-            return
-        }
-        
-        firmwareLoaderFinder = FirmwareUpgradePeripheralFinder(bleTransport.centralManager, searchName: resetBootloaderName)
-        log(msg: "Looking for device named \(resetBootloaderName) after reset...", atLevel: .debug)
-        firmwareLoaderFinder?.find(with: firmwareLoaderFinderCallback)
     }
     
     // MARK: Bootloader Info Callback
@@ -1018,14 +1009,30 @@ public class FirmwareUpgradeManager: FirmwareUpgradeController, ConnectionObserv
         // Disregard connected state.
         guard state == .disconnected else { return }
         
-        if resetBootloaderName != nil, imageManager.transport.mode == .alternate {
-            do {
-                log(msg: "Switching transport back to Default Mode...", atLevel: .debug)
-                try imageManager.transport.switchMode(to: .default, with: nil)
-            } catch {
-                fail(error: error)
+        switch self.state { // FirmwareUpgradeState, not McuMgrTransportState
+        case .resetIntoFirmwareLoader:
+            guard let bleTransport = imageManager.transport as? McuMgrBleTransport else {
+                log(msg: "Reset into Firmware Loader Mode is only supported for Bluetooth LE Transport.", atLevel: .error)
+                fail(error: FirmwareUpgradeError.unknown("Reset into Firmware Loader Mode is only supported for Bluetooth LE."))
                 return
             }
+            
+            firmwareLoaderFinder = FirmwareUpgradePeripheralFinder(bleTransport.centralManager, searchName: resetBootloaderName)
+            log(msg: "Looking for device named \(resetBootloaderName) after reset...", atLevel: .debug)
+            firmwareLoaderFinder?.find(with: firmwareLoaderFinderCallback)
+            return // Do not proceed. firmwareLoaderFinderCallback will take over.
+        case .reset:
+            if resetBootloaderName != nil, imageManager.transport.mode == .alternate {
+                do {
+                    log(msg: "Switching transport back to Default Mode...", atLevel: .debug)
+                    try imageManager.transport.switchMode(to: .default, with: nil)
+                } catch {
+                    fail(error: error)
+                    return
+                }
+            }
+        default:
+            break
         }
         
         log(msg: "Device disconnected.", atLevel: .info)
