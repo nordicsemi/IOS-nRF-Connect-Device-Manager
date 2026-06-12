@@ -299,17 +299,17 @@ public class FirmwareUpgradeManager: FirmwareUpgradeController, ConnectionObserv
         
         if let mcuMgrError = error as? McuMgrError,
            case let McuMgrError.returnCode(returnCode) = mcuMgrError {
-            if configuration.bootloaderMode.isBareMetal, returnCode == .unsupported {
+            if returnCode == .unsupported {
                 if imageManager.transport.mode == .default {
-                    log(msg: "Bare Metal Command Error Detected. Attempting Reset into Firmware Loader Mode...", atLevel: .debug)
-                    buttonlessBareMetalResetIntoFirmwareLoader()
+                    log(msg: "Command Unsupported Error Detected. Attempting Reset into Firmware Loader Mode...", atLevel: .debug)
+                    buttonlessResetIntoFirmwareLoader()
                     return // swallow error for Firmware Loader Mode switch.
                 }
                 // 'default' mode means Application Mode. 'alternate' is Firmware
-                // Loader. So if there's an unsopported Bare Metal error and we're
+                // Loader. So if there's an unsupported command error and we're
                 // already speaking to the Firmware Loader, there's nothing more
                 // we can do.
-                log(msg: "Bare Metal Command Error Detected in Firmware Loader Mode. Operation cannot continue.", atLevel: .error)
+                log(msg: "Command Unsupported Error Detected in Firmware Loader Mode. Operation cannot continue.", atLevel: .error)
             }
         }
         log(msg: error.localizedDescription, atLevel: .error)
@@ -360,7 +360,7 @@ public class FirmwareUpgradeManager: FirmwareUpgradeController, ConnectionObserv
     
     // MARK: buttonlessBareMetalResetIntoFirmwareLoader()
     
-    private func buttonlessBareMetalResetIntoFirmwareLoader() {
+    private func buttonlessResetIntoFirmwareLoader() {
         objc_sync_enter(self)
         defer {
             objc_sync_exit(self)
