@@ -14,8 +14,29 @@ import iOSMcuManagerLibrary
 @available(iOS 13.0, macCatalyst 13.0, macOS 10.15, *)
 public extension DefaultManager {
     
+    // MARK: async reset(bootMode:force:)
+    
+    /// Async variant of ``reset(bootMode:force:callback:)``
+    public func reset(bootMode: ResetBootMode = .normal, force: Bool = false) async throws -> McuMgrResponse {
+        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<McuMgrResponse, Error>) in
+            reset(bootMode: bootMode, force: force) { response, error in
+                if let error {
+                    continuation.resume(throwing: error)
+                    return
+                }
+                
+                if let response {
+                    continuation.resume(returning: response)
+                } else {
+                    continuation.resume(throwing: McuMgrResponseParseError.invalidPayload)
+                }
+            }
+        }
+    }
+    
     // MARK: async params()
     
+    /// Async variant of ``params(callback:)``
     public func params() async throws -> McuMgrParametersResponse {
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<McuMgrParametersResponse, Error>) in
             params { response, error in
@@ -35,6 +56,7 @@ public extension DefaultManager {
     
     // MARK: async applicationInfo(format:)
     
+    /// Async variant of ``applicationInfo(format:callback:)``
     public func applicationInfo(format: Set<ApplicationInfoFormat>) async throws -> AppInfoResponse {
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<AppInfoResponse, Error>) in
             applicationInfo(format: format) { response, error in
@@ -65,6 +87,7 @@ public extension DefaultManager {
     
     // MARK: bootloaderQuery(:)
     
+    /// Async variant of ``bootloaderInfo(query:callback:)``
     public func bootloaderQuery(_ query: BootloaderInfoQuery) async throws -> BootloaderInfoResponse {
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<BootloaderInfoResponse, Error>) in
             bootloaderInfo(query: query) { response, error in
