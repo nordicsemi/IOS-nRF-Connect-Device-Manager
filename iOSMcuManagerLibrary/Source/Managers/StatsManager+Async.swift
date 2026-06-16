@@ -15,6 +15,7 @@ public extension StatsManager {
     
     // MARK: async list()
     
+    /// Async variant of ``list(callback:)``
     public func list() async throws -> McuMgrStatsListResponse {
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<McuMgrStatsListResponse, Error>) in
             list { response, error in
@@ -34,6 +35,7 @@ public extension StatsManager {
     
     // MARK: async read(module:)
     
+    /// Async variant of ``read(module:callback:)``
     public func read(module: String) async throws -> McuMgrStatsResponse {
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<McuMgrStatsResponse, Error>) in
             read(module: module) { response, error in
