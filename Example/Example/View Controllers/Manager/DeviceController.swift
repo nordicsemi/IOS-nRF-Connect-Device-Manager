@@ -342,7 +342,7 @@ extension DeviceController: DeviceStatusManager.Delegate {
         tableView.reloadSections(IndexSet([Section.deviceStatus.rawValue]), with: .none)
     }
     
-    func connectionStateDidChange(_ state: PeripheralState) {
+    func transportStateDidChange(_ state: PeripheralState) {
         tableView.reloadSections(IndexSet([Section.deviceStatus.rawValue]), with: .none)
     }
     

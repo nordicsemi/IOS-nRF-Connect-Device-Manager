@@ -18,7 +18,7 @@ final class BaseViewController: UITabBarController {
     weak var deviceStatusDelegate: DeviceStatusManager.Delegate? {
         didSet {
             if let peripheralState {
-                deviceStatusDelegate?.connectionStateDidChange(peripheralState)
+                deviceStatusDelegate?.transportStateDidChange(peripheralState)
             }
             if let statusInfo {
                 deviceStatusDelegate?.statusInfoDidChange(statusInfo)
@@ -66,7 +66,7 @@ final class BaseViewController: UITabBarController {
     private var peripheralState: PeripheralState? {
         didSet {
             guard let peripheralState else { return }
-            deviceStatusDelegate?.connectionStateDidChange(peripheralState)
+            deviceStatusDelegate?.transportStateDidChange(peripheralState)
         }
     }
     
@@ -84,7 +84,12 @@ final class BaseViewController: UITabBarController {
         }
     }
     
-    private var observabilityStatusInfo: ObservabilityStatusInfo?
+    private var observabilityStatusInfo: ObservabilityStatusInfo? {
+        didSet {
+            guard let observabilityStatusInfo else { return }
+            deviceStatusDelegate?.observabilityStatusChanged(observabilityStatusInfo)
+        }
+    }
     
     // MARK: viewDidLoad()
     
@@ -144,7 +149,7 @@ final class BaseViewController: UITabBarController {
 // MARK: - DeviceStatusRow
 
 enum DeviceStatusRow: Int, RawRepresentable, CaseIterable, CustomStringConvertible {
-    case connection
+    case smpService
     case mcuMgrParameters
     case bootloaderName
     case bootloaderMode
@@ -155,8 +160,8 @@ enum DeviceStatusRow: Int, RawRepresentable, CaseIterable, CustomStringConvertib
     
     var description: String {
         switch self {
-        case .connection:
-            return "Connection Status"
+        case .smpService:
+            return "SMP Service"
         case .mcuMgrParameters:
             return "Buffer Details"
         case .bootloaderName:
@@ -197,7 +202,7 @@ extension BaseViewController {
     
     func update(_ cell: UITableViewCell, asDeviceStatusRow row: DeviceStatusRow?) {
         switch row {
-        case .connection:
+        case .smpService:
             cell.detailTextLabel?.text = peripheralState?.description
         case .mcuMgrParameters:
             if let buffers = statusInfo?.bufferCount, let size = statusInfo?.bufferSize {
@@ -343,8 +348,8 @@ extension BaseViewController {
         guard let statusRow = DeviceStatusRow(rawValue: indexPath.row) else { return }
         let helpDialogAlertController = UIAlertController(title: "\(statusRow) Help", message: nil, preferredStyle: .alert)
         switch statusRow {
-        case .connection:
-            helpDialogAlertController.message = "\nReports the status of the Bluetooth LE connection to the device."
+        case .smpService:
+            helpDialogAlertController.message = "\nReports the status of the SMP Service connection to the device."
         case .mcuMgrParameters:
             helpDialogAlertController.message = "\nNumber of MCU Manager buffers and their size. Requires MCU Mgr Parameters command in OS Group."
         case .bootloaderName:
@@ -400,6 +405,9 @@ extension BaseViewController {
 extension BaseViewController {
     
     func startObservability(for peripheral: CBPeripheral) {
+        guard observabilityStatusManager == nil else {
+            return // Already in Progress.
+        }
         let peripheralUUID = peripheral.identifier
         Task { @MainActor in
             observabilityStatusManager = ObservabilityStatusManager(peripheralIdentifier: peripheralUUID)
@@ -407,12 +415,11 @@ extension BaseViewController {
             print("\(#function): STARTED Listening to \(peripheralUUID) Observability Events.")
             for await statusInfo in stream {
                 observabilityStatusInfo = statusInfo
-                deviceStatusDelegate?.observabilityStatusChanged(statusInfo)
             }
             print("\(#function): STOPPED Listening to \(peripheralUUID) Observability Events.")
-            guard var observabilityStatusInfo else { return }
-            observabilityStatusInfo.updatedStatus(.connectionClosed)
-            deviceStatusDelegate?.observabilityStatusChanged(observabilityStatusInfo)
+            var connectionClosedStatus = observabilityStatusInfo
+            connectionClosedStatus?.updatedStatus(.connectionClosed)
+            observabilityStatusInfo = connectionClosedStatus
         }
     }
     
@@ -429,12 +436,14 @@ extension BaseViewController: PeripheralDelegate {
     func peripheral(_ peripheral: CBPeripheral, didChangeStateTo state: PeripheralState) {
         peripheralState = state
         switch state {
-        case .connected:
+        case .connecting:
+            // Don't wait for .connected because McuMgrBleTransport only sends 'connected'
+            // if SMP Service is found. Observability might still work because it relies
+            // on MDS Service Instead.
             startObservability(for: peripheral)
         case .disconnecting, .disconnected:
             // Set to false, because a DFU update might change things if that's what happened.
             deviceInfoRequested = false
-            stopObservability()
         default:
             // Nothing to do here.
             break

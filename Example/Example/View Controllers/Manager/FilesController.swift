@@ -266,7 +266,7 @@ final class FilesController: UITableViewController {
 
 extension FilesController: DeviceStatusManager.Delegate {
     
-    func connectionStateDidChange(_ state: PeripheralState) {
+    func transportStateDidChange(_ state: PeripheralState) {
         tableView.reloadSections(IndexSet([Section.deviceStatus.rawValue]), with: .none)
     }
     

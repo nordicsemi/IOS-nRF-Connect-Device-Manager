@@ -27,8 +27,8 @@
                                             <rect key="frame" x="0.0" y="0.0" width="335" height="51"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
-                                                <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" insetsLayoutMarginsFromSafeArea="NO" text="Connection status" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="yZo-Ck-heo">
-                                                    <rect key="frame" x="16" y="15.999999999999998" width="138.66666666666666" height="20.333333333333332"/>
+                                                <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" insetsLayoutMarginsFromSafeArea="NO" text="SMP Service" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="yZo-Ck-heo">
+                                                    <rect key="frame" x="15.999999999999993" y="15.999999999999998" width="96.333333333333329" height="20.333333333333332"/>
                                                     <autoresizingMask key="autoresizingMask"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                     <nil key="textColor"/>
@@ -355,11 +355,11 @@
                         <outlet property="bootloaderMode" destination="smW-QM-FfV" id="mA4-h1-ZYw"/>
                         <outlet property="bootloaderName" destination="uaI-gC-497" id="f38-2r-hlr"/>
                         <outlet property="bootloaderSlot" destination="Vby-ya-YD1" id="rrh-Sx-rHv"/>
-                        <outlet property="connectionStatus" destination="O3R-v7-4NX" id="yj7-St-r3t"/>
                         <outlet property="kernel" destination="gLO-Vy-wq7" id="l0u-T4-ia8"/>
                         <outlet property="mcuMgrParams" destination="XBY-MZ-p44" id="rmM-Jj-00v"/>
                         <outlet property="observabilityStatus" destination="ngs-um-OT5" id="uL0-Um-cfd"/>
                         <outlet property="otaStatusLabel" destination="hpN-ya-AfX" id="QHf-Dt-yFv"/>
+                        <outlet property="smpService" destination="O3R-v7-4NX" id="yj7-St-r3t"/>
                     </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="6wy-pp-4s9" userLabel="First Responder" sceneMemberID="firstResponder"/>
