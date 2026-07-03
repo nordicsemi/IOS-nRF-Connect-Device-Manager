@@ -211,7 +211,11 @@ extension BaseViewController {
                 cell.detailTextLabel?.text = "UNKNOWN"
             }
         case .bootloaderName:
-            cell.detailTextLabel?.text = (statusInfo?.bootloader ?? .unknown).description
+            guard let bootloader = statusInfo?.bootloader, bootloader != .unknown else {
+                cell.detailTextLabel?.text = "UNKNOWN"
+                break
+            }
+            cell.detailTextLabel?.text = bootloader.description
         case .bootloaderMode:
             if let mode = statusInfo?.bootloaderMode {
                 cell.detailTextLabel?.text = mode.description

@@ -133,7 +133,11 @@ extension ImageController: DeviceStatusManager.Delegate {
         if let appInfo = info.appInfoOutput {
             kernel.text = appInfo
         }
-        bootloaderName.text = (info.bootloader ?? .unknown).description
+        if let bootloader = info.bootloader, bootloader != .unknown {
+            bootloaderName.text = bootloader.description
+        } else {
+            bootloaderName.text = "UNKNOWN"
+        }
         if let mode = info.bootloaderMode {
             bootloaderMode.text = mode.description
         }
