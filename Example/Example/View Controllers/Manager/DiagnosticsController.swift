@@ -384,7 +384,7 @@ private extension DiagnosticsController {
 
 extension DiagnosticsController: DeviceStatusManager.Delegate {
     
-    func connectionStateDidChange(_ state: PeripheralState) {
+    func transportStateDidChange(_ state: PeripheralState) {
         tableView.reloadSections(IndexSet([Section.deviceStatus.rawValue]), with: .none)
         // Reload in separate command, otherwise we get a 'blinking' header effect.
         tableView.reloadSections(IndexSet([Section.observability.rawValue]), with: .none)

@@ -118,7 +118,7 @@ extension DeviceStatusManager {
     protocol Delegate: AnyObject {
         
         func statusInfoDidChange(_ info: DeviceStatusInfo)
-        func connectionStateDidChange(_ state: PeripheralState)
+        func transportStateDidChange(_ state: PeripheralState)
         func otaStatusChanged(_ status: OTAStatus)
         func observabilityStatusChanged(_ statusInfo: ObservabilityStatusInfo)
     }

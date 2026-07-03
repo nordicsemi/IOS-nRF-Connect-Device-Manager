@@ -13,7 +13,7 @@ final class ImageController: UITableViewController {
     
     // MARK: @IBOutlet(s)
     
-    @IBOutlet weak var connectionStatus: UILabel!
+    @IBOutlet weak var smpService: UILabel!
     @IBOutlet weak var mcuMgrParams: UILabel!
     @IBOutlet weak var bootloaderName: UILabel!
     @IBOutlet weak var bootloaderMode: UILabel!
@@ -122,8 +122,8 @@ final class ImageController: UITableViewController {
 
 extension ImageController: DeviceStatusManager.Delegate {
     
-    func connectionStateDidChange(_ state: PeripheralState) {
-        connectionStatus.text = state.description
+    func transportStateDidChange(_ state: PeripheralState) {
+        smpService.text = state.description
     }
     
     func statusInfoDidChange(_ info: DeviceStatusInfo) {
