@@ -88,7 +88,7 @@ internal extension ObservabilityManager {
             
             guard state.pendingChunks(for: identifier).hasItems else { return }
             resumeUploadsIfNotBusy(for: identifier, with: auth)
-        } catch CBATTError.insufficientEncryption {
+        } catch CBATTError.insufficientEncryption, CBATTError.insufficientAuthentication {
             deviceContinuations[identifier]?.yield(with: .failure(ObservabilityError.pairingError))
             deviceCancellables[identifier]?.removeAll()
         } catch {
