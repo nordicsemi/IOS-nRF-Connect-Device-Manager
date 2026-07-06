@@ -43,7 +43,7 @@ enum ObservabilityStatus: CustomStringConvertible {
         case .connectionClosed:
             return "DISCONNECTED"
         case .pairingError:
-            return "PAIRING REQUIRED"
+            return "PAIRING ERROR"
         case .errorEvent:
             return "ERROR"
         }

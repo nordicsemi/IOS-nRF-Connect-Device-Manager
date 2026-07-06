@@ -21,8 +21,13 @@ final class ObservabilityStatusManager {
     private var observabilityIdentifier: UUID
     private var observabilityManager: ObservabilityManager?
     
-    private(set) var statusInfo: ObservabilityStatusInfo!
     private(set) var statusContinuation: AsyncStream<ObservabilityStatusInfo>.Continuation?
+    private(set) var statusInfo: ObservabilityStatusInfo! {
+        didSet {
+            guard let statusInfo else { return }
+            statusContinuation?.yield(statusInfo)
+        }
+    }
     
     // MARK: init
     
@@ -57,6 +62,7 @@ final class ObservabilityStatusManager {
         observabilityTask = Task {
             guard let observabilityStream = observabilityManager?.connectToDevice(observabilityIdentifier) else { return }
             do {
+                statusInfo = ObservabilityStatusInfo(status: .receivedEvent(.disconnected))
                 for try await event in observabilityStream {
                     switch event.event {
                     case .connected:
@@ -68,8 +74,6 @@ final class ObservabilityStatusManager {
                     default:
                         statusInfo?.updatedStatus(.receivedEvent(event.event))
                     }
-                    guard let statusInfo else { continue } // defensive programming
-                    statusContinuation?.yield(statusInfo)
                 }
                 print("STOPPED Listening to \(observabilityIdentifier.uuidString) Connection Events.")
                 statusInfo?.updatedStatus(.connectionClosed)
