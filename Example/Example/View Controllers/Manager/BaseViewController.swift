@@ -412,6 +412,7 @@ extension BaseViewController {
         guard observabilityStatusManager == nil else {
             return // Already in Progress.
         }
+        
         let peripheralUUID = peripheral.identifier
         Task { @MainActor in
             observabilityStatusManager = ObservabilityStatusManager(peripheralIdentifier: peripheralUUID)
@@ -421,9 +422,15 @@ extension BaseViewController {
                 observabilityStatusInfo = statusInfo
             }
             print("\(#function): STOPPED Listening to \(peripheralUUID) Observability Events.")
-            var connectionClosedStatus = observabilityStatusInfo
-            connectionClosedStatus?.updatedStatus(.connectionClosed)
-            observabilityStatusInfo = connectionClosedStatus
+            
+            guard let status = observabilityStatusInfo?.status, case ObservabilityStatus.receivedEvent = status else {
+                // No-op. Keep a "not normal" status as the last visible update for the user.
+                return
+            }
+            
+            var statusInfo = observabilityStatusInfo
+            statusInfo?.updatedStatus(.connectionClosed)
+            observabilityStatusInfo = statusInfo
         }
     }
     
