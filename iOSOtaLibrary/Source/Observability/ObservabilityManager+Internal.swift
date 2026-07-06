@@ -92,7 +92,11 @@ internal extension ObservabilityManager {
             deviceContinuations[identifier]?.yield(with: .failure(ObservabilityError.pairingError))
             deviceCancellables[identifier]?.removeAll()
         } catch {
-            deviceContinuations[identifier]?.yield(with: .failure(error))
+            if error.localizedDescription.localizedCaseInsensitiveContains("Peer removed pairing information") {
+                deviceContinuations[identifier]?.yield(with: .failure(ObservabilityError.pairingError))
+            } else {
+                deviceContinuations[identifier]?.yield(with: .failure(error))
+            }
             deviceCancellables[identifier]?.removeAll()
             // Is disconnect here necessary? It was not in Memfault-lib.
 //            disconnect(from: identifier)
