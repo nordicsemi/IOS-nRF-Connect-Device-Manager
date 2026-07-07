@@ -1265,12 +1265,43 @@ extension FirmwareUpgradeManager: SuitManagerDelegate {
 // MARK: - FirmwareUpgradeState
 //******************************************************************************
 
-public enum FirmwareUpgradeState {
+public enum FirmwareUpgradeState: CustomStringConvertible {
     case none
     case requestMcuMgrParameters, bootloaderInfo, eraseAppSettings
     case upload, success
     case validate, test, confirm, reset
     case resetIntoFirmwareLoader
+    
+    // MARK: description
+    
+    public var description: String {
+        switch self {
+        case .none:
+            return "Standby"
+        case .resetIntoFirmwareLoader:
+            return "Resetting into Fw Loader Mode"
+        case .requestMcuMgrParameters:
+            return "Requesting McuMgr Parameters"
+        case .bootloaderInfo:
+            return "Requesting Bootloader Info"
+        case .validate:
+            return "Validating"
+        case .upload:
+            return "Uploading"
+        case .eraseAppSettings:
+            return "Erasing App Settings"
+        case .test:
+            return "Testing"
+        case .confirm:
+            return "Confirming"
+        case .reset:
+            return "Resetting"
+        case .success:
+            return "Upload Complete"
+        }
+    }
+    
+    // MARK: isInProgress()
     
     func isInProgress() -> Bool {
         return self != .none
