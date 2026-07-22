@@ -108,7 +108,7 @@ extension ImageController {
     
     @IBAction func imageRead(_ sender: UIButton) {
         Task {
-            disableImagesButtons()
+            disableActionableButtons()
             
             switch await requestBootloaderIfNecessary() {
             case .suit:
@@ -134,7 +134,7 @@ extension ImageController {
     @IBAction func imageTest(_ sender: UIButton) {
         Task {
             guard let imageHash = await selectImageCore() else { return }
-            disableImagesButtons()
+            disableActionableButtons()
             do {
                 let response = try await imageManager.test(hash: imageHash)
                 handle(response, nil)
@@ -148,7 +148,7 @@ extension ImageController {
     
     @IBAction func imageConfirm(_ sender: UIButton) {
         Task {
-            disableImagesButtons()
+            disableActionableButtons()
             
             switch await requestBootloaderIfNecessary() {
             case .suit:
@@ -181,7 +181,7 @@ extension ImageController {
             do {
                 switch await requestBootloaderIfNecessary() {
                 case .suit:
-                    disableImagesButtons()
+                    disableActionableButtons()
                     let response = try await suitManager.cleanup()
                     if response.rc != .ok {
                         setImagesText(response.rc.description, color: .systemRed, readEnabled: true)
@@ -190,7 +190,7 @@ extension ImageController {
                     }
                 case .mcuboot, .unknown:
                     guard let unconfirmedSlot = await selectUnconfirmedImageSlot() else { return }
-                    disableImagesButtons()
+                    disableActionableButtons()
                     let response = try await imageManager.erase(image: Int(unconfirmedSlot.0),
                                                                 slot: Int(unconfirmedSlot.1))
                     if response.rc != .ok {
@@ -299,7 +299,7 @@ extension ImageController {
             }
         }
         
-        updateImagesButtons()
+        updateActionableButtonsState()
     }
     
     // MARK: getInfo()
@@ -363,35 +363,5 @@ extension ImageController {
         imagesReadButton?.isEnabled = readEnabled
         
         tableView.reloadSections(IndexSet([Section.advancedImages.rawValue]), with: .none)
-    }
-    
-    // MARK: updateImagesButtons()
-    
-    internal func updateImagesButtons() {
-        imagesReadButton?.isEnabled = true
-        settingsEraseButton?.isEnabled = true
-        resetButton?.isEnabled = true
-        guard let images = readImagesResponse?.images else {
-            imagesTestButton?.isEnabled = false
-            imagesConfirmButton?.isEnabled = false
-            imagesEraseButton?.isEnabled = false
-            return
-        }
-        imagesTestButton?.isEnabled = images.first(where: { !$0.active && !$0.pending }) != nil
-        imagesConfirmButton?.isEnabled = images.first(where: { !$0.active && !$0.permanent }) != nil
-        imagesEraseButton?.isEnabled = images.first(where: { !$0.active && !$0.confirmed }) != nil
-    }
-    
-    // MARK: disableImagesButtons()
-    
-    internal func disableImagesButtons() {
-        imagesReadButton?.isEnabled = false
-        imagesTestButton?.isEnabled = false
-        imagesConfirmButton?.isEnabled = false
-        imagesEraseButton?.isEnabled = false
-        
-        settingsEraseButton?.isEnabled = false
-        
-        resetButton?.isEnabled = false
     }
 }

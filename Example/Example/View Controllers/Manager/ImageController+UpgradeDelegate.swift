@@ -21,13 +21,10 @@ extension ImageController: FirmwareUpgradeDelegate {
 
         uploadCancelButton.isHidden = false
         uploadCancelButton.isEnabled = true
-        uploadSelectFile?.isEnabled = false
-        uploadCheckForUpdates?.isEnabled = false
-        uploadEraseAppSettingsSwitch?.isEnabled = false
 
         initialBytes = 0
         uploadImageSize = nil
-        disableImagesButtons()
+        disableActionableButtons()
         
         guard let baseController = parent as? BaseViewController else { return }
         baseController.stopObservability()
@@ -51,7 +48,7 @@ extension ImageController: FirmwareUpgradeDelegate {
         uploadSelectFile?.isEnabled = true
         uploadCheckForUpdates?.isEnabled = true
         uploadEraseAppSettingsSwitch?.isEnabled = true
-        updateImagesButtons()
+        updateActionableButtonsState()
     }
     
     func upgradeDidFail(inState state: FirmwareUpgradeState, with error: Error) {
@@ -69,7 +66,7 @@ extension ImageController: FirmwareUpgradeDelegate {
         uploadStateLabel?.text = error.localizedDescription
         uploadStateLabel?.numberOfLines = 0
         uploadSpeedLabel.isHidden = true
-        updateImagesButtons()
+        updateActionableButtonsState()
     }
     
     func upgradeDidCancel(state: FirmwareUpgradeState) {
@@ -149,15 +146,11 @@ extension ImageController: ImageUploadDelegate {
         uploadActionButton.setTitle("Pause", for: .normal)
 
         uploadCancelButton.isHidden = false
-        uploadSelectFile?.isEnabled = false
-        uploadCheckForUpdates?.isEnabled = false
-        uploadEraseAppSettingsSwitch?.isEnabled = false
-
         initialBytes = 0
         uploadImageSize = nil
         
         uploadStateLabel?.text = "Starting"
-        disableImagesButtons()
+        disableActionableButtons()
         
         guard let baseController = parent as? BaseViewController else { return }
         baseController.stopObservability()

@@ -136,12 +136,12 @@ extension ImageController {
     
     private func callReset(with mode: DefaultManager.ResetBootMode) {
         Task {
-            disableImagesButtons()
+            disableActionableButtons()
             guard mode == .bootloader else {
                 do {
                     _ = try await defaultManager.reset(bootMode: mode)
                 } catch {}
-                updateImagesButtons()
+                updateActionableButtonsState()
                 return
             }
             
@@ -152,7 +152,7 @@ extension ImageController {
                 _ = try await defaultManager.reset(bootMode: mode)
             } catch {}
             
-            updateImagesButtons()
+            updateActionableButtonsState()
         }
     }
 }

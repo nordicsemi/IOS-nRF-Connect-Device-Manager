@@ -30,6 +30,7 @@
 		AA60B4582FD6EA4600A5FC6E /* ImageController+Upload.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA60B4572FD6EA4600A5FC6E /* ImageController+Upload.swift */; };
 		AA6A3B8C300F6D2900504AFE /* ImageController+Settings.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA6A3B8B300F6D2900504AFE /* ImageController+Settings.swift */; };
 		AA6A3B8F300F6D4200504AFE /* ImageController+Reset.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA6A3B8E300F6D4200504AFE /* ImageController+Reset.swift */; };
+		AA6A3B913010F10C00504AFE /* ImageController+Buttons.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA6A3B903010F10C00504AFE /* ImageController+Buttons.swift */; };
 		AA7145062F6D9FF800AF4BE7 /* AppMainSceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA7145052F6D9FF800AF4BE7 /* AppMainSceneDelegate.swift */; };
 		AA7799F82E785BA800CAA1C3 /* iOSMcuManagerLibrary in Frameworks */ = {isa = PBXBuildFile; productRef = AA7799F72E785BA800CAA1C3 /* iOSMcuManagerLibrary */; };
 		AA8404C42E7832ED00BD6B4A /* CryptoKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA8404C32E7832ED00BD6B4A /* CryptoKit.framework */; };
@@ -67,6 +68,7 @@
 		AA60B4572FD6EA4600A5FC6E /* ImageController+Upload.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ImageController+Upload.swift"; sourceTree = "<group>"; };
 		AA6A3B8B300F6D2900504AFE /* ImageController+Settings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ImageController+Settings.swift"; sourceTree = "<group>"; };
 		AA6A3B8E300F6D4200504AFE /* ImageController+Reset.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ImageController+Reset.swift"; sourceTree = "<group>"; };
+		AA6A3B903010F10C00504AFE /* ImageController+Buttons.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ImageController+Buttons.swift"; sourceTree = "<group>"; };
 		AA7145052F6D9FF800AF4BE7 /* AppMainSceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppMainSceneDelegate.swift; sourceTree = "<group>"; };
 		AA8404C32E7832ED00BD6B4A /* CryptoKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CryptoKit.framework; path = System/Library/Frameworks/CryptoKit.framework; sourceTree = SDKROOT; };
 		AA8C1BA52F7543FC00234E5F /* DeviceStatusManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceStatusManager.swift; sourceTree = "<group>"; };
@@ -135,6 +137,7 @@
 				524DCFCF210B0EB6000E110D /* BaseViewController.swift */,
 				524DCFD3210B1C17000E110D /* DeviceController.swift */,
 				526270A3210B8E8000FC17D4 /* ImageController.swift */,
+				AA6A3B903010F10C00504AFE /* ImageController+Buttons.swift */,
 				AA60B4572FD6EA4600A5FC6E /* ImageController+Upload.swift */,
 				AA07170F2FFE6EAA00F3D5A4 /* ImageController+UpgradeDelegate.swift */,
 				AA0717112FFFB70E00F3D5A4 /* ImageController+Images.swift */,
@@ -335,6 +338,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				AA60B4582FD6EA4600A5FC6E /* ImageController+Upload.swift in Sources */,
+				AA6A3B913010F10C00504AFE /* ImageController+Buttons.swift in Sources */,
 				AA12B3A02E79885600378F1E /* DeviceInfoManager.swift in Sources */,
 				AA6A3B8F300F6D4200504AFE /* ImageController+Reset.swift in Sources */,
 				AA5710112E829DD4001544D0 /* ObservabilityStatus.swift in Sources */,
