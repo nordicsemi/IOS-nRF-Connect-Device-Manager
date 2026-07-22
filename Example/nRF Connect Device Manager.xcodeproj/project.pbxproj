@@ -23,7 +23,6 @@
 		5264C1DE210F640F0044FBBA /* McuMgrViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5264C1DD210F640F0044FBBA /* McuMgrViewController.swift */; };
 		5266273724ACA7F4008F528C /* IntroViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5266273624ACA7F4008F528C /* IntroViewController.swift */; };
 		5266273824ACA883008F528C /* NordicButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5266273524ACA7A1008F528C /* NordicButton.swift */; };
-		5274C2622796CEC40043D7CA /* SettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5274C2612796CEC40043D7CA /* SettingsViewController.swift */; };
 		AA0717102FFE6EAA00F3D5A4 /* ImageController+UpgradeDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA07170F2FFE6EAA00F3D5A4 /* ImageController+UpgradeDelegate.swift */; };
 		AA0717122FFFB70E00F3D5A4 /* ImageController+Images.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0717112FFFB70E00F3D5A4 /* ImageController+Images.swift */; };
 		AA12B3A02E79885600378F1E /* DeviceInfoManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA12B39F2E79885600378F1E /* DeviceInfoManager.swift */; };
@@ -66,7 +65,6 @@
 		5264C1DD210F640F0044FBBA /* McuMgrViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = McuMgrViewController.swift; sourceTree = "<group>"; };
 		5266273524ACA7A1008F528C /* NordicButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NordicButton.swift; sourceTree = "<group>"; };
 		5266273624ACA7F4008F528C /* IntroViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntroViewController.swift; sourceTree = "<group>"; };
-		5274C2612796CEC40043D7CA /* SettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewController.swift; sourceTree = "<group>"; };
 		AA07170F2FFE6EAA00F3D5A4 /* ImageController+UpgradeDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ImageController+UpgradeDelegate.swift"; sourceTree = "<group>"; };
 		AA0717112FFFB70E00F3D5A4 /* ImageController+Images.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ImageController+Images.swift"; sourceTree = "<group>"; };
 		AA12B39F2E79885600378F1E /* DeviceInfoManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceInfoManager.swift; sourceTree = "<group>"; };
@@ -155,7 +153,6 @@
 				5264C1D5210E26C20044FBBA /* FirmwareUpgradeViewController.swift */,
 				5264C1D7210F32A60044FBBA /* FirmwareUploadViewController.swift */,
 				5264C1DB210F63850044FBBA /* ImagesViewController.swift */,
-				5274C2612796CEC40043D7CA /* SettingsViewController.swift */,
 			);
 			path = Manager;
 			sourceTree = "<group>";
@@ -375,7 +372,6 @@
 				5266273724ACA7F4008F528C /* IntroViewController.swift in Sources */,
 				524DCFD0210B0EB6000E110D /* BaseViewController.swift in Sources */,
 				AA8C1BAD2F7A8E2C00234E5F /* ObservabilityStatusManager.swift in Sources */,
-				5274C2622796CEC40043D7CA /* SettingsViewController.swift in Sources */,
 				AAEE3B972FD18E4600B900DB /* FilesController+Upload.swift in Sources */,
 				AA8C1BA62F7543FC00234E5F /* DeviceStatusManager.swift in Sources */,
 				AA0717122FFFB70E00F3D5A4 /* ImageController+Images.swift in Sources */,
