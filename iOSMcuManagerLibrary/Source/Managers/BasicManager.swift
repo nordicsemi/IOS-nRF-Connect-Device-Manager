@@ -16,7 +16,7 @@ public class BasicManager: McuManager {
     
     public override class var TAG: McuMgrLogCategory { .basic }
     
-    // MARK: - Constants
+    // MARK: Constants
 
     public static let MAX_ECHO_MESSAGE_SIZE_BYTES = 2475
     
@@ -24,13 +24,13 @@ public class BasicManager: McuManager {
         case reset = 0
     }
     
-    // MARK: - Init
+    // MARK: init
     
     public init(transport: McuMgrTransport) {
         super.init(group: .basic, transport: transport)
     }
     
-    // MARK: - Commands
+    // MARK: eraseAppSettings(callback:)
 
     /// Erase stored Application-Level Settings from the Application Core.
     ///
