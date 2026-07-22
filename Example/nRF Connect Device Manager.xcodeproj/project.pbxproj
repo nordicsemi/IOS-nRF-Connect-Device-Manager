@@ -25,11 +25,16 @@
 		5266273724ACA7F4008F528C /* IntroViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5266273624ACA7F4008F528C /* IntroViewController.swift */; };
 		5266273824ACA883008F528C /* NordicButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5266273524ACA7A1008F528C /* NordicButton.swift */; };
 		5274C2622796CEC40043D7CA /* SettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5274C2612796CEC40043D7CA /* SettingsViewController.swift */; };
+		AA0717102FFE6EAA00F3D5A4 /* ImageController+UpgradeDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA07170F2FFE6EAA00F3D5A4 /* ImageController+UpgradeDelegate.swift */; };
+		AA0717122FFFB70E00F3D5A4 /* ImageController+Images.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0717112FFFB70E00F3D5A4 /* ImageController+Images.swift */; };
 		AA12B3A02E79885600378F1E /* DeviceInfoManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA12B39F2E79885600378F1E /* DeviceInfoManager.swift */; };
 		AA12B3A62E7993F000378F1E /* iOS-BLE-Library-Mock in Frameworks */ = {isa = PBXBuildFile; productRef = AA12B3A52E7993F000378F1E /* iOS-BLE-Library-Mock */; };
 		AA141AA52FBF2FBC002DFD86 /* CoreBluetoothMock in Frameworks */ = {isa = PBXBuildFile; productRef = AA141AA42FBF2FBC002DFD86 /* CoreBluetoothMock */; };
 		AA5710112E829DD4001544D0 /* ObservabilityStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA5710102E829DD4001544D0 /* ObservabilityStatus.swift */; };
 		AA5710132E829E0D001544D0 /* OTAStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA5710122E829E0D001544D0 /* OTAStatus.swift */; };
+		AA60B4582FD6EA4600A5FC6E /* ImageController+Upload.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA60B4572FD6EA4600A5FC6E /* ImageController+Upload.swift */; };
+		AA6A3B8C300F6D2900504AFE /* ImageController+Settings.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA6A3B8B300F6D2900504AFE /* ImageController+Settings.swift */; };
+		AA6A3B8F300F6D4200504AFE /* ImageController+Reset.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA6A3B8E300F6D4200504AFE /* ImageController+Reset.swift */; };
 		AA7145062F6D9FF800AF4BE7 /* AppMainSceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA7145052F6D9FF800AF4BE7 /* AppMainSceneDelegate.swift */; };
 		AA7799F82E785BA800CAA1C3 /* iOSMcuManagerLibrary in Frameworks */ = {isa = PBXBuildFile; productRef = AA7799F72E785BA800CAA1C3 /* iOSMcuManagerLibrary */; };
 		AA8404C42E7832ED00BD6B4A /* CryptoKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA8404C32E7832ED00BD6B4A /* CryptoKit.framework */; };
@@ -40,7 +45,6 @@
 		AAEE3B992FD1901700B900DB /* FilesController+Download.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAEE3B982FD1901700B900DB /* FilesController+Download.swift */; };
 		BD5A285820CB44AF0061F0EE /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD5A285720CB44AF0061F0EE /* AppDelegate.swift */; };
 		BD5A285A20CB44AF0061F0EE /* ScannerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD5A285920CB44AF0061F0EE /* ScannerViewController.swift */; };
-		BD5A285D20CB44AF0061F0EE /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = BD5A285B20CB44AF0061F0EE /* Main.storyboard */; };
 		BD5A285F20CB44B00061F0EE /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BD5A285E20CB44B00061F0EE /* Assets.xcassets */; };
 		BD5A286220CB44B00061F0EE /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = BD5A286020CB44B00061F0EE /* LaunchScreen.storyboard */; };
 		F07D73AC2AE9AE3A00ED6B9A /* StringConvertibles.swift in Sources */ = {isa = PBXBuildFile; fileRef = F07D73AB2AE9AE3A00ED6B9A /* StringConvertibles.swift */; };
@@ -65,9 +69,14 @@
 		5266273524ACA7A1008F528C /* NordicButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NordicButton.swift; sourceTree = "<group>"; };
 		5266273624ACA7F4008F528C /* IntroViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntroViewController.swift; sourceTree = "<group>"; };
 		5274C2612796CEC40043D7CA /* SettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewController.swift; sourceTree = "<group>"; };
+		AA07170F2FFE6EAA00F3D5A4 /* ImageController+UpgradeDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ImageController+UpgradeDelegate.swift"; sourceTree = "<group>"; };
+		AA0717112FFFB70E00F3D5A4 /* ImageController+Images.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ImageController+Images.swift"; sourceTree = "<group>"; };
 		AA12B39F2E79885600378F1E /* DeviceInfoManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceInfoManager.swift; sourceTree = "<group>"; };
 		AA5710102E829DD4001544D0 /* ObservabilityStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObservabilityStatus.swift; sourceTree = "<group>"; };
 		AA5710122E829E0D001544D0 /* OTAStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OTAStatus.swift; sourceTree = "<group>"; };
+		AA60B4572FD6EA4600A5FC6E /* ImageController+Upload.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ImageController+Upload.swift"; sourceTree = "<group>"; };
+		AA6A3B8B300F6D2900504AFE /* ImageController+Settings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ImageController+Settings.swift"; sourceTree = "<group>"; };
+		AA6A3B8E300F6D4200504AFE /* ImageController+Reset.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ImageController+Reset.swift"; sourceTree = "<group>"; };
 		AA7145052F6D9FF800AF4BE7 /* AppMainSceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppMainSceneDelegate.swift; sourceTree = "<group>"; };
 		AA8404C32E7832ED00BD6B4A /* CryptoKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CryptoKit.framework; path = System/Library/Frameworks/CryptoKit.framework; sourceTree = SDKROOT; };
 		AA8C1BA52F7543FC00234E5F /* DeviceStatusManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceStatusManager.swift; sourceTree = "<group>"; };
@@ -78,7 +87,6 @@
 		BD5A285420CB44AF0061F0EE /* nRF Connect Device Manager.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "nRF Connect Device Manager.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		BD5A285720CB44AF0061F0EE /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		BD5A285920CB44AF0061F0EE /* ScannerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScannerViewController.swift; sourceTree = "<group>"; };
-		BD5A285C20CB44AF0061F0EE /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		BD5A285E20CB44B00061F0EE /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		BD5A286120CB44B00061F0EE /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		BD5A286320CB44B00061F0EE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -137,6 +145,11 @@
 				524DCFCF210B0EB6000E110D /* BaseViewController.swift */,
 				524DCFD3210B1C17000E110D /* DeviceController.swift */,
 				526270A3210B8E8000FC17D4 /* ImageController.swift */,
+				AA60B4572FD6EA4600A5FC6E /* ImageController+Upload.swift */,
+				AA07170F2FFE6EAA00F3D5A4 /* ImageController+UpgradeDelegate.swift */,
+				AA0717112FFFB70E00F3D5A4 /* ImageController+Images.swift */,
+				AA6A3B8B300F6D2900504AFE /* ImageController+Settings.swift */,
+				AA6A3B8E300F6D4200504AFE /* ImageController+Reset.swift */,
 				5215762E2125B59400C21B0C /* FilesController.swift */,
 				AAEE3B962FD18E4600B900DB /* FilesController+Upload.swift */,
 				AAEE3B982FD1901700B900DB /* FilesController+Download.swift */,
@@ -223,7 +236,6 @@
 				524DCFD7210B421E000E110D /* Util */,
 				BD5A285720CB44AF0061F0EE /* AppDelegate.swift */,
 				AA7145052F6D9FF800AF4BE7 /* AppMainSceneDelegate.swift */,
-				BD5A285B20CB44AF0061F0EE /* Main.storyboard */,
 				BD5A286020CB44B00061F0EE /* LaunchScreen.storyboard */,
 				BD5A285E20CB44B00061F0EE /* Assets.xcassets */,
 				BD5A286320CB44B00061F0EE /* Info.plist */,
@@ -304,7 +316,6 @@
 			files = (
 				BD5A286220CB44B00061F0EE /* LaunchScreen.storyboard in Resources */,
 				BD5A285F20CB44B00061F0EE /* Assets.xcassets in Resources */,
-				BD5A285D20CB44AF0061F0EE /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -339,12 +350,16 @@
 			buildActionMask = 2147483647;
 			files = (
 				5264C1DA210F43B40044FBBA /* ResetViewController.swift in Sources */,
+				AA60B4582FD6EA4600A5FC6E /* ImageController+Upload.swift in Sources */,
 				AA12B3A02E79885600378F1E /* DeviceInfoManager.swift in Sources */,
+				AA6A3B8F300F6D4200504AFE /* ImageController+Reset.swift in Sources */,
 				AA5710112E829DD4001544D0 /* ObservabilityStatus.swift in Sources */,
 				5246368A2108DE77008B3D5B /* ScannerTableViewCell.swift in Sources */,
 				524636962109D0D7008B3D5B /* ScannerFilterViewController.swift in Sources */,
+				AA0717102FFE6EAA00F3D5A4 /* ImageController+UpgradeDelegate.swift in Sources */,
 				5264C1D8210F32A60044FBBA /* FirmwareUploadViewController.swift in Sources */,
 				5246368E2108DF23008B3D5B /* DiscoveredPeripheral.swift in Sources */,
+				AA6A3B8C300F6D2900504AFE /* ImageController+Settings.swift in Sources */,
 				5264C1D6210E26C20044FBBA /* FirmwareUpgradeViewController.swift in Sources */,
 				BD5A285A20CB44AF0061F0EE /* ScannerViewController.swift in Sources */,
 				AA7145062F6D9FF800AF4BE7 /* AppMainSceneDelegate.swift in Sources */,
@@ -367,20 +382,13 @@
 				5274C2622796CEC40043D7CA /* SettingsViewController.swift in Sources */,
 				AAEE3B972FD18E4600B900DB /* FilesController+Upload.swift in Sources */,
 				AA8C1BA62F7543FC00234E5F /* DeviceStatusManager.swift in Sources */,
+				AA0717122FFFB70E00F3D5A4 /* ImageController+Images.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXVariantGroup section */
-		BD5A285B20CB44AF0061F0EE /* Main.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				BD5A285C20CB44AF0061F0EE /* Base */,
-			);
-			name = Main.storyboard;
-			sourceTree = "<group>";
-		};
 		BD5A286020CB44B00061F0EE /* LaunchScreen.storyboard */ = {
 			isa = PBXVariantGroup;
 			children = (

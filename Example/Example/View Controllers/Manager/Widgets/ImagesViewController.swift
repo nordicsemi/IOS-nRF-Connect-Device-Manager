@@ -39,6 +39,7 @@ class ImagesViewController: UIViewController, McuMgrViewController {
     
     @IBAction func test(_ sender: UIButton) {
         selectImageCore() { [weak self] imageHash in
+            guard let imageHash else { return }
             self?.busy()
             self?.imageManager.test(hash: imageHash) { [weak self] response, error in
                 self?.lastResponse = response
@@ -153,7 +154,7 @@ class ImagesViewController: UIViewController, McuMgrViewController {
     
     // MARK: selectImageCore(callback:)
     
-    private func selectImageCore(callback: @escaping (([UInt8]) -> Void)) {
+    private func selectImageCore(callback: @escaping (([UInt8]?) -> Void)) {
         guard let responseImages = lastResponse?.images, responseImages.count > 1 else {
             if let image = lastResponse?.images?.first, !image.confirmed {
                 callback(image.hash)
@@ -161,7 +162,9 @@ class ImagesViewController: UIViewController, McuMgrViewController {
             return
         }
         
-        let alertController = buildSelectImageController()
+        let alertController = buildSelectImageController() {
+            callback(nil)
+        }
         for image in responseImages {
             guard !image.confirmed else { continue }
             let title = "Image \(image.image), slot \(image.slot)"
@@ -223,7 +226,6 @@ class ImagesViewController: UIViewController, McuMgrViewController {
                 message.text = "Empty Response"
             }
         }
-        (parent as? ImageController)?.innerViewReloaded()
     }
     
     // MARK: handle(response:error:)
@@ -250,7 +252,6 @@ class ImagesViewController: UIViewController, McuMgrViewController {
                 message.text = "Empty response"
             }
         }
-        (parent as? ImageController)?.innerViewReloaded()
     }
     
     // MARK: getInfo()
@@ -312,7 +313,6 @@ class ImagesViewController: UIViewController, McuMgrViewController {
         message.text = text
         message.textColor = color
         readAction.isEnabled = readEnabled
-        (parent as? ImageController)?.innerViewReloaded()
     }
     
     // MARK: busy()

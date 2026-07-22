@@ -266,7 +266,6 @@ final class FirmwareUpgradeViewController: UIViewController, McuMgrViewControlle
         case .failure(let error):
             onParseError(error, for: url)
         }
-        (parent as? ImageController)?.innerViewReloaded()
     }
     
     private func startPackageDFU() {

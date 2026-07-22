@@ -329,6 +329,18 @@ public class ImageManager: McuManager {
         send(op: .read, commandId: ImageID.slotInfo, payload: nil, callback: callback)
     }
     
+    // MARK: isPaused()
+    
+    public func isPaused() -> Bool {
+        uploadState == .paused
+    }
+    
+    // MARK: isInProgress()
+    
+    public func isInProgress() -> Bool {
+        uploadState == .uploading
+    }
+    
     //**************************************************************************
     // MARK: Image Upload
     //**************************************************************************
