@@ -489,32 +489,28 @@ internal extension ImageController {
         
         let configuration = dfuManagerConfiguration
         Task {
-            do {
-                let images: [ImageManager.Image]
-                switch await requestBootloaderIfNecessary() {
-                case .suit where package.images.count == 1:
-                    let singleImage: ImageManager.Image! = package.images.first
-                    let partitions = 0...3
-                    images = partitions.map {
-                        ImageManager.Image(image: $0, hash: singleImage.hash, data: singleImage.data)
-                    }
-                default:
-                    images = package.images
+            let images: [ImageManager.Image]
+            switch await requestBootloaderIfNecessary() {
+            case .suit where package.images.count == 1:
+                let singleImage: ImageManager.Image! = package.images.first
+                let partitions = 0...3
+                images = partitions.map {
+                    ImageManager.Image(image: $0, hash: singleImage.hash, data: singleImage.data)
                 }
-                
-                let alertController = buildSelectImageController()
-                for image in images {
-                    alertController.addAction(UIAlertAction(title: image.imageName(), style: .default) { [weak self]
-                        action in
-                        self?.uploadWillStart()
-                        _ = self?.imageManager.upload(images: [image], using: configuration, delegate: self)
-                    })
-                }
-                
-                present(alertController, animated: true)
-            } catch {
-                
-            }   
+            default:
+                images = package.images
+            }
+            
+            let alertController = buildSelectImageController()
+            for image in images {
+                alertController.addAction(UIAlertAction(title: image.imageName(), style: .default) { [weak self]
+                    action in
+                    self?.uploadWillStart()
+                    _ = self?.imageManager.upload(images: [image], using: configuration, delegate: self)
+                })
+            }
+            
+            present(alertController, animated: true)
         }
     }
     
