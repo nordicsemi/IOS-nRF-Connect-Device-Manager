@@ -61,7 +61,7 @@ extension ImageController {
     
     @IBAction func settingsErase(_ sender: UIButton) {
         Task {
-            disableImagesButtons()
+            disableActionableButtons()
             
             do {
                 let _ = try await basicManager.eraseAppSettings()
@@ -69,7 +69,7 @@ extension ImageController {
                 handle(nil, error)
             }
             
-            updateImagesButtons()
+            updateActionableButtonsState()
         }
     }
 }

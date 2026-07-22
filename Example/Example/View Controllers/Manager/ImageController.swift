@@ -310,7 +310,7 @@ final class ImageController: UITableViewController, ExtendedMcuMgrViewController
         switch section {
         case .sharedUpload:
             // Trick to update Section Buttons that are not always visible.
-            updateImagesButtons()
+            updateActionableButtonsState()
             fallthrough
         default:
             return nil
