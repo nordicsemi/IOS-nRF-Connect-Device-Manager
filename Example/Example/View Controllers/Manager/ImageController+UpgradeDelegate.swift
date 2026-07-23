@@ -20,6 +20,7 @@ extension ImageController: FirmwareUpgradeDelegate {
         uploadCancelButton.isHidden = false
         uploadActionButton.setTitle("Pause", for: .normal)
 
+        dfuError = nil
         initialBytes = 0
         uploadImageSize = nil
         disableActionableButtons()
@@ -49,17 +50,13 @@ extension ImageController: FirmwareUpgradeDelegate {
     }
     
     func upgradeDidFail(inState state: FirmwareUpgradeState, with error: Error) {
+        dfuError = error
+        tableView.reloadSections(IndexSet([Section.sharedUpload.rawValue]), with: .none)
+        
         uploadProgressView.setProgress(0, animated: true)
         uploadCancelButton.isHidden = true
-        uploadSwapButton.isHidden = false
-        uploadBuffersButton.isHidden = false
-        uploadAlignmentButton.isHidden = false
         uploadActionButton.setTitle("Start", for: .normal)
 
-        uploadStateLabel?.textColor = .systemRed
-        uploadStateLabel?.text = error.localizedDescription
-        uploadStateLabel?.numberOfLines = 0
-        uploadSpeedLabel.isHidden = true
         updateActionableButtonsState(for: .none)
     }
     
@@ -139,6 +136,7 @@ extension ImageController: ImageUploadDelegate {
         uploadActionButton.setTitle("Pause", for: .normal)
 
         uploadCancelButton.isHidden = false
+        dfuError = nil
         initialBytes = 0
         uploadImageSize = nil
         
