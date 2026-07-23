@@ -299,7 +299,7 @@ extension ImageController {
             }
         }
         
-        updateActionableButtonsState()
+        updateActionableButtonsState(for: .none)
     }
     
     // MARK: getInfo()

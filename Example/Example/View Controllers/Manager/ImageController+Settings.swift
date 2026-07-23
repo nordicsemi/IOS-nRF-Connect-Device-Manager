@@ -69,7 +69,7 @@ extension ImageController {
                 handle(nil, error)
             }
             
-            updateActionableButtonsState()
+            updateActionableButtonsState(for: .none)
         }
     }
 }
