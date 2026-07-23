@@ -17,10 +17,8 @@ extension ImageController: FirmwareUpgradeDelegate {
         uploadSwapButton.isHidden = true
         uploadBuffersButton.isHidden = true
         uploadAlignmentButton.isHidden = true
-        uploadActionButton.setTitle("Pause", for: .normal)
-
         uploadCancelButton.isHidden = false
-        uploadCancelButton.isEnabled = true
+        uploadActionButton.setTitle("Pause", for: .normal)
 
         initialBytes = 0
         uploadImageSize = nil
@@ -32,9 +30,11 @@ extension ImageController: FirmwareUpgradeDelegate {
     
     func upgradeStateDidChange(from previousState: FirmwareUpgradeState, to newState: FirmwareUpgradeState) {
         dfuState = newState
-        uploadCancelButton.isEnabled = dfuManager.isInProgress() || imageManager.isInProgress()
         tableView.reloadSections(IndexSet([Section.deviceStatus.rawValue]), with: .none)
         tableView.reloadSections(IndexSet([Section.sharedUpload.rawValue]), with: .none)
+        
+        uploadCancelButton.isEnabled = dfuManager.isInProgress() || imageManager.isInProgress()
+        updateActionableButtonsState(for: newState)
     }
     
     func upgradeDidComplete() {
@@ -45,10 +45,7 @@ extension ImageController: FirmwareUpgradeDelegate {
         uploadAlignmentButton.isHidden = false
         uploadActionButton.setTitle("Start", for: .normal)
 
-        uploadSelectFile?.isEnabled = true
-        uploadCheckForUpdates?.isEnabled = true
-        uploadEraseAppSettingsSwitch?.isEnabled = true
-        updateActionableButtonsState()
+        updateActionableButtonsState(for: .success)
     }
     
     func upgradeDidFail(inState state: FirmwareUpgradeState, with error: Error) {
@@ -59,14 +56,11 @@ extension ImageController: FirmwareUpgradeDelegate {
         uploadAlignmentButton.isHidden = false
         uploadActionButton.setTitle("Start", for: .normal)
 
-        uploadSelectFile?.isEnabled = true
-        uploadCheckForUpdates?.isEnabled = true
-        uploadEraseAppSettingsSwitch?.isEnabled = true
         uploadStateLabel?.textColor = .systemRed
         uploadStateLabel?.text = error.localizedDescription
         uploadStateLabel?.numberOfLines = 0
         uploadSpeedLabel.isHidden = true
-        updateActionableButtonsState()
+        updateActionableButtonsState(for: .none)
     }
     
     func upgradeDidCancel(state: FirmwareUpgradeState) {
@@ -75,15 +69,14 @@ extension ImageController: FirmwareUpgradeDelegate {
         uploadSwapButton.isHidden = false
         uploadBuffersButton.isHidden = false
         uploadAlignmentButton.isHidden = false
-        uploadSelectFile?.isEnabled = true
-        uploadCheckForUpdates?.isEnabled = true
-        uploadEraseAppSettingsSwitch?.isEnabled = true
+        
         uploadStateLabel?.textColor = .secondary
         uploadStateLabel?.text = "CANCELLED"
         uploadStateLabel?.numberOfLines = 1
         uploadSpeedLabel.isHidden = true
         
         uploadActionButton.setTitle("Start", for: .normal)
+        updateActionableButtonsState(for: .none)
     }
     
     func uploadProgressDidChange(bytesSent: Int, imageSize: Int, timestamp: Date) {

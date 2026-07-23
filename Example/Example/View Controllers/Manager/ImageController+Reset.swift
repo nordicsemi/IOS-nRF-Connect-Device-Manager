@@ -141,18 +141,18 @@ extension ImageController {
                 do {
                     _ = try await defaultManager.reset(bootMode: mode)
                 } catch {}
-                updateActionableButtonsState()
+                updateActionableButtonsState(for: .reset)
                 return
             }
             
-            let name: String! = (fwLoaderAdvName?.hasItems ?? false) ?
-                fwLoaderAdvName : settingsManager.generateNewAdvertisingName()
+            let name: String! = (fwLoaderAdvName?.hasItems ?? false)
+                ? fwLoaderAdvName : settingsManager.generateNewAdvertisingName()
             do {
                 _ = try await settingsManager.setFirmwareLoaderAdvertisingName(name)
                 _ = try await defaultManager.reset(bootMode: mode)
             } catch {}
             
-            updateActionableButtonsState()
+            updateActionableButtonsState(for: .reset)
         }
     }
 }
