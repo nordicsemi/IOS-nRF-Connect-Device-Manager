@@ -34,7 +34,7 @@ extension ImageController: FirmwareUpgradeDelegate {
         tableView.reloadSections(IndexSet([Section.deviceStatus.rawValue]), with: .none)
         tableView.reloadSections(IndexSet([Section.sharedUpload.rawValue]), with: .none)
         
-        uploadCancelButton.isEnabled = dfuManager.isInProgress() || imageManager.isInProgress()
+        uploadCancelButton.isEnabled = isDFUinProgress()
         updateActionableButtonsState(for: newState)
     }
     
@@ -89,7 +89,7 @@ extension ImageController: FirmwareUpgradeDelegate {
             uploadProgressView.setProgress(percentage, animated: true)
         }
         
-        if dfuManager.isInProgress() || imageManager.isInProgress() {
+        if isDFUinProgress() {
             uploadStateLabel?.text = "\(FirmwareUpgradeState.upload.description) (\(String(format: "%.0f%", percentage * 100.0))%)"
             uploadStateLabel?.textColor = FirmwareUpgradeState.upload.associatedColor
         }

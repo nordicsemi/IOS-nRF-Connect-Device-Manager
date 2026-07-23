@@ -197,6 +197,12 @@ final class ImageController: UITableViewController, ExtendedMcuMgrViewController
         tabBarController?.navigationItem.rightBarButtonItem = nil
     }
     
+    // MARK: isDFUinProgress()
+    
+    func isDFUinProgress() -> Bool {
+        dfuManager.isInProgress() || imageManager.isInProgress()
+    }
+    
     // MARK: Handling Basic / Advanced mode
     
     @objc func modeSwitched() {

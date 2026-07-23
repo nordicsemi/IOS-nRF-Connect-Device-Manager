@@ -373,7 +373,7 @@ extension ImageController {
     
     @objc func uploadAction(_ sender: UIButton) {
         guard let dfuManager, let imageManager else { return }
-        if dfuManager.isInProgress() || imageManager.isInProgress() {
+        if isDFUinProgress() {
             // Pause
             if imageManager.isInProgress() {
                 imageManager.pauseUpload()
