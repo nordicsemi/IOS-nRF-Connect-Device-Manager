@@ -40,6 +40,7 @@ extension ImageController {
             let selectFileButton = UIButton()
             selectFileButton.setTitle("Select File", for: .normal)
             selectFileButton.setTitleColor(.nordic, for: .normal)
+            selectFileButton.setTitleColor(.secondary, for: .disabled)
             selectFileButton.addTarget(self, action: #selector(selectFirmware), for: .touchUpInside)
             selectFileButton.titleLabel?.font = .preferredFont(forTextStyle: .callout)
             selectFileButton.translatesAutoresizingMaskIntoConstraints = false
@@ -65,6 +66,7 @@ extension ImageController {
             let checkOtaButton = UIButton()
             checkOtaButton.setTitle("Check for Updates", for: .normal)
             checkOtaButton.setTitleColor(.nordic, for: .normal)
+            checkOtaButton.setTitleColor(.secondary, for: .disabled)
             checkOtaButton.addTarget(self, action: #selector(checkForUpdates), for: .touchUpInside)
             checkOtaButton.titleLabel?.font = .preferredFont(forTextStyle: .callout)
             checkOtaButton.translatesAutoresizingMaskIntoConstraints = false
@@ -146,7 +148,7 @@ extension ImageController {
             }
             
             return cell
-        case .fileState, .swapTime, .numberOfBuffers, .byteAlignment:
+        case .fileState:
             let cell = UITableViewCell(style: .value1, reuseIdentifier: "sharedFileInfo")
             cell.selectionStyle = .none
             cell.textLabel?.font = .preferredFont(forTextStyle: .callout)
@@ -165,24 +167,6 @@ extension ImageController {
                     cell.detailTextLabel?.numberOfLines = 1
                 }
                 uploadStateLabel = cell.detailTextLabel
-            case .swapTime:
-                cell.textLabel?.text = "Swap Time"
-                
-                cell.detailTextLabel?.text = package != nil ? "\(dfuManagerConfiguration.estimatedSwapTime)s" : "N/A"
-                cell.detailTextLabel?.textColor = .secondary
-            case .numberOfBuffers:
-                cell.textLabel?.text = "No. of Buffers"
-                
-                if package != nil {
-                    cell.detailTextLabel?.text = dfuManagerConfiguration.pipelineDepth == 1 ? "Disabled" : "\(dfuManagerConfiguration.pipelineDepth + 1)"
-                } else {
-                    cell.detailTextLabel?.text = "N/A"
-                }
-            case .byteAlignment:
-                cell.textLabel?.text = "Byte Alignment"
-                
-                cell.detailTextLabel?.text = package != nil ? "\(dfuManagerConfiguration.byteAlignment)" : "N/A"
-                cell.separatorInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: .greatestFiniteMagnitude)
             default:
                 cell.textLabel?.text = "N/A"
                 cell.separatorInset = UIEdgeInsets(top: 0, left: tableView.bounds.size.width, bottom: 0, right: 0)
@@ -203,6 +187,86 @@ extension ImageController {
             cell.accessoryView = eraseAppSettingsSwitch
             uploadEraseAppSettingsSwitch = eraseAppSettingsSwitch
             
+            return cell
+        case .swapTime:
+            let identifier = "sharedUploadSwapTime"
+            let cell = tableView.dequeueReusableCell(withIdentifier: identifier) ??
+                UITableViewCell(style: .default, reuseIdentifier: identifier)
+            cell.selectionStyle = .none
+            cell.textLabel?.text = "Swap Time"
+            cell.textLabel?.font = .preferredFont(forTextStyle: .callout)
+            
+            if uploadSwapButton.superview != cell.contentView {
+                uploadSwapButton.removeFromSuperview()
+                cell.contentView.addSubview(uploadSwapButton)
+            }
+            if package != nil {
+                uploadSwapButton.setTitle("\(dfuManagerConfiguration.estimatedSwapTime)s", for: .normal)
+            } else {
+                uploadSwapButton.setTitle("N/A", for: .normal)
+                uploadSwapButton.isEnabled = false
+            }
+            
+            NSLayoutConstraint.activate([
+                uploadSwapButton.topAnchor.constraint(equalTo: cell.contentView.safeAreaLayoutGuide.topAnchor, constant: 8.0),
+                uploadSwapButton.trailingAnchor.constraint(equalTo: cell.contentView.safeAreaLayoutGuide.trailingAnchor, constant: -14.0),
+                
+                cell.contentView.bottomAnchor.constraint(equalTo: uploadSwapButton.bottomAnchor, constant: 8.0)
+            ])
+            return cell
+        case .numberOfBuffers:
+            let identifier = "sharedUploadNumberOfBuffers"
+            let cell = tableView.dequeueReusableCell(withIdentifier: identifier) ??
+                UITableViewCell(style: .default, reuseIdentifier: identifier)
+            cell.selectionStyle = .none
+            cell.textLabel?.text = "No. of Buffers"
+            cell.textLabel?.font = .preferredFont(forTextStyle: .callout)
+            
+            if uploadBuffersButton.superview != cell.contentView {
+                uploadBuffersButton.removeFromSuperview()
+                cell.contentView.addSubview(uploadBuffersButton)
+            }
+            if package != nil {
+                uploadBuffersButton.setTitle(dfuManagerConfiguration.pipelineDepth == 1 ? "Disabled" : "\(dfuManagerConfiguration.pipelineDepth + 1)", for: .normal)
+            } else {
+                uploadBuffersButton.setTitle("N/A", for: .normal)
+                uploadBuffersButton.isEnabled = false
+            }
+            
+            NSLayoutConstraint.activate([
+                uploadBuffersButton.topAnchor.constraint(equalTo: cell.contentView.safeAreaLayoutGuide.topAnchor, constant: 8.0),
+                uploadBuffersButton.trailingAnchor.constraint(equalTo: cell.contentView.safeAreaLayoutGuide.trailingAnchor, constant: -14.0),
+                
+                cell.contentView.bottomAnchor.constraint(equalTo: uploadBuffersButton.bottomAnchor, constant: 8.0)
+            ])
+            return cell
+        case .byteAlignment:
+            let identifier = "sharedUploadByteAlignment"
+            let cell = tableView.dequeueReusableCell(withIdentifier: identifier) ??
+                UITableViewCell(style: .default, reuseIdentifier: identifier)
+            cell.selectionStyle = .none
+            cell.separatorInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: .greatestFiniteMagnitude)
+            
+            cell.textLabel?.text = "Byte Alignment"
+            cell.textLabel?.font = .preferredFont(forTextStyle: .callout)
+            
+            if uploadAlignmentButton.superview != cell.contentView {
+                uploadAlignmentButton.removeFromSuperview()
+                cell.contentView.addSubview(uploadAlignmentButton)
+            }
+            if package != nil {
+                uploadAlignmentButton.setTitle("\(dfuManagerConfiguration.byteAlignment)", for: .normal)
+            } else {
+                uploadAlignmentButton.setTitle("N/A", for: .normal)
+                uploadAlignmentButton.isEnabled = false
+            }
+            
+            NSLayoutConstraint.activate([
+                uploadAlignmentButton.topAnchor.constraint(equalTo: cell.contentView.safeAreaLayoutGuide.topAnchor, constant: 8.0),
+                uploadAlignmentButton.trailingAnchor.constraint(equalTo: cell.contentView.safeAreaLayoutGuide.trailingAnchor, constant: -14.0),
+                
+                cell.contentView.bottomAnchor.constraint(equalTo: uploadAlignmentButton.bottomAnchor, constant: 8.0)
+            ])
             return cell
         case .progressBar:
             let cell = UITableViewCell(style: .default, reuseIdentifier: "progressBar")
@@ -234,24 +298,12 @@ extension ImageController {
             let cell = UITableViewCell(style: .default, reuseIdentifier: "eraseAppSettings")
             cell.selectionStyle = .none
             
-            if uploadSwapButton.superview != nil {
-                uploadSwapButton.removeFromSuperview()
-            }
-            if uploadBuffersButton.superview != nil {
-                uploadBuffersButton.removeFromSuperview()
-            }
-            if uploadAlignmentButton.superview != nil {
-                uploadAlignmentButton.removeFromSuperview()
-            }
             if uploadCancelButton.superview != nil {
                 uploadCancelButton.removeFromSuperview()
             }
             if uploadActionButton.superview != nil {
                 uploadActionButton.removeFromSuperview()
             }
-            cell.contentView.addSubview(uploadSwapButton)
-            cell.contentView.addSubview(uploadBuffersButton)
-            cell.contentView.addSubview(uploadAlignmentButton)
             cell.contentView.addSubview(uploadCancelButton)
             cell.contentView.addSubview(uploadActionButton)
             
@@ -262,16 +314,7 @@ extension ImageController {
                 uploadActionButton.trailingAnchor.constraint(equalTo: cell.contentView.trailingAnchor, constant: -14.0),
 
                 uploadCancelButton.centerYAnchor.constraint(equalTo: uploadActionButton.centerYAnchor),
-                uploadCancelButton.trailingAnchor.constraint(equalTo: uploadActionButton.leadingAnchor, constant: -16.0),
-
-                uploadSwapButton.centerYAnchor.constraint(equalTo: uploadActionButton.centerYAnchor),
-                uploadSwapButton.leadingAnchor.constraint(equalTo: cell.contentView.safeLeadingAnchor, constant: 16.0),
-                
-                uploadBuffersButton.centerYAnchor.constraint(equalTo: uploadActionButton.centerYAnchor),
-                uploadBuffersButton.leadingAnchor.constraint(equalTo: uploadSwapButton.trailingAnchor, constant: 14.0),
-                
-                uploadAlignmentButton.centerYAnchor.constraint(equalTo: uploadActionButton.centerYAnchor),
-                uploadAlignmentButton.leadingAnchor.constraint(equalTo: uploadBuffersButton.trailingAnchor, constant: 8.0)
+                uploadCancelButton.trailingAnchor.constraint(equalTo: uploadActionButton.leadingAnchor, constant: -16.0)
             ])
             return cell
         default:

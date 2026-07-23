@@ -14,16 +14,13 @@ import iOSMcuManagerLibrary
 extension ImageController: FirmwareUpgradeDelegate {
     
     func upgradeDidStart(controller: FirmwareUpgradeController) {
-        uploadSwapButton.isHidden = true
-        uploadBuffersButton.isHidden = true
-        uploadAlignmentButton.isHidden = true
+        disableActionableButtons()
         uploadCancelButton.isHidden = false
         uploadActionButton.setTitle("Pause", for: .normal)
 
         dfuError = nil
         initialBytes = 0
         uploadImageSize = nil
-        disableActionableButtons()
         
         guard let baseController = parent as? BaseViewController else { return }
         baseController.stopObservability()
@@ -34,16 +31,12 @@ extension ImageController: FirmwareUpgradeDelegate {
         tableView.reloadSections(IndexSet([Section.deviceStatus.rawValue]), with: .none)
         tableView.reloadSections(IndexSet([Section.sharedUpload.rawValue]), with: .none)
         
-        uploadCancelButton.isEnabled = isDFUinProgress()
         updateActionableButtonsState(for: newState)
     }
     
     func upgradeDidComplete() {
         uploadProgressView.setProgress(0, animated: false)
         uploadCancelButton.isHidden = true
-        uploadSwapButton.isHidden = false
-        uploadBuffersButton.isHidden = false
-        uploadAlignmentButton.isHidden = false
         uploadActionButton.setTitle("Start", for: .normal)
 
         updateActionableButtonsState(for: .success)
@@ -61,11 +54,11 @@ extension ImageController: FirmwareUpgradeDelegate {
     }
     
     func upgradeDidCancel(state: FirmwareUpgradeState) {
+        dfuState = nil
+        dfuError = nil
+        
         uploadProgressView.setProgress(0, animated: true)
         uploadCancelButton.isHidden = true
-        uploadSwapButton.isHidden = false
-        uploadBuffersButton.isHidden = false
-        uploadAlignmentButton.isHidden = false
         
         uploadStateLabel?.textColor = .secondary
         uploadStateLabel?.text = "CANCELLED"
@@ -130,9 +123,6 @@ extension ImageController: SuitFirmwareUpgradeDelegate {
 extension ImageController: ImageUploadDelegate {
     
     func uploadWillStart() {
-        uploadSwapButton.isHidden = true
-        uploadBuffersButton.isHidden = true
-        uploadAlignmentButton.isHidden = true
         uploadActionButton.setTitle("Pause", for: .normal)
 
         uploadCancelButton.isHidden = false
