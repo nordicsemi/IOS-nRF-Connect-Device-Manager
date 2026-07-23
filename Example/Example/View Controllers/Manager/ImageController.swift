@@ -171,6 +171,7 @@ final class ImageController: UITableViewController, ExtendedMcuMgrViewController
     internal var dfuManagerConfiguration = FirmwareUpgradeConfiguration(
         estimatedSwapTime: 10.0, eraseAppSettings: false, pipelineDepth: 3, byteAlignment: .fourByte)
     internal var dfuState: FirmwareUpgradeState?
+    internal var dfuError: (any Error)?
     internal var initialBytes: Int = 0
     internal var uploadImageSize: Int!
     internal var uploadTimestamp: Date!

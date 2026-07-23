@@ -155,8 +155,15 @@ extension ImageController {
             case .fileState:
                 cell.textLabel?.text = "State"
                 
-                cell.detailTextLabel?.text = dfuState?.description ?? "N/A"
-                cell.detailTextLabel?.textColor = dfuState?.associatedColor ?? .secondary
+                if let dfuError {
+                    cell.detailTextLabel?.textColor = .systemRed
+                    cell.detailTextLabel?.text = dfuError.localizedDescription
+                    cell.detailTextLabel?.numberOfLines = 0
+                } else {
+                    cell.detailTextLabel?.text = dfuState?.description ?? "N/A"
+                    cell.detailTextLabel?.textColor = dfuState?.associatedColor ?? .secondary
+                    cell.detailTextLabel?.numberOfLines = 1
+                }
                 uploadStateLabel = cell.detailTextLabel
             case .swapTime:
                 cell.textLabel?.text = "Swap Time"
