@@ -19,13 +19,16 @@ public extension DefaultManager {
     /// Async variant of ``reset(bootMode:force:callback:)``
     public func reset(bootMode: ResetBootMode = .normal, force: Bool = false) async throws -> McuMgrResponse {
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<McuMgrResponse, Error>) in
+            var alreadyResumed: Bool = false
             reset(bootMode: bootMode, force: force) { response, error in
-                if let error {
-                    continuation.resume(throwing: error)
-                    return
+                guard !alreadyResumed else { return }
+                defer {
+                    alreadyResumed = true
                 }
                 
-                if let response {
+                if let error {
+                    continuation.resume(throwing: error)
+                } else if let response {
                     continuation.resume(returning: response)
                 } else {
                     continuation.resume(throwing: McuMgrResponseParseError.invalidPayload)
@@ -39,13 +42,16 @@ public extension DefaultManager {
     /// Async variant of ``params(callback:)``
     public func params() async throws -> McuMgrParametersResponse {
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<McuMgrParametersResponse, Error>) in
+            var alreadyResumed: Bool = false
             params { response, error in
-                if let error {
-                    continuation.resume(throwing: error)
-                    return
+                guard !alreadyResumed else { return }
+                defer {
+                    alreadyResumed = true
                 }
                 
-                if let response {
+                if let error {
+                    continuation.resume(throwing: error)
+                } else if let response {
                     continuation.resume(returning: response)
                 } else {
                     continuation.resume(throwing: McuMgrResponseParseError.invalidPayload)
@@ -59,13 +65,16 @@ public extension DefaultManager {
     /// Async variant of ``applicationInfo(format:callback:)``
     public func applicationInfo(format: Set<ApplicationInfoFormat>) async throws -> AppInfoResponse {
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<AppInfoResponse, Error>) in
+            var alreadyResumed: Bool = false
             applicationInfo(format: format) { response, error in
-                if let error {
-                    continuation.resume(throwing: error)
-                    return
+                guard !alreadyResumed else { return }
+                defer {
+                    alreadyResumed = true
                 }
                 
-                if let response {
+                if let error {
+                    continuation.resume(throwing: error)
+                } else if let response {
                     continuation.resume(returning: response)
                 } else {
                     continuation.resume(throwing: McuMgrResponseParseError.invalidPayload)
@@ -90,13 +99,16 @@ public extension DefaultManager {
     /// Async variant of ``bootloaderInfo(query:callback:)``
     public func bootloaderQuery(_ query: BootloaderInfoQuery) async throws -> BootloaderInfoResponse {
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<BootloaderInfoResponse, Error>) in
+            var alreadyResumed: Bool = false
             bootloaderInfo(query: query) { response, error in
-                if let error {
-                    continuation.resume(throwing: error)
-                    return
+                guard !alreadyResumed else { return }
+                defer {
+                    alreadyResumed = true
                 }
                 
-                if let response {
+                if let error {
+                    continuation.resume(throwing: error)
+                } else if let response {
                     continuation.resume(returning: response)
                 } else {
                     continuation.resume(throwing: McuMgrResponseParseError.invalidPayload)
