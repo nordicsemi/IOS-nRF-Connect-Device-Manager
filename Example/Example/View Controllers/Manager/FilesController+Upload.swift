@@ -29,6 +29,7 @@ extension FilesController {
             let selectFileButton = UIButton()
             selectFileButton.setTitle("Select File", for: .normal)
             selectFileButton.setTitleColor(.nordic, for: .normal)
+            selectFileButton.setTitleColor(.secondary, for: .disabled)
             selectFileButton.addTarget(self, action: #selector(selectFile), for: .touchUpInside)
             selectFileButton.titleLabel?.font = .preferredFont(forTextStyle: .callout)
             selectFileButton.translatesAutoresizingMaskIntoConstraints = false

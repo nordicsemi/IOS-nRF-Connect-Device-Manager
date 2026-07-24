@@ -16,31 +16,23 @@ extension ImageController {
     internal func updateActionableButtonsState(for state: FirmwareUpgradeState) {
         switch state {
         case .reset, .upload:
-            uploadCancelButton.isEnabled = true
-            
-            uploadSelectFile?.isEnabled = false
-            uploadCheckForUpdates?.isEnabled = false
-            uploadEraseAppSettingsSwitch?.isEnabled = false
-            
-            resetButton?.isEnabled = false
-            
-            imagesTestButton?.isEnabled = false
-            imagesConfirmButton?.isEnabled = false
-            imagesEraseButton?.isEnabled = false
+            disableActionableButtons()
             return
         default:
             break
         }
         
-        uploadCancelButton.isEnabled = false
+        uploadSelectFile?.isEnabled = !isDFUinProgress()
+        uploadCheckForUpdates?.isEnabled = !isDFUinProgress()
+        uploadEraseAppSettingsSwitch?.isEnabled = !isDFUinProgress()
         
-        uploadSelectFile?.isEnabled = true
-        uploadCheckForUpdates?.isEnabled = true
-        uploadEraseAppSettingsSwitch?.isEnabled = true
+        uploadSwapButton.isEnabled = !isDFUinProgress()
+        uploadBuffersButton.isEnabled = !isDFUinProgress()
+        uploadAlignmentButton.isEnabled = !isDFUinProgress()
         
-        imagesReadButton?.isEnabled = true
-        settingsEraseButton?.isEnabled = true
-        resetButton?.isEnabled = true
+        imagesReadButton?.isEnabled = !isDFUinProgress()
+        settingsEraseButton?.isEnabled = !isDFUinProgress()
+        resetButton?.isEnabled = !isDFUinProgress()
         
         guard let images = readImagesResponse?.images else {
             imagesTestButton?.isEnabled = false
@@ -59,6 +51,10 @@ extension ImageController {
         uploadSelectFile?.isEnabled = false
         uploadCheckForUpdates?.isEnabled = false
         uploadEraseAppSettingsSwitch?.isEnabled = false
+        
+        uploadSwapButton.isEnabled = false
+        uploadBuffersButton.isEnabled = false
+        uploadAlignmentButton.isEnabled = false
         
         imagesReadButton?.isEnabled = false
         imagesTestButton?.isEnabled = false

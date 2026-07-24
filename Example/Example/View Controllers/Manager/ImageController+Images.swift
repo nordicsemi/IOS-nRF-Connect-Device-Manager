@@ -45,7 +45,7 @@ extension ImageController {
             let readButton = UIButton()
             readButton.setTitle("Read", for: .normal)
             readButton.setTitleColor(.nordic, for: .normal)
-            readButton.setTitleColor(.nordic.withAlphaComponent(0.5), for: .disabled)
+            readButton.setTitleColor(.secondary, for: .disabled)
             readButton.addTarget(self, action: #selector(imageRead), for: .touchUpInside)
             readButton.titleLabel?.font = .preferredFont(forTextStyle: .callout)
             readButton.translatesAutoresizingMaskIntoConstraints = false
@@ -55,7 +55,7 @@ extension ImageController {
             let testButton = UIButton()
             testButton.setTitle("Test", for: .normal)
             testButton.setTitleColor(.nordic, for: .normal)
-            testButton.setTitleColor(.nordic.withAlphaComponent(0.5), for: .disabled)
+            testButton.setTitleColor(.secondary, for: .disabled)
             testButton.addTarget(self, action: #selector(imageTest), for: .touchUpInside)
             testButton.titleLabel?.font = .preferredFont(forTextStyle: .callout)
             testButton.translatesAutoresizingMaskIntoConstraints = false
@@ -65,7 +65,7 @@ extension ImageController {
             let confirmButton = UIButton()
             confirmButton.setTitle("Confirm", for: .normal)
             confirmButton.setTitleColor(.nordic, for: .normal)
-            confirmButton.setTitleColor(.nordic.withAlphaComponent(0.5), for: .disabled)
+            confirmButton.setTitleColor(.secondary, for: .disabled)
             confirmButton.addTarget(self, action: #selector(imageConfirm), for: .touchUpInside)
             confirmButton.titleLabel?.font = .preferredFont(forTextStyle: .callout)
             confirmButton.translatesAutoresizingMaskIntoConstraints = false

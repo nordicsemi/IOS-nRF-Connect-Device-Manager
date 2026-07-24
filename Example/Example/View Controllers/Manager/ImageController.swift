@@ -33,7 +33,7 @@ final class ImageController: UITableViewController, ExtendedMcuMgrViewController
         let button = UIButton()
         button.setTitle("Swap", for: .normal)
         button.setTitleColor(.nordic, for: .normal)
-        button.setTitleColor(.nordic.withAlphaComponent(0.5), for: .disabled)
+        button.setTitleColor(.secondary, for: .disabled)
         button.addTarget(self, action: #selector(setSwapTime), for: .touchUpInside)
         button.titleLabel?.font = .preferredFont(forTextStyle: .callout)
         button.translatesAutoresizingMaskIntoConstraints = false
@@ -44,7 +44,7 @@ final class ImageController: UITableViewController, ExtendedMcuMgrViewController
         let button = UIButton()
         button.setTitle("Buffers", for: .normal)
         button.setTitleColor(.nordic, for: .normal)
-        button.setTitleColor(.nordic.withAlphaComponent(0.5), for: .disabled)
+        button.setTitleColor(.secondary, for: .disabled)
         button.addTarget(self, action: #selector(setPipelineDepth), for: .touchUpInside)
         button.titleLabel?.font = .preferredFont(forTextStyle: .callout)
         button.translatesAutoresizingMaskIntoConstraints = false
@@ -55,7 +55,7 @@ final class ImageController: UITableViewController, ExtendedMcuMgrViewController
         let button = UIButton()
         button.setTitle("Alignment", for: .normal)
         button.setTitleColor(.nordic, for: .normal)
-        button.setTitleColor(.nordic.withAlphaComponent(0.5), for: .disabled)
+        button.setTitleColor(.secondary, for: .disabled)
         button.addTarget(self, action: #selector(setByteAlignment), for: .touchUpInside)
         button.titleLabel?.font = .preferredFont(forTextStyle: .callout)
         button.translatesAutoresizingMaskIntoConstraints = false
@@ -66,7 +66,7 @@ final class ImageController: UITableViewController, ExtendedMcuMgrViewController
         let button = UIButton()
         button.setTitle("Start", for: .normal)
         button.setTitleColor(.nordic, for: .normal)
-        button.setTitleColor(.nordic.withAlphaComponent(0.5), for: .disabled)
+        button.setTitleColor(.secondary, for: .disabled)
         button.addTarget(self, action: #selector(uploadAction), for: .touchUpInside)
         button.titleLabel?.font = .preferredFont(forTextStyle: .callout)
         button.translatesAutoresizingMaskIntoConstraints = false
@@ -200,7 +200,10 @@ final class ImageController: UITableViewController, ExtendedMcuMgrViewController
     // MARK: isDFUinProgress()
     
     func isDFUinProgress() -> Bool {
-        dfuManager.isInProgress() || imageManager.isInProgress()
+        guard let dfuManager, let imageManager else {
+            return false
+        }
+        return dfuManager.isInProgress() || imageManager.isInProgress()
     }
     
     // MARK: Handling Basic / Advanced mode
