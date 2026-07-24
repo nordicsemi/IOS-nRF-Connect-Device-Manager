@@ -59,7 +59,7 @@ extension ImageController {
     
     // MARK: @objc settingsErase(_:)
     
-    @IBAction func settingsErase(_ sender: UIButton) {
+    @objc func settingsErase(_ sender: UIButton) {
         Task {
             disableActionableButtons()
             
