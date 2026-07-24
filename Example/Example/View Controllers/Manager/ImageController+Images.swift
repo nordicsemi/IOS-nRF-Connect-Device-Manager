@@ -106,7 +106,7 @@ extension ImageController {
     
     // MARK: @objc imageRead(_:)
     
-    @IBAction func imageRead(_ sender: UIButton) {
+    @objc func imageRead(_ sender: UIButton) {
         Task {
             disableActionableButtons()
             
@@ -131,7 +131,7 @@ extension ImageController {
     
     // MARK: @objc imageTest(_:)
     
-    @IBAction func imageTest(_ sender: UIButton) {
+    @objc func imageTest(_ sender: UIButton) {
         Task {
             guard let imageHash = await selectImageCore() else { return }
             disableActionableButtons()
@@ -146,7 +146,7 @@ extension ImageController {
     
     // MARK: @objc imageConfirm(_:)
     
-    @IBAction func imageConfirm(_ sender: UIButton) {
+    @objc func imageConfirm(_ sender: UIButton) {
         Task {
             disableActionableButtons()
             
@@ -176,7 +176,7 @@ extension ImageController {
     
     // MARK: @objc imageErase(_:)
     
-    @IBAction func imageErase(_ sender: UIButton) {
+    @objc func imageErase(_ sender: UIButton) {
         Task {
             do {
                 switch await requestBootloaderIfNecessary() {
