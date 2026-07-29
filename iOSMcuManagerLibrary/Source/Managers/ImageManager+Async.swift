@@ -16,13 +16,7 @@ public extension ImageManager {
     
     public func list() async throws -> McuMgrImageStateResponse {
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<McuMgrImageStateResponse, Error>) in
-            var alreadyResumed: Bool = false
             list() { response, error in
-                guard !alreadyResumed else { return }
-                defer {
-                    alreadyResumed = true
-                }
-                
                 if let error {
                     continuation.resume(throwing: error)
                 } else if let response {
@@ -38,13 +32,7 @@ public extension ImageManager {
     
     public func test(hash: [UInt8]) async throws -> McuMgrImageStateResponse {
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<McuMgrImageStateResponse, Error>) in
-            var alreadyResumed: Bool = false
             test(hash: hash) { response, error in
-                guard !alreadyResumed else { return }
-                defer {
-                    alreadyResumed = true
-                }
-                
                 if let error {
                     continuation.resume(throwing: error)
                 } else if let response {
@@ -60,13 +48,7 @@ public extension ImageManager {
     
     public func confirm(hash: [UInt8]) async throws -> McuMgrImageStateResponse {
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<McuMgrImageStateResponse, Error>) in
-            var alreadyResumed: Bool = false
             confirm(hash: hash) { response, error in
-                guard !alreadyResumed else { return }
-                defer {
-                    alreadyResumed = true
-                }
-                
                 if let error {
                     continuation.resume(throwing: error)
                 } else if let response {
@@ -82,13 +64,7 @@ public extension ImageManager {
     
     public func erase(image: Int? = nil, slot: Int? = nil) async throws -> McuMgrResponse {
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<McuMgrResponse, Error>) in
-            var alreadyResumed: Bool = false
             erase(image: image, slot: slot) { response, error in
-                guard !alreadyResumed else { return }
-                defer {
-                    alreadyResumed = true
-                }
-                
                 if let error {
                     continuation.resume(throwing: error)
                 } else if let response {

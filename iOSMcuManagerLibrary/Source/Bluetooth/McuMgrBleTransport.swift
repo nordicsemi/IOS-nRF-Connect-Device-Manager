@@ -246,9 +246,10 @@ extension McuMgrBleTransport: McuMgrTransport {
         log(msg: "Successfully switched to \(mode) mode.", atLevel: .debug)
     }
     
-    public func send<T: McuMgrResponse>(data: Data, timeout: Int, callback: @escaping McuMgrCallback<T>) {
+    public func send<T: McuMgrResponse>(data: Data, timeout: Int, autoRetry: Bool, callback: @escaping McuMgrCallback<T>) {
         operationQueue.addOperation { [weak self] in
-            for i in 0..<McuMgrBleTransportConstant.MAX_RETRIES {
+            let retryCount = autoRetry ? McuMgrBleTransportConstant.MAX_RETRIES : 1
+            for i in 0..<retryCount {
                 switch self?._send(data: data, timeoutInSeconds: timeout) {
                 case .failure(McuMgrTransportError.waitAndRetry):
                     let waitInterval = min(timeout, McuMgrBleTransportConstant.WAIT_AND_RETRY_INTERVAL)

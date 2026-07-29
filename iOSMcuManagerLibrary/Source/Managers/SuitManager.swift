@@ -303,7 +303,7 @@ public class SuitManager: McuManager {
         let packetLength = maxDataPacketLengthFor(data: data, offset: offset)
         let payload = buildPayload(for: data, at: offset, with: packetLength)
         send(op: .write, commandId: commandID, payload: payload,
-             timeout: uploadTimeoutInSeconds, callback: uploadCallback)
+             timeout: uploadTimeoutInSeconds, autoRetry: true, callback: uploadCallback)
     }
     
     // MARK: uploadCallback

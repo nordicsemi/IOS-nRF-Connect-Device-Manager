@@ -173,7 +173,7 @@ public class ImageManager: McuManager {
             uploadTimeoutInSeconds = McuManager.FAST_TIMEOUT
         }
         send(op: .write, commandId: ImageID.upload, payload: payload, timeout: uploadTimeoutInSeconds,
-             callback: callback)
+             autoRetry: true, callback: callback)
     }
     
     // MARK: test(hash:callback:)

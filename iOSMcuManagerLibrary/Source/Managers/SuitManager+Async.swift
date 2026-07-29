@@ -16,13 +16,7 @@ public extension SuitManager {
     
     public func listManifest() async throws -> SuitListResponse {
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<SuitListResponse, Error>) in
-            var alreadyResumed: Bool = false
             listManifest { response, error in
-                guard !alreadyResumed else { return }
-                defer {
-                    alreadyResumed = true
-                }
-                
                 if let error {
                     continuation.resume(throwing: error)
                 } else if let response {
@@ -38,13 +32,7 @@ public extension SuitManager {
     
     public func processRecentlyUploadedEnvelope() async throws -> McuMgrResponse {
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<McuMgrResponse, Error>) in
-            var alreadyResumed: Bool = false
             processRecentlyUploadedEnvelope() { response, error in
-                guard !alreadyResumed else { return }
-                defer {
-                    alreadyResumed = true
-                }
-                
                 if let error {
                     continuation.resume(throwing: error)
                 } else if let response {
@@ -60,13 +48,7 @@ public extension SuitManager {
     
     public func cleanup() async throws -> McuMgrResponse {
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<McuMgrResponse, Error>) in
-            var alreadyResumed: Bool = false
             cleanup { response, error in
-                guard !alreadyResumed else { return }
-                defer {
-                    alreadyResumed = true
-                }
-                
                 if let error {
                     continuation.resume(throwing: error)
                 } else if let response {
