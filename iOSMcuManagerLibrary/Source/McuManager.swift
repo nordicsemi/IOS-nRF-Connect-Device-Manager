@@ -114,14 +114,16 @@ open class McuManager: NSObject {
     
     public func send<T: McuMgrResponse, R: RawRepresentable>(op: McuMgrOperation, commandId: R, payload: [String:CBOR]?,
                                                              timeout: Int = DEFAULT_SEND_TIMEOUT_SECONDS,
+                                                             autoRetry: Bool = false,
                                                              callback: @escaping McuMgrCallback<T>) where R.RawValue == UInt8 {
         return send(op: op, flags: 0, commandId: commandId, payload: payload, timeout: timeout,
-                    callback: callback)
+                    autoRetry: autoRetry, callback: callback)
     }
     
     public func send<T: McuMgrResponse, R: RawRepresentable>(op: McuMgrOperation, flags: UInt8,
                                                              commandId: R, payload: [String:CBOR]?,
                                                              timeout: Int = DEFAULT_SEND_TIMEOUT_SECONDS,
+                                                             autoRetry: Bool,
                                                              callback: @escaping McuMgrCallback<T>) where R.RawValue == UInt8 {
         log(msg: "Sending \(op) command (Version: \(smpVersion), Group: \(group), seq: \(nextSequenceNumber), ID: \(commandId)): \(payload?.debugDescription ?? "nil")",
             atLevel: .verbose)
@@ -160,13 +162,13 @@ open class McuManager: NSObject {
         
         oobBuffer.logDelegate = logDelegate
         oobBuffer.enqueueExpectation(for: packetSequenceNumber)
-        send(data: packetData, timeout: timeout, callback: _callback)
+        send(data: packetData, timeout: timeout, autoRetry: autoRetry, callback: _callback)
         // Use of Overflow operator
         nextSequenceNumber = nextSequenceNumber &+ 1
     }
     
-    public func send<T: McuMgrResponse>(data: Data, timeout: Int, callback: @escaping McuMgrCallback<T>) {
-        transport.send(data: data, timeout: timeout, callback: callback)
+    public func send<T: McuMgrResponse>(data: Data, timeout: Int, autoRetry: Bool, callback: @escaping McuMgrCallback<T>) {
+        transport.send(data: data, timeout: timeout, autoRetry: autoRetry, callback: callback)
     }
     
     //**************************************************************************

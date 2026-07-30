@@ -18,13 +18,7 @@ public extension StatsManager {
     /// Async variant of ``list(callback:)``
     public func list() async throws -> McuMgrStatsListResponse {
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<McuMgrStatsListResponse, Error>) in
-            var alreadyResumed: Bool = false
             list { response, error in
-                guard !alreadyResumed else { return }
-                defer {
-                    alreadyResumed = true
-                }
-                
                 if let error {
                     continuation.resume(throwing: error)
                 } else if let response {
@@ -41,13 +35,7 @@ public extension StatsManager {
     /// Async variant of ``read(module:callback:)``
     public func read(module: String) async throws -> McuMgrStatsResponse {
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<McuMgrStatsResponse, Error>) in
-            var alreadyResumed: Bool = false
             read(module: module) { response, error in
-                guard !alreadyResumed else { return }
-                defer {
-                    alreadyResumed = true
-                }
-                
                 if let error {
                     continuation.resume(throwing: error)
                 } else if let response {

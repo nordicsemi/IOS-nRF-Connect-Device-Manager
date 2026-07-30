@@ -138,8 +138,9 @@ public protocol McuMgrTransport: AnyObject {
     ///
     /// - parameter data: The data to be sent.
     /// - parameter timeout: The amount of time in seconds to wait before the .send Operation is declared to have failed due to a timeout error if no appropriate response is received.
+    /// - parameter autoRetry: If true, when `callback` is called to report an Error, the transport will attempt a retry on its own, reusing the given `callback`.
     /// - parameter callback: The request callback.
-    func send<T: McuMgrResponse>(data: Data, timeout: Int, callback: @escaping McuMgrCallback<T>)
+    func send<T: McuMgrResponse>(data: Data, timeout: Int, autoRetry: Bool, callback: @escaping McuMgrCallback<T>)
     
     /// Set up a connection to the remote device.
     func connect(_ callback: @escaping ConnectionCallback)

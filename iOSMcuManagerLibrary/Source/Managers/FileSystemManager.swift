@@ -108,7 +108,7 @@ public class FileSystemManager: McuManager {
             payload.updateValue(CBOR.unsignedInt(UInt64(data.count)), forKey: "len")
         }
         // Build request and send.
-        send(op: .write, commandId: FilesystemID.file, payload: payload, callback: callback)
+        send(op: .write, commandId: FilesystemID.file, payload: payload, autoRetry: true, callback: callback)
     }
     
     // MARK: download(name:delegate:)

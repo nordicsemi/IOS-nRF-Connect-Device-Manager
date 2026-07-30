@@ -17,13 +17,7 @@ public extension SettingsManager {
     
     public func write(name: String, value: [UInt8]) async throws -> McuMgrResponse {
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<McuMgrResponse, Error>) in
-            var alreadyResumed: Bool = false
             write(name: name, value: value) { response, error in
-                guard !alreadyResumed else { return }
-                defer {
-                    alreadyResumed = true
-                }
-                
                 if let error {
                     continuation.resume(throwing: error)
                 } else if let response {
@@ -39,13 +33,7 @@ public extension SettingsManager {
     
     public func save() async throws -> McuMgrResponse {
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<McuMgrResponse, Error>) in
-            var alreadyResumed: Bool = false
             send(op: .write, commandId: ConfigID.three, payload: nil) { response, error in
-                guard !alreadyResumed else { return }
-                defer {
-                    alreadyResumed = true
-                }
-                
                 if let error {
                     continuation.resume(throwing: error)
                 }else if let response {
