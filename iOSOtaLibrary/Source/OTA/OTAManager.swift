@@ -34,7 +34,7 @@ public final class OTAManager {
     // MARK: deinit
     
     deinit {
-        print(#function)
+        log(#function)
         logDelegate = nil
     }
 }
