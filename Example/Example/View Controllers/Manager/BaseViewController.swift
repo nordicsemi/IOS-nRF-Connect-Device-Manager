@@ -8,6 +8,7 @@ import UIKit
 import CoreBluetooth
 import iOSMcuManagerLibrary
 import iOSOtaLibrary
+import iOS_Common_Libraries
 
 // MARK: - BaseViewController
 
@@ -49,10 +50,22 @@ final class BaseViewController: UITabBarController {
         super.init(nibName: nil, bundle: nil)
         
         (transport as? McuMgrBleTransport)?.delegate = self
+        
+        guard #available(iOS 14.0, *) else { return }
+        let log = NordicLog(Self.self, subsystem: Constant.bundleName(forBundleWithClass: Self.self))
+        log.debug(#function)
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    // MARK: deinit
+    
+    deinit {
+        guard #available(iOS 14.0, *) else { return }
+        let log = NordicLog(Self.self, subsystem: Constant.bundleName(forBundleWithClass: Self.self))
+        log.debug(#function)
     }
     
     // MARK: Private Properties
