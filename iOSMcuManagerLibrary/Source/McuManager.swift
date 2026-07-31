@@ -110,6 +110,21 @@ open class McuManager: NSObject {
         dispatchPrecondition(condition: .onQueue(.main))
     }
     
+    // MARK: atomic getNextPacketSequenceNumber()
+    
+    /**
+     Prevents parallel send() requests from having the same ``McuSequenceNumber``.
+     */
+    private func getNextPacketSequenceNumber() -> McuSequenceNumber {
+        objc_sync_enter(self)
+        let current = nextSequenceNumber
+        // Use of Overflow operator
+        nextSequenceNumber = nextSequenceNumber &+ 1
+        objc_sync_exit(self)
+        
+        return current
+    }
+    
     // MARK: send
     
     public func send<T: McuMgrResponse, R: RawRepresentable>(op: McuMgrOperation, commandId: R, payload: [String:CBOR]?,
@@ -125,9 +140,9 @@ open class McuManager: NSObject {
                                                              timeout: Int = DEFAULT_SEND_TIMEOUT_SECONDS,
                                                              autoRetry: Bool,
                                                              callback: @escaping McuMgrCallback<T>) where R.RawValue == UInt8 {
-        log(msg: "Sending \(op) command (Version: \(smpVersion), Group: \(group), seq: \(nextSequenceNumber), ID: \(commandId)): \(payload?.debugDescription ?? "nil")",
+        let packetSequenceNumber = getNextPacketSequenceNumber()
+        log(msg: "Sending \(op) command (Version: \(smpVersion), Group: \(group), seq: \(packetSequenceNumber), ID: \(commandId)): \(payload?.debugDescription ?? "nil")",
             atLevel: .verbose)
-        let packetSequenceNumber = nextSequenceNumber
         let packetData = McuManager.buildPacket(scheme: transport.getScheme(),
                                                 version: smpVersion, op: op,
                                                 flags: flags, group: group.rawValue,
@@ -163,8 +178,6 @@ open class McuManager: NSObject {
         oobBuffer.logDelegate = logDelegate
         oobBuffer.enqueueExpectation(for: packetSequenceNumber)
         send(data: packetData, timeout: timeout, autoRetry: autoRetry, callback: _callback)
-        // Use of Overflow operator
-        nextSequenceNumber = nextSequenceNumber &+ 1
     }
     
     public func send<T: McuMgrResponse>(data: Data, timeout: Int, autoRetry: Bool, callback: @escaping McuMgrCallback<T>) {
