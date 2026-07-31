@@ -49,11 +49,8 @@ final class BaseViewController: UITabBarController {
         self.peripheral = peripheral
         super.init(nibName: nil, bundle: nil)
         
+        log(#function)
         (transport as? McuMgrBleTransport)?.delegate = self
-        
-        guard #available(iOS 14.0, *) else { return }
-        let log = NordicLog(Self.self, subsystem: Constant.bundleName(forBundleWithClass: Self.self))
-        log.debug(#function)
     }
     
     required init?(coder: NSCoder) {
@@ -63,9 +60,7 @@ final class BaseViewController: UITabBarController {
     // MARK: deinit
     
     deinit {
-        guard #available(iOS 14.0, *) else { return }
-        let log = NordicLog(Self.self, subsystem: Constant.bundleName(forBundleWithClass: Self.self))
-        log.debug(#function)
+        log(#function)
     }
     
     // MARK: Private Properties
@@ -123,6 +118,11 @@ final class BaseViewController: UITabBarController {
         }
         
         setupViewControllers()
+    }
+    
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        log(#function)
     }
     
     // MARK: setupViewControllers()
@@ -457,6 +457,7 @@ extension BaseViewController: PeripheralDelegate {
     
     func peripheral(_ peripheral: CBPeripheral, didChangeStateTo state: PeripheralState) {
         peripheralState = state
+        log("peripheral(_, didChangeTo: \(state.description))")
         switch state {
         case .connecting:
             // Don't wait for .connected because McuMgrBleTransport only sends 'connected'
@@ -470,5 +471,16 @@ extension BaseViewController: PeripheralDelegate {
             // Nothing to do here.
             break
         }
+    }
+}
+
+// MARK: log(_:)
+
+extension BaseViewController {
+    
+    func log(_ string: String) {
+        guard  #available(iOS 14.0, *) else { return }
+        let log = NordicLog(Self.self, subsystem: Constant.bundleName(forBundleWithClass: Self.self))
+        log.debug(string)
     }
 }
