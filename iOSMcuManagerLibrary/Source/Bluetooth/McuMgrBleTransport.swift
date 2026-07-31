@@ -410,7 +410,7 @@ extension McuMgrBleTransport: McuMgrTransport {
                 log(msg: "Discovering services...", atLevel: .verbose)
                 state = .connecting
                 targetPeripheral.delegate = self
-                targetPeripheral.discoverServices([configuration.characteristicUUUID])
+                targetPeripheral.discoverServices([configuration.serviceUUID])
             case .disconnected:
                 // If the peripheral is disconnected, begin the setup process by
                 // connecting to the device. Once the characteristic's
