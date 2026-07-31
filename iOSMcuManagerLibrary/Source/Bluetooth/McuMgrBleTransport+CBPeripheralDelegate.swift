@@ -20,11 +20,15 @@ extension McuMgrBleTransport: CBPeripheralDelegate {
             return
         }
         
-        let s = peripheral.services?
-            .map({ $0.uuid.uuidString })
-            .joined(separator: ", ")
-            ?? "none"
-        log(msg: "Services discovered: \(s)", atLevel: .verbose)
+        let discoveredString: String
+        if let services = peripheral.services, !services.isEmpty {
+            discoveredString = ListFormatter.localizedString(
+                byJoining: services.map({ $0.uuid.uuidString })
+            )
+        } else {
+            discoveredString = "None"
+        }
+        log(msg: "Services discovered: \(discoveredString)", atLevel: .verbose)
         
         // Get peripheral's services.
         guard let services = peripheral.services else {
