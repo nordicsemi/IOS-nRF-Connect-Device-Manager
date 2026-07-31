@@ -155,19 +155,7 @@ open class McuManager: NSObject {
             }
             
             do {
-                guard try self.oobBuffer.received((response, error), for: packetSequenceNumber) else { return }
-                try self.oobBuffer.deliver { responseSequenceNumber, response in
-                    let responseResult = response as? (T?, (any Error)?)
-                    if let response = responseResult?.0 {
-                        self.smpVersion = McuMgrVersion(rawValue: response.header.version) ?? .SMPv1
-                        self.log(msg: "Response (\(self.smpVersion), group: \(self.group), seq: \(responseSequenceNumber), command: \(commandId)): \(response)",
-                                 atLevel: .verbose)
-                    } else if let error = responseResult?.1 {
-                        self.log(msg: "Request (\(self.smpVersion), group: \(self.group), seq: \(responseSequenceNumber), command: \(commandId)) failed: \(error.localizedDescription)",
-                                 atLevel: .error)
-                    }
-                    callback(responseResult?.0, responseResult?.1)
-                }
+                try self.oobBuffer.received((response, error), for: packetSequenceNumber)
             } catch let robBufferError {
                 DispatchQueue.main.async {
                     callback(response, robBufferError)
@@ -176,7 +164,18 @@ open class McuManager: NSObject {
         }
         
         oobBuffer.logDelegate = logDelegate
-        oobBuffer.enqueueExpectation(for: packetSequenceNumber)
+        oobBuffer.enqueueKey(packetSequenceNumber) { response in
+            let responseResult = response as? (T?, (any Error)?)
+            if let response = responseResult?.0 {
+                self.smpVersion = McuMgrVersion(rawValue: response.header.version) ?? .SMPv1
+                self.log(msg: "Response (\(self.smpVersion), group: \(self.group), seq: \(packetSequenceNumber), command: \(commandId)): \(response)",
+                         atLevel: .verbose)
+            } else if let error = responseResult?.1 {
+                self.log(msg: "Request (\(self.smpVersion), group: \(self.group), seq: \(packetSequenceNumber), command: \(commandId)) failed: \(error.localizedDescription)",
+                         atLevel: .error)
+            }
+            callback(responseResult?.0, responseResult?.1)
+        }
         send(data: packetData, timeout: timeout, autoRetry: autoRetry, callback: _callback)
     }
     
