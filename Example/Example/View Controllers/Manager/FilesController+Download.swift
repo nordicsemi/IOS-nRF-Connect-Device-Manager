@@ -125,7 +125,8 @@ extension FilesController {
                 downloadResultLabel.leadingAnchor.constraint(equalTo: cell.contentView.safeAreaLayoutGuide.leadingAnchor, constant: 14.0),
                 downloadResultLabel.trailingAnchor.constraint(equalTo: downloadPreviewButton.leadingAnchor, constant: -14.0),
                 
-                cell.contentView.bottomAnchor.constraint(equalTo: downloadPreviewButton.bottomAnchor, constant: 8.0)
+                cell.contentView.bottomAnchor.constraint(greaterThanOrEqualToSystemSpacingBelow: downloadPreviewButton.bottomAnchor, multiplier: 1.0),
+                cell.contentView.bottomAnchor.constraint(equalTo: downloadResultLabel.bottomAnchor, constant: 8.0)
             ])
             return cell
         default:
