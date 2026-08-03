@@ -256,11 +256,11 @@ final class ImageController: UITableViewController, ExtendedMcuMgrViewController
         case checkOtaUpdate
         case fileSize
         case fileHash
-        case fileState
         case eraseAppSettings
         case swapTime
         case numberOfBuffers
         case byteAlignment
+        case fileState
         case progressBar
         case uploadButtons
     }

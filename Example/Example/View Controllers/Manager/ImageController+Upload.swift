@@ -148,30 +148,6 @@ extension ImageController {
             }
             
             return cell
-        case .fileState:
-            let cell = UITableViewCell(style: .value1, reuseIdentifier: "sharedFileInfo")
-            cell.selectionStyle = .none
-            cell.textLabel?.font = .preferredFont(forTextStyle: .callout)
-            
-            switch row {
-            case .fileState:
-                cell.textLabel?.text = "State"
-                
-                if let dfuError {
-                    cell.detailTextLabel?.textColor = .systemRed
-                    cell.detailTextLabel?.text = dfuError.localizedDescription
-                    cell.detailTextLabel?.numberOfLines = 0
-                } else {
-                    cell.detailTextLabel?.text = dfuState?.description ?? "N/A"
-                    cell.detailTextLabel?.textColor = dfuState?.associatedColor ?? .secondary
-                    cell.detailTextLabel?.numberOfLines = 1
-                }
-                uploadStateLabel = cell.detailTextLabel
-            default:
-                cell.textLabel?.text = "N/A"
-                cell.separatorInset = UIEdgeInsets(top: 0, left: tableView.bounds.size.width, bottom: 0, right: 0)
-            }
-            return cell
         case .eraseAppSettings:
             let identifier = "sharedUploadEraseAppSettings"
             let cell = tableView.dequeueReusableCell(withIdentifier: identifier) ??
@@ -245,7 +221,6 @@ extension ImageController {
             let cell = tableView.dequeueReusableCell(withIdentifier: identifier) ??
                 UITableViewCell(style: .default, reuseIdentifier: identifier)
             cell.selectionStyle = .none
-            cell.separatorInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: .greatestFiniteMagnitude)
             
             cell.textLabel?.text = "Byte Alignment"
             cell.textLabel?.font = .preferredFont(forTextStyle: .callout)
@@ -267,6 +242,24 @@ extension ImageController {
                 
                 cell.contentView.bottomAnchor.constraint(equalTo: uploadAlignmentButton.bottomAnchor, constant: 8.0)
             ])
+            return cell
+        case .fileState:
+            let cell = UITableViewCell(style: .value1, reuseIdentifier: "sharedFileInfo")
+            cell.selectionStyle = .none
+            cell.separatorInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: .greatestFiniteMagnitude)
+            
+            cell.textLabel?.font = .preferredFont(forTextStyle: .callout)
+            cell.textLabel?.text = "State"
+            if let dfuError {
+                cell.detailTextLabel?.textColor = .systemRed
+                cell.detailTextLabel?.text = dfuError.localizedDescription
+                cell.detailTextLabel?.numberOfLines = 0
+            } else {
+                cell.detailTextLabel?.text = dfuState?.description ?? "N/A"
+                cell.detailTextLabel?.textColor = dfuState?.associatedColor ?? .secondary
+                cell.detailTextLabel?.numberOfLines = 1
+            }
+            uploadStateLabel = cell.detailTextLabel
             return cell
         case .progressBar:
             let cell = UITableViewCell(style: .default, reuseIdentifier: "progressBar")
