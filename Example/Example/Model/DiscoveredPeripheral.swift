@@ -11,13 +11,13 @@ import CoreBluetoothMock
 
 final class DiscoveredPeripheral: NSObject {
     
-    //MARK: Properties
+    // MARK: Properties
     
-    public private(set) var basePeripheral : CBMPeripheral
-    public private(set) var advertisedName : String
-    public private(set) var RSSI : NSNumber = -127
-    public private(set) var highestRSSI : NSNumber = -127
-    public private(set) var advertisedServices : [CBMUUID]?
+    public private(set) var basePeripheral: CBMPeripheral
+    public private(set) var advertisedName: String
+    public private(set) var RSSI: NSNumber = -127
+    public private(set) var highestRSSI: NSNumber = -127
+    public private(set) var advertisedServices: [CBMUUID]?
     
     // MARK: init
     
@@ -57,7 +57,8 @@ final class DiscoveredPeripheral: NSObject {
         return (advertisedName, advertisedServices)
     }
     
-    //MARK: - NSObject protocols
+    // MARK: NSObject
+    
     override func isEqual(_ object: Any?) -> Bool {
         if object is DiscoveredPeripheral {
             let peripheralObject = object as! DiscoveredPeripheral
