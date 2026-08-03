@@ -141,7 +141,6 @@ final class FilesController: UITableViewController {
         button.setTitleColor(.secondary, for: .disabled)
         button.addTarget(self, action: #selector(onPreviewButtonTapped), for: .touchUpInside)
         button.setContentHuggingPriority(.required, for: .horizontal)
-        button.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
         button.titleLabel?.font = .preferredFont(forTextStyle: .callout)
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
@@ -154,7 +153,6 @@ final class FilesController: UITableViewController {
         button.setTitleColor(.secondary, for: .disabled)
         button.addTarget(self, action: #selector(onExportButtonTapped), for: .touchUpInside)
         button.setContentHuggingPriority(.required, for: .horizontal)
-        button.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
         button.titleLabel?.font = .preferredFont(forTextStyle: .callout)
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
