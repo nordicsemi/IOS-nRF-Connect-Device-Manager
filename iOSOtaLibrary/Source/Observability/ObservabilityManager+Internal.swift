@@ -153,11 +153,12 @@ internal extension ObservabilityManager {
             .map { [weak self] data in
                 ObservabilityChunk(data)
             }
-            .tryMap { [weak self] chunk -> (ObservabilityAuth, ObservabilityChunk) in
+            .collect(.byTime(RunLoop.main, .milliseconds(500)))
+            .tryMap { [weak self] chunks -> (ObservabilityAuth, [ObservabilityChunk]) in
                 guard let auth = self?.devices[identifier]?.auth else {
                     throw ObservabilityError.missingAuthData
                 }
-                return (auth, chunk)
+                return (auth, chunks)
             }
             .receive(on: RunLoop.main)
             .sink { [weak self] completion in
@@ -170,9 +171,9 @@ internal extension ObservabilityManager {
                         .yield(with: .failure(error))
                     self?.disconnect(from: identifier)
                 }
-            } receiveValue: { [weak self] auth, incomingChunk in
+            } receiveValue: { [weak self] auth, incomingChunks in
                 guard let self else { return }
-                received(incomingChunk, from: identifier)
+                received(chunks: incomingChunks, from: identifier)
                 resumeUploadsIfNotBusy(for: identifier, with: auth)
             }
             .store(in: &deviceCancellables[identifier]!)
@@ -206,10 +207,12 @@ fileprivate extension ObservabilityManager {
     
     // MARK: received
     
-    func received(_ chunk: ObservabilityChunk, from identifier: UUID) {
-        log("Received Chunk Seq. Number \(chunk.sequenceNumber) with Timestamp: \(chunk.timestamp)")
-        state.add([chunk], for: identifier)
-        deviceContinuations[identifier]?.yield((identifier, .updatedChunk(chunk)))
+    func received(chunks: [ObservabilityChunk], from identifier: UUID) {
+        state.add(chunks, for: identifier)
+        for chunk in chunks {
+            log("Received Chunk Seq. Number \(chunk.sequenceNumber) with Timestamp: \(chunk.timestamp)")
+            deviceContinuations[identifier]?.yield((identifier, .updatedChunk(chunk)))
+        }
     }
     
     // MARK: upload
