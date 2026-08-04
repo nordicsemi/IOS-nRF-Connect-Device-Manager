@@ -92,18 +92,18 @@ extension FilesController {
                 downloadProgress.setProgress(percentage, animated: true)
             case .paused:
                 downloadResultLabel.text = "PAUSED"
-                downloadResultLabel.textColor = .primary
+                downloadResultLabel.textColor = .systemYellow
             case .cancelled:
                 downloadResultLabel.text = "CANCELLED"
-                downloadResultLabel.textColor = .red
+                downloadResultLabel.textColor = .systemRed
                 downloadProgress.setProgress(0.0, animated: false)
             case .error(let error):
                 downloadResultLabel.text = "Error: \(error.localizedDescription)"
-                downloadResultLabel.textColor = .red
+                downloadResultLabel.textColor = .systemRed
                 downloadProgress.setProgress(0.0, animated: false)
             case .completed:
                 downloadResultLabel.text = "SUCCESS"
-                downloadResultLabel.textColor = .primary
+                downloadResultLabel.textColor = .nordic
                 downloadProgress.setProgress(0.0, animated: false)
             }
             

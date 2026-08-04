@@ -75,26 +75,26 @@ extension FilesController {
                     cell.textLabel?.textColor = .secondary
                 case .ready:
                     cell.textLabel?.text = "State: READY"
-                    cell.textLabel?.textColor = .secondary
+                    cell.textLabel?.textColor = .primary
                 case .inProgress(_ , let speed):
                     if let speed {
                         cell.textLabel?.text = "State: UPLOADING... (\(String(format: "%.2f", speed)) kB/s)"
                     } else {
                         cell.textLabel?.text = "State: UPLOADING..."
                     }
-                    cell.textLabel?.textColor = .primary
+                    cell.textLabel?.textColor = .systemGreen
                 case .paused:
                     cell.textLabel?.text = "State: PAUSED"
                     cell.textLabel?.textColor = .secondary
                 case .cancelled:
                     cell.textLabel?.text = "State: CANCELLED"
-                    cell.textLabel?.textColor = .red
+                    cell.textLabel?.textColor = .systemRed
                 case .error(let error):
                     cell.textLabel?.text = "State: \(error.localizedDescription)"
-                    cell.textLabel?.textColor = .red
+                    cell.textLabel?.textColor = .systemRed
                 case .completed:
                     cell.textLabel?.text = "State: UPLOAD COMPLETE"
-                    cell.textLabel?.textColor = .secondary
+                    cell.textLabel?.textColor = .nordic
                 }
             default:
                 break
