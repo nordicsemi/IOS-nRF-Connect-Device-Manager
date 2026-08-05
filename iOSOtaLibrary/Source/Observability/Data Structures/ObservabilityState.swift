@@ -59,8 +59,13 @@ struct ObservabilityState: Codable {
         return pendingUploads[identifier] ?? []
     }
     
-    func nextChunk(for identifier: UUID) -> ObservabilityChunk? {
-        return pendingChunks(for: identifier).first
+    private static let CHUNK_BATCH_SIZE = 10
+    func nextChunks(for identifier: UUID) -> [ObservabilityChunk]? {
+        let pendingChunks = pendingChunks(for: identifier)
+        guard pendingChunks.hasItems else { return nil }
+        return pendingChunks
+            .prefix(Self.CHUNK_BATCH_SIZE)
+            .toArray()
     }
 }
 
