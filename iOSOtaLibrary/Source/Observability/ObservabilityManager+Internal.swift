@@ -134,6 +134,9 @@ internal extension ObservabilityManager {
     func reportPendingChunks(from peripheral: Peripheral) {
         let identifier = peripheral.peripheral.identifier
         let pendingChunks = state.pendingChunks(for: identifier)
+        guard !pendingChunks.isEmpty else { return }
+        
+        log("Restored \(pendingChunks.count) Pending Chunks from \(identifier)")
         for chunk in pendingChunks {
             let pendingChunk = state.update(chunk, from: identifier, to: .pendingUpload)
             deviceContinuations[identifier]?.yield((identifier, .updatedChunk(pendingChunk)))
