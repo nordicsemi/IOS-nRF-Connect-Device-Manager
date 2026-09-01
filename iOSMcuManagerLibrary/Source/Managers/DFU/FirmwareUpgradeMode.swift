@@ -45,7 +45,7 @@ public enum FirmwareUpgradeMode: Codable, CustomStringConvertible, CustomDebugSt
         case .testOnly:
             return "Test only"
         case .confirmOnly:
-            return "Confirm only (Recommended)"
+            return "Confirm only (Default)"
         case .testAndConfirm:
             return "Test and Confirm"
         case .uploadOnly:
