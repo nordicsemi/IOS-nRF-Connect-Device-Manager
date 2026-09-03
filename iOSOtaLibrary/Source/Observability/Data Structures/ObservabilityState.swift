@@ -84,6 +84,19 @@ extension ObservabilityState {
             guard let restored = try? JSONDecoder().decode(Self.self, from: data) else { return }
             self = restored
         }
+        pruneState()
+    }
+    
+    mutating func pruneState() {
+        var count = 0
+        for key in pendingUploads.keys where pendingChunks(for: key).isEmpty {
+            pendingUploads.removeValue(forKey: key)
+            count += 1
+        }
+        #if DEBUG
+        guard count > 0 else { return }
+        print("Pruned \(count) key(s).")
+        #endif
     }
     
     mutating func enqueueWriteToDisk() {
