@@ -583,7 +583,7 @@
 /* Begin XCRemoteSwiftPackageReference section */
 		AA12B3A42E7993F000378F1E /* XCRemoteSwiftPackageReference "IOS-BLE-Library" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/NordicSemiconductor/IOS-BLE-Library.git";
+			repositoryURL = "https://github.com/nordicsemi/IOS-BLE-Library.git";
 			requirement = {
 				branch = main;
 				kind = branch;
