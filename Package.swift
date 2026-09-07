@@ -25,7 +25,7 @@ let package = Package(
             .exact("0.9.20")
         ),
         .package(
-            url: "https://github.com/NordicSemiconductor/IOS-BLE-Library",
+            url: "https://github.com/nordicsemi/IOS-BLE-Library",
             .exact("0.4.5")
         ),
         .package(
