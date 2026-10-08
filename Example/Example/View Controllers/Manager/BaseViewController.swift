@@ -180,7 +180,7 @@ enum DeviceStatusRow: Int, RawRepresentable, CaseIterable, CustomStringConvertib
         case .bootloaderMode:
             return "Bootloader Mode"
         case .bootloaderSlot:
-            return "Bootlaoder Slot"
+            return "Bootloader Slot"
         case .kernel:
             return "Kernel"
         case .otaStatus:
