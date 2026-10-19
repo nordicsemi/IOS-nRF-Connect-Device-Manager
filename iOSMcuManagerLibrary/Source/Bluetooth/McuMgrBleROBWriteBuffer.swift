@@ -34,6 +34,9 @@ internal final class McuMgrBleROBWriteBuffer {
     
     private var overridePeripheralNotReadyForWriteWithoutResponse: Bool
     private var pausedWritesWithoutResponse: Bool
+    /// Identifies the current pause. Each time we pause, we schedule an override timer that
+    /// is only valid for that specific pause, so stale timers can be told apart from current ones.
+    private var pauseGeneration: UInt
     private var window: [Write]
     private var writeNumber: Int
     
@@ -51,6 +54,7 @@ internal final class McuMgrBleROBWriteBuffer {
         // Override for first packet we try to send.
         self.overridePeripheralNotReadyForWriteWithoutResponse = true
         self.pausedWritesWithoutResponse = false
+        self.pauseGeneration = 0
         self.window = [Write]()
         self.writeNumber = 0
     }
@@ -69,20 +73,21 @@ internal final class McuMgrBleROBWriteBuffer {
      All chunks of the same packet need to be sent together. Otherwise, they can't be merged properly on the receiving end.
      */
     internal func enqueue(_ sequenceNumber: McuSequenceNumber, data: [Data], to peripheral: CBPeripheral, characteristic: CBCharacteristic, callback: @escaping (Data?, McuMgrTransportError?) -> Void) {
-        // Do not enqueue again if said sequence number is in-flight.
-        guard !isInFlight(sequenceNumber) else {
-            guard pausedWritesWithoutResponse else { return }
-            // Note that sometimes we will not get a "peripheralIsReadyForWriteWithoutResponse".
-            // The only way to move forward, is just to ask / try again to send.
-            pausedWritesWithoutResponse = false
-            let targetSequenceNumber: McuSequenceNumber! = window.first?.mcuMgrSequenceNumber
-            log(msg: "→ Continue [Seq. No: \(targetSequenceNumber)].", atLevel: .debug)
-            unsafe_writeThroughWindow(to: peripheral)
-            return
-        }
-        
-        // This lock guarantees parallel writes are not interleaved with each other.
+        // This lock guarantees parallel writes are not interleaved with each other, and that
+        // all the state below is only ever accessed from a single context.
         lock.async { [unowned self] in
+            // Do not enqueue again if said sequence number is in-flight.
+            guard !window.contains(where: { $0.mcuMgrSequenceNumber == sequenceNumber }) else {
+                guard pausedWritesWithoutResponse else { return }
+                // Note that sometimes we will not get a "peripheralIsReadyForWriteWithoutResponse".
+                // The only way to move forward, is just to ask / try again to send.
+                pausedWritesWithoutResponse = false
+                let targetSequenceNumber: McuSequenceNumber! = window.first?.mcuMgrSequenceNumber
+                log(msg: "→ Continue [Seq. No: \(targetSequenceNumber)].", atLevel: .debug)
+                unsafe_writeThroughWindow(to: peripheral)
+                return
+            }
+            
             window.append(contentsOf: Write.split(writeNumber, sequenceNumber: sequenceNumber, chunks: data, peripheral: peripheral, characteristic: characteristic, callback: callback))
             window.sort(by: <)
             #if DEBUG
@@ -119,10 +124,16 @@ private extension McuMgrBleROBWriteBuffer {
         while let write = window.first {
             guard overridePeripheralNotReadyForWriteWithoutResponse || peripheral.canSendWriteWithoutResponse else {
                 pausedWritesWithoutResponse = true
+                pauseGeneration &+= 1
+                let generation = pauseGeneration
                 unsafe_logPause(write)
                 // If after 15ms we have not received peripheralIsReady(), override.
                 lock.asyncAfter(deadline: .now() + .milliseconds(Self.CONNECTION_BUFFER_WAIT_TIME_MS)) { [weak self] in
-                    guard let self, pausedWritesWithoutResponse else { return }
+                    // Only act if the pause that scheduled this timer is still the current one.
+                    // Otherwise, a timer left over from an earlier pause (which was resolved by
+                    // peripheralIsReady()) could fire early during a newer pause and make us write
+                    // while CoreBluetooth is still not ready, in which case the write is dropped.
+                    guard let self, pausedWritesWithoutResponse, pauseGeneration == generation else { return }
                     log(msg: "! Override Peripheral Ready For Write Without Response", atLevel: .debug)
                     overridePeripheralNotReadyForWriteWithoutResponse = true
                     unsafe_writeThroughWindow(to: peripheral)
