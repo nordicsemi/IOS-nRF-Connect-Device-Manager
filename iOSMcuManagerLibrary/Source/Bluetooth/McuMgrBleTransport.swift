@@ -49,6 +49,11 @@ public class McuMgrBleTransport: NSObject {
     internal var writeState: McuMgrBleTransportWriteState
     /// Used to track the Sequence Number the chunked responses belong to.
     internal var previousUpdateNotificationSequenceNumber: McuSequenceNumber?
+    /// Tracking an issue when building with NCS 2.5.1 with 2 buffers, packets are dropped.
+    /// We know this doesn't happen with newer NCS, but it happens with the older one. If we
+    /// add an artificial delay, it helps us get through the finish line even though some
+    /// retries are needed along the way.
+    internal var lowThroughputMode: Bool = false
     
     internal lazy var robWriteBuffer = McuMgrBleROBWriteBuffer(logDelegate)
     
@@ -245,12 +250,16 @@ extension McuMgrBleTransport: McuMgrTransport {
         log(msg: "Successfully switched to \(mode) mode.", atLevel: .debug)
     }
     
+    // MARK: send<T>(data:timeout:autoRetry:callback:)
+    
     public func send<T: McuMgrResponse>(data: Data, timeout: Int, autoRetry: Bool, callback: @escaping McuMgrCallback<T>) {
         operationQueue.addOperation { [weak self] in
             let retryCount = autoRetry ? McuMgrBleTransportConstant.MAX_RETRIES : 1
             for i in 0..<retryCount {
                 switch self?._send(data: data, timeoutInSeconds: timeout) {
                 case .failure(McuMgrTransportError.waitAndRetry):
+                    self?.attemptToImproveThroughputOnWaitAndRetry()
+                    
                     #if DEBUG
                     if let header = try? McuMgrHeader(data: data) {
                         self?.log(msg: "⌚ [Seq: \(header.sequenceNumber)] Transport Error: Sleeping before Retry.", atLevel: .info)
@@ -314,9 +323,13 @@ extension McuMgrBleTransport: McuMgrTransport {
         }
     }
     
+    // MARK: connect(_:)
+    
     public func connect(_ callback: @escaping ConnectionCallback) {
         callback(.deferred)
     }
+    
+    // MARK: close()
     
     public func close() {
         if let peripheral = modePeripherals[mode],
@@ -327,15 +340,35 @@ extension McuMgrBleTransport: McuMgrTransport {
         }
     }
     
+    // MARK: addObserver(_:)
+    
     public func addObserver(_ observer: ConnectionObserver) {
         observers.append(observer)
     }
+    
+    // MARK: removeObserver(_:)
     
     public func removeObserver(_ observer: ConnectionObserver) {
         if let index = observers.firstIndex(where: {$0 === observer}) {
             observers.remove(at: index)
         }
     }
+    
+    // MARK: attemptToImproveThroughputOnWaitAndRetry()
+    
+    internal func attemptToImproveThroughputOnWaitAndRetry() {
+        if numberOfParallelWrites > 1 {
+            // Disable pipelining to improve throughput and cause less retries.
+            numberOfParallelWrites -= 1
+            log(msg: "[!!] Detected possible packet drop from target device. Reducing pipeline depth (from \(numberOfParallelWrites + 1) to \(numberOfParallelWrites)) in an attempt to improve throughput.", atLevel: .warning)
+        } else { // if already on single pipeline
+            guard !lowThroughputMode else { return }
+            lowThroughputMode = true
+            log(msg: "[!!!] Detected possible packet drop from target device at minimum pipelien depth. Enabling Low Throughput Mode.", atLevel: .warning)
+        }
+    }
+    
+    // MARK: notifyStateChanged(_:)
     
     internal func notifyStateChanged(_ state: McuMgrTransportState) {
         // The list of observers may be modified by each observer.
@@ -345,6 +378,8 @@ extension McuMgrBleTransport: McuMgrTransport {
             observer.transport(self, didChangeStateTo: state)
         }
     }
+    
+    // MARK: softReset()
     
     /**
      Clean any necessary state between Peripheral Connections.
@@ -365,7 +400,10 @@ extension McuMgrBleTransport: McuMgrTransport {
         // Clear write buffers.
         writeState = McuMgrBleTransportWriteState()
         robWriteBuffer = McuMgrBleROBWriteBuffer(logDelegate)
+        lowThroughputMode = false
     }
+    
+    // MARK: didDisconnect()
     
     internal func didDisconnect() {
         modePeripherals[mode]?.delegate = nil
@@ -374,6 +412,8 @@ extension McuMgrBleTransport: McuMgrTransport {
         state = .disconnected
         softReset()
     }
+    
+    // MARK: _send(data:timeoutInSeconds:)
     
     /// This method sends the data to the target. Before, it ensures that
     /// CBCentralManager is ready and the peripheral is connected.
@@ -559,9 +599,14 @@ extension McuMgrBleTransport: McuMgrTransport {
                 return .failure(McuMgrTransportError.badHeader)
             }
             log(msg: "<- [Seq: \(sequenceNumber)] \(returnData.hexEncodedString(options: [.upperCase, .twoByteSpacing])) (\(returnData.count) bytes)", atLevel: .debug)
+            if lowThroughputMode {
+                usleep(useconds_t(McuMgrBleTransportConstant.LOW_THROUGHPUT_MODE_WAIT_MS * 1000))
+            }
             return .success(returnData)
         }
     }
+    
+    // MARK: log(msg:atLevel:)
     
     internal func log(msg: @autoclosure () -> String, atLevel level: McuMgrLogLevel) {
         if let logDelegate, level >= logDelegate.minLogLevel() {
@@ -577,6 +622,11 @@ public enum McuMgrBleTransportConstant {
     internal static let MAX_RETRIES = 3
     /// The interval to wait before attempting a transaction again in seconds.
     internal static let WAIT_AND_RETRY_INTERVAL = 10
+    /// In Low Throughput Mode to fix NCS's 2.5.1 (maybe older and newer) issue which
+    /// drops packets and kills DFU, we artificially delay returning the transport's
+    /// callback to slow down the writes. This might be a threading or buffer issue on
+    /// the side of NCS. But it's not a library issue.
+    internal static let LOW_THROUGHPUT_MODE_WAIT_MS = 30
     /// Connection timeout in seconds.
     internal static let CONNECTION_TIMEOUT = 20
 }
