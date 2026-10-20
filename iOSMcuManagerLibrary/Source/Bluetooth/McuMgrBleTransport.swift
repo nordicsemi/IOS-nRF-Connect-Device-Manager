@@ -251,8 +251,15 @@ extension McuMgrBleTransport: McuMgrTransport {
             for i in 0..<retryCount {
                 switch self?._send(data: data, timeoutInSeconds: timeout) {
                 case .failure(McuMgrTransportError.waitAndRetry):
+                    #if DEBUG
+                    if let header = try? McuMgrHeader(data: data) {
+                        self?.log(msg: "⌚ [Seq: \(header.sequenceNumber)] Transport Error: Sleeping before Retry.", atLevel: .info)
+                    }
+                    #endif
+                    
                     let waitInterval = min(timeout, McuMgrBleTransportConstant.WAIT_AND_RETRY_INTERVAL)
                     sleep(UInt32(waitInterval))
+                    
                     guard self != nil else {
                         // Wake-up from sleep retry after the Transport has been de-allocated.
                         // This happens if the user cancels an operation whilst we sleep and then
@@ -260,9 +267,9 @@ extension McuMgrBleTransport: McuMgrTransport {
                         return
                     }
                     if let header = try? McuMgrHeader(data: data) {
-                        self?.log(msg: "Retry \(i + 1) for seq: \(header.sequenceNumber)", atLevel: .info)
+                        self?.log(msg: "↷ [Seq: \(header.sequenceNumber)] Retry \(i + 1)", atLevel: .info)
                     } else {
-                        self?.log(msg: "Retry \(i + 1) (Unknown Header Type)", atLevel: .info)
+                        self?.log(msg: "↷ [Seq: ?] Retry \(i + 1) (Unknown Header Type)", atLevel: .info)
                     }
                     continue // retry
                 case .failure(McuMgrTransportError.peripheralNotReadyForWriteWithoutResponse):
