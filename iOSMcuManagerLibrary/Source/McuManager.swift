@@ -92,6 +92,17 @@ open class McuManager: NSObject {
     public init(group: McuMgrGroup, transport: McuMgrTransport) {
         self.group = group
         self.transport = transport
+        #if DEBUG
+        super.init()
+        let managerName = "\(self)".components(separatedBy: ".").last ?? "\(self)"
+        print("init [\(managerName)]")
+        #endif
+    }
+    
+    // MARK: deinit
+    
+    deinit {
+        log(msg: #function, atLevel: .debug)
     }
     
     // MARK: verifyOnMainThread
@@ -341,9 +352,15 @@ open class McuManager: NSObject {
 public extension McuManager {
     
     func log(msg: @autoclosure () -> String, atLevel level: McuMgrLogLevel) {
-        if let logDelegate, level >= logDelegate.minLogLevel() {
-            logDelegate.log(msg(), ofCategory: Self.TAG, atLevel: level)
-        }
+        guard let logDelegate, level >= logDelegate.minLogLevel() else { return }
+        
+        #if DEBUG
+        let pointerString = Unmanaged.passUnretained(self).toOpaque().debugDescription
+        let logMessage = "\(msg()) <\(pointerString)> "
+        logDelegate.log(logMessage, ofCategory: Self.TAG, atLevel: level)
+        #else
+        logDelegate.log(msg(), ofCategory: Self.TAG, atLevel: level)
+        #endif
     }
 }
 

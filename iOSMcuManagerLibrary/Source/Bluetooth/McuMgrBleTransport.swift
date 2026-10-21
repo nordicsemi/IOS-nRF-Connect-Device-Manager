@@ -204,11 +204,22 @@ public class McuMgrBleTransport: NSObject {
             let peripheralWriteValueLength = max(McuManager.ValidMTURange.lowerBound, peripheral.maximumWriteValueLength(for: .withoutResponse))
             return min(peripheralWriteValueLength, defaultMtu)
         }()
+        log(msg: #function, atLevel: .debug)
     }
+    
+    // MARK: deinit
+    
+    deinit {
+        log(msg: #function, atLevel: .debug)
+    }
+    
+    // MARK: name
     
     public var name: String? {
         return modePeripherals[mode]?.name
     }
+    
+    // MARK: identifier
     
     public private(set) var identifier: UUID
 
@@ -609,9 +620,15 @@ extension McuMgrBleTransport: McuMgrTransport {
     // MARK: log(msg:atLevel:)
     
     internal func log(msg: @autoclosure () -> String, atLevel level: McuMgrLogLevel) {
-        if let logDelegate, level >= logDelegate.minLogLevel() {
-            logDelegate.log(msg(), ofCategory: .transport, atLevel: level)
-        }
+        guard let logDelegate, level >= logDelegate.minLogLevel() else { return }
+        
+        #if DEBUG
+        let pointerString = Unmanaged.passUnretained(self).toOpaque().debugDescription
+        let logMessage = "\(msg()) <\(pointerString)> "
+        logDelegate.log(logMessage, ofCategory: .transport, atLevel: level)
+        #else
+        logDelegate.log(msg(), ofCategory: .transport, atLevel: level)
+        #endif
     }
 }
 

@@ -18,7 +18,7 @@ extension OTAManager {
             print(string)
             return
         }
-        let log = NordicLog(Self.self, subsystem: "com.nordicsemi.ios_ota_library")
+        let log = NordicLog(self, subsystem: "com.nordicsemi.ios_ota_library")
         log.debug(string)
     }
     
@@ -27,7 +27,7 @@ extension OTAManager {
             print("Error: \(string)")
             return
         }
-        let log = NordicLog(Self.self, subsystem: "com.nordicsemi.ios_ota_library")
+        let log = NordicLog(self, subsystem: "com.nordicsemi.ios_ota_library")
         log.error(string)
     }
 }
