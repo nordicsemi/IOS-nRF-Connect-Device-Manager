@@ -50,19 +50,11 @@ class DeviceController: UITableViewController, UITextFieldDelegate {
         return imageView
     }()
     
-    private var defaultManager: DefaultManager!
+    private var baseController: BaseViewController? { parent as? BaseViewController }
     
     // MARK: UIViewController API
     
-    override func viewDidLoad() {
-        let baseController = parent as! BaseViewController
-        let transport: McuMgrTransport! = baseController.transport
-        defaultManager = DefaultManager(transport: transport)
-        defaultManager.logDelegate = UIApplication.shared.delegate as? McuMgrLogDelegate
-    }
-    
     override func viewDidAppear(_ animated: Bool) {
-        let baseController = parent as? BaseViewController
         baseController?.deviceStatusDelegate = self
     }
     
@@ -280,7 +272,7 @@ class DeviceController: UITableViewController, UITextFieldDelegate {
         messageReceived?.isHidden = true
         messageReceivedBackground.isHidden = true
         
-        defaultManager.echo(message, callback: sendCallback)
+        baseController?.defaultManager.echo(message, callback: sendCallback)
     }
     
     private lazy var sendCallback: McuMgrCallback<McuMgrEchoResponse> = { [weak self] (response: McuMgrEchoResponse?, error: Error?) in
@@ -298,7 +290,7 @@ class DeviceController: UITableViewController, UITextFieldDelegate {
             if case let McuMgrTransportError.insufficientMtu(newMtu) = error {
                 // Change MTU to the recommended new value.
                 do {
-                    try self?.defaultManager.setMtu(newMtu)
+                    try self?.baseController?.defaultManager.setMtu(newMtu)
                     // MTU Set successful and we have the text, so try again.
                     if let messageText = self?.messageSent?.text {
                         self?.send(message: messageText)
@@ -306,7 +298,7 @@ class DeviceController: UITableViewController, UITextFieldDelegate {
                 } catch McuManagerError.mtuValueHasNotChanged {
                     // If MTU value did not change, try reassembly.
                     if let messageText = self?.messageSent?.text,
-                       let bleTransport = self?.defaultManager.transport as? McuMgrBleTransport,
+                       let bleTransport = self?.baseController?.transport as? McuMgrBleTransport,
                        !bleTransport.chunkSendDataToMtuSize {
                         bleTransport.chunkSendDataToMtuSize = true
                         self?.send(message: messageText)

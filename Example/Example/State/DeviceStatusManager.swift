@@ -17,16 +17,14 @@ final class DeviceStatusManager {
     
     // MARK: Private Properties
     
-    private weak var transport: McuMgrTransport?
+    private weak var defaultManager: DefaultManager?
     private weak var logDelegate: (any McuMgrLogDelegate)?
-    private let defaultManager: DefaultManager
     
     // MARK: init
     
-    init(_ transport: McuMgrTransport, logDelegate: (any McuMgrLogDelegate)?) {
-        self.transport = transport
+    init(_ defaultManager: DefaultManager, logDelegate: (any McuMgrLogDelegate)?) {
+        self.defaultManager = defaultManager
         self.logDelegate = logDelegate
-        self.defaultManager = DefaultManager(transport: transport)
         defaultManager.logDelegate = logDelegate
     }
 }
@@ -38,9 +36,9 @@ extension DeviceStatusManager {
     // MARK: requestStatusInfo
     
     func requestStatusInfo() async -> DeviceStatusInfo {
-        let mcuMgrParametersResponse = try? await defaultManager.params()
-        let appInfoResponse = try? await defaultManager.applicationInfo(format: [.kernelName, .kernelVersion])
-        let bootloaderInfo = try? await defaultManager.bootloaderInfo()
+        let mcuMgrParametersResponse = try? await defaultManager?.params()
+        let appInfoResponse = try? await defaultManager?.applicationInfo(format: [.kernelName, .kernelVersion])
+        let bootloaderInfo = try? await defaultManager?.bootloaderInfo()
         
         var info = DeviceStatusInfo()
         if let mcuMgrParametersResponse {
@@ -88,7 +86,7 @@ fileprivate extension DeviceStatusManager {
     // MARK: requestTokensViaMemfaultManager
     
     func requestTokensViaMemfaultManager() async throws -> (DeviceInfoToken, ProjectKey) {
-        guard let transport else {
+        guard let transport = defaultManager?.transport else {
             throw ObservabilityError.mdsServiceNotFound
         }
         let otaManager = OTAManager()
