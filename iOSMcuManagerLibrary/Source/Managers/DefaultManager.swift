@@ -181,7 +181,7 @@ public class DefaultManager: McuManager {
     ///
     /// - parameter callback: The response callback.
     public func params(callback: @escaping McuMgrCallback<McuMgrParametersResponse>) {
-        send(op: .read, commandId: ID.mcuMgrParameters, payload: nil, timeout: McuManager.FAST_TIMEOUT, callback: callback)
+        send(op: .read, commandId: ID.mcuMgrParameters, payload: nil, timeout: McuManager.FAST_TIMEOUT_SECONDS, callback: callback)
     }
     
     // MARK: Application Info
@@ -198,7 +198,7 @@ public class DefaultManager: McuManager {
             payload = ["format": CBOR.utf8String(format.map({$0.rawValue}).joined(separator: ""))]
         }
         send(op: .read, commandId: ID.applicationInfo, payload: payload,
-             timeout: McuManager.FAST_TIMEOUT, callback: callback)
+             timeout: McuManager.FAST_TIMEOUT_SECONDS, callback: callback)
     }
     
     // MARK: Bootloader Info
@@ -217,7 +217,7 @@ public class DefaultManager: McuManager {
             payload = ["query": CBOR.utf8String(query.rawValue)]
         }
         send(op: .read, commandId: ID.bootloaderInformation, payload: payload,
-             timeout: McuManager.FAST_TIMEOUT, callback: callback)
+             timeout: McuManager.FAST_TIMEOUT_SECONDS, callback: callback)
     }
 }
 

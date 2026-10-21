@@ -36,7 +36,7 @@ public class BasicManager: McuManager {
     ///
     /// - parameter callback: The response callback with a ``McuMgrResponse``.
     public func eraseAppSettings(callback: @escaping McuMgrCallback<McuMgrResponse>) {
-        send(op: .write, commandId: ID.reset, payload: [:], timeout: McuManager.FAST_TIMEOUT, callback: callback)
+        send(op: .write, commandId: ID.reset, payload: [:], timeout: McuManager.FAST_TIMEOUT_SECONDS, callback: callback)
     }
 }
 

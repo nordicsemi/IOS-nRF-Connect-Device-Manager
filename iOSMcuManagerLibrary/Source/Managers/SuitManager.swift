@@ -285,7 +285,7 @@ public class SuitManager: McuManager {
             // Hence, the longer timeout.
             uploadTimeoutInSeconds = McuManager.DEFAULT_SEND_TIMEOUT_SECONDS
         } else {
-            uploadTimeoutInSeconds = McuManager.FAST_TIMEOUT
+            uploadTimeoutInSeconds = McuManager.FAST_TIMEOUT_SECONDS
         }
         
         let commandID: SuitID
@@ -293,7 +293,7 @@ public class SuitManager: McuManager {
             commandID = .uploadCache
             // Device will probably restart itself in preparation for .cacheUpload,
             // so we need to retry quickly.
-            uploadTimeoutInSeconds = McuManager.FAST_TIMEOUT
+            uploadTimeoutInSeconds = McuManager.FAST_TIMEOUT_SECONDS
         } else if sessionID != nil {
             commandID = .uploadResource
         } else {

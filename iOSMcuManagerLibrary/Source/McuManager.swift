@@ -47,7 +47,7 @@ open class McuManager: NSObject {
     public static let DEFAULT_SEND_TIMEOUT_SECONDS = 40
     /// This is the default time to wait for a command to be sent, executed
     /// and received (responded to) by the firmware on the other end.
-    public static let FAST_TIMEOUT = 10
+    public static let FAST_TIMEOUT_SECONDS = 8
     /**
      When encountering a ``McuMgrReturnCode/busy`` value during an Upload,
      instead of responding with an Error and cancelling the Upload, we can

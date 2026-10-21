@@ -266,7 +266,7 @@ extension McuMgrBleTransport: McuMgrTransport {
                     }
                     #endif
                     
-                    let waitInterval = min(timeout, McuMgrBleTransportConstant.WAIT_AND_RETRY_INTERVAL)
+                    let waitInterval = min(timeout, McuMgrBleTransportConstant.WAIT_AND_RETRY_INTERVAL_S)
                     sleep(UInt32(waitInterval))
                     
                     guard self != nil else {
@@ -364,7 +364,7 @@ extension McuMgrBleTransport: McuMgrTransport {
         } else { // if already on single pipeline
             guard !lowThroughputMode else { return }
             lowThroughputMode = true
-            log(msg: "[!!!] Detected possible packet drop from target device at minimum pipelien depth. Enabling Low Throughput Mode.", atLevel: .warning)
+            log(msg: "[!!!] Detected possible packet drop from target device at minimum pipeline depth. Enabling Low Throughput Mode.", atLevel: .warning)
         }
     }
     
@@ -621,12 +621,12 @@ public enum McuMgrBleTransportConstant {
     /// Max number of retries until the transaction is failed.
     internal static let MAX_RETRIES = 3
     /// The interval to wait before attempting a transaction again in seconds.
-    internal static let WAIT_AND_RETRY_INTERVAL = 10
+    internal static let WAIT_AND_RETRY_INTERVAL_S = 4
     /// In Low Throughput Mode to fix NCS's 2.5.1 (maybe older and newer) issue which
     /// drops packets and kills DFU, we artificially delay returning the transport's
     /// callback to slow down the writes. This might be a threading or buffer issue on
     /// the side of NCS. But it's not a library issue.
-    internal static let LOW_THROUGHPUT_MODE_WAIT_MS = 30
+    internal static let LOW_THROUGHPUT_MODE_WAIT_MS = 40
     /// Connection timeout in seconds.
     internal static let CONNECTION_TIMEOUT = 20
 }
