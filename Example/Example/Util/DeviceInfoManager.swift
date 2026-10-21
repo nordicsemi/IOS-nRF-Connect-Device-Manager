@@ -36,7 +36,7 @@ final class DeviceInfoManager {
     
     private func logError(_ errorMessage: String) {
         guard #available(iOS 14.0, macCatalyst 14.0, *) else { return }
-        let log = NordicLog(Self.self, subsystem: "com.nordicsemi.nrfconnect.devicemanager")
+        let log = NordicLog(self, subsystem: "com.nordicsemi.nrfconnect.devicemanager")
         log.error(errorMessage)
     }
 }

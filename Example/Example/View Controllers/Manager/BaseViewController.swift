@@ -480,7 +480,7 @@ extension BaseViewController {
     
     func log(_ string: String) {
         guard  #available(iOS 14.0, *) else { return }
-        let log = NordicLog(Self.self, subsystem: Constant.bundleName(forBundleWithClass: Self.self))
+        let log = NordicLog(self, subsystem: Constant.bundleName(forBundleWithClass: Self.self))
         log.debug(string)
     }
 }
