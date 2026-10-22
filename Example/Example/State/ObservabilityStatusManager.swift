@@ -8,6 +8,7 @@
 
 import Foundation
 import SwiftUI
+import iOS_Common_Libraries
 import iOSMcuManagerLibrary
 import iOSOtaLibrary
 
@@ -39,6 +40,7 @@ final class ObservabilityStatusManager {
     // MARK: deinit
     
     deinit {
+        log(#function)
         stopObservabilityManagerAndTask()
     }
     
@@ -75,11 +77,11 @@ final class ObservabilityStatusManager {
                         statusInfo?.updatedStatus(.receivedEvent(event.event))
                     }
                 }
-                print("STOPPED Listening to \(observabilityIdentifier.uuidString) Connection Events.")
+                log("STOPPED Listening to \(observabilityIdentifier.uuidString) Connection Events.")
                 statusInfo?.updatedStatus(.connectionClosed)
                 finishContinuation()
             } catch let obsError as ObservabilityError {
-                print("CAUGHT ObservabilityManagerError \(obsError.localizedDescription)")
+                log("CAUGHT ObservabilityManagerError \(obsError.localizedDescription)")
                 switch obsError {
                 case .mdsServiceNotFound:
                     statusInfo?.updatedStatus(.unsupported(obsError))
@@ -90,7 +92,7 @@ final class ObservabilityStatusManager {
                 }
                 stopObservabilityManagerAndTask()
             } catch let error {
-                print("CAUGHT Error \(error.localizedDescription) Listening to \(observabilityIdentifier.uuidString) Connection Events.")
+                log("CAUGHT Error \(error.localizedDescription) Listening to \(observabilityIdentifier.uuidString) Connection Events.")
                 statusInfo?.updatedStatus(.errorEvent(error))
                 stopObservabilityManagerAndTask()
             }
@@ -106,7 +108,11 @@ final class ObservabilityStatusManager {
     // MARK: stopObservabilityManagerAndTask
     
     func stopObservabilityManagerAndTask() {
-        print(#function)
+        guard observabilityManager != nil || observabilityTask != nil || statusContinuation != nil else {
+            return
+        }
+        
+        log(#function)
         observabilityManager?.disconnect(from: observabilityIdentifier)
         observabilityManager = nil
         observabilityTask?.cancel()
@@ -114,15 +120,24 @@ final class ObservabilityStatusManager {
         finishContinuation()
     }
     
-    // MARK: finishContinuation
+    // MARK: finishContinuation()
     
     private func finishContinuation() {
         guard let statusContinuation else { return }
+        log(#function)
         if let statusInfo {
             statusContinuation.yield(statusInfo)
         }
         statusContinuation.finish()
         self.statusContinuation = nil
+    }
+    
+    // MARK: log(_:)
+    
+    private func log(_ string: String) {
+        guard #available(iOS 14.0, *) else { return }
+        let log = NordicLog(self, subsystem: Constant.bundleName(forBundleWithClass: Self.self))
+        log.debug(string)
     }
 }
 

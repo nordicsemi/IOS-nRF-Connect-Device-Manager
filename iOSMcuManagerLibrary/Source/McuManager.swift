@@ -356,7 +356,7 @@ public extension McuManager {
         
         #if DEBUG
         let pointerString = Unmanaged.passUnretained(self).toOpaque().debugDescription
-        let logMessage = "\(msg()) <\(pointerString)> "
+        let logMessage = "\(msg()) <\(pointerString)>"
         logDelegate.log(logMessage, ofCategory: Self.TAG, atLevel: level)
         #else
         logDelegate.log(msg(), ofCategory: Self.TAG, atLevel: level)
