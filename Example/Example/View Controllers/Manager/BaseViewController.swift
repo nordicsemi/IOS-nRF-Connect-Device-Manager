@@ -69,8 +69,8 @@ final class BaseViewController: UITabBarController {
     private var deviceStatusManager: DeviceStatusManager?
     private var observabilityStatusManager: ObservabilityStatusManager?
     
-    private var deviceInfoRequested: Bool = false
-    private var statusInfoCallback: (() -> ())?
+    private var deviceStatusTask: Task<Void, Never>?
+    private var deviceInfoUpToDate: Bool = false
     
     private var peripheralState: PeripheralState? {
         didSet {
@@ -158,6 +158,7 @@ final class BaseViewController: UITabBarController {
     
     func disconnect() {
         stopObservability()
+        deviceStatusTask?.cancel()
         transport?.close()
     }
 }
@@ -270,64 +271,54 @@ extension BaseViewController {
     // MARK: onDeviceStatusReady(_:)
     
     func onDeviceStatusReady(_ callback: @escaping () -> Void) {
-        statusInfoCallback = callback
-        guard !deviceInfoRequested else {
-            onDeviceStatusFinished()
+        guard !deviceInfoUpToDate else {
+            callback()
             return
         }
         
-        if deviceStatusManager == nil {
-            defaultManager = DefaultManager(transport: transport)
-            deviceStatusManager = DeviceStatusManager(defaultManager, logDelegate: UIApplication.shared.delegate as? McuMgrLogDelegate)
-        }
-        guard let deviceStatusManager else { return }
-        
-        Task { @MainActor in
-            statusInfo = await deviceStatusManager.requestStatusInfo()
-            
-            guard let peripheral = peripheral?.basePeripheral else {
-                onDeviceStatusFinished()
-                return
-            }
-            otaStatus = await deviceStatusManager.requestOTAStatus(for: peripheral.identifier)
-            onDeviceStatusFinished()
+        deviceStatusTask = Task { @MainActor in
+            await onDeviceStatusReady()
+            guard !Task.isCancelled, deviceInfoUpToDate else { return }
+            callback()
         }
     }
     
     // MARK: onDeviceStatusReady() async
     
     func onDeviceStatusReady() async {
-        // Clear because we don't want to trigger the delegate-based callback.
-        statusInfoCallback = nil
-        guard !deviceInfoRequested else {
+        defer {
             onDeviceStatusFinished()
-            return
         }
         
+        guard !deviceInfoUpToDate else { return }
         if deviceStatusManager == nil {
             defaultManager = DefaultManager(transport: transport)
             deviceStatusManager = DeviceStatusManager(defaultManager, logDelegate: UIApplication.shared.delegate as? McuMgrLogDelegate
             )
         }
         
-        guard let deviceStatusManager else { return }
-        statusInfo = await deviceStatusManager.requestStatusInfo()
-        
-        guard let peripheral = peripheral?.basePeripheral else {
-            onDeviceStatusFinished()
-            return
+        do {
+            statusInfo = try await deviceStatusManager?.requestStatusInfo()
+            
+            guard !Task.isCancelled, let peripheral = peripheral?.basePeripheral else { return }
+            otaStatus = await deviceStatusManager?.requestOTAStatus(for: peripheral.identifier)
+        } catch let error as McuMgrBleTransportError {
+            // Covers use cases such as missing SMP Service, Characteristic, etc.
+            logError("Status Info returned error: \(error.localizedDescription). Marking OTA as unsupported as well.")
+            otaStatus = .unsupported(error)
+        } catch {
+            // Covers McuMgrTransportError, such as disconnection, retry, etc.
+            logError("Unable to complete \(#function) due to error: \(error.localizedDescription)")
         }
-        otaStatus = await deviceStatusManager.requestOTAStatus(for: peripheral.identifier)
-        onDeviceStatusFinished()
     }
     
-    // MARK: onDeviceStatusFinished
+    // MARK: onDeviceStatusFinished()
     
     private func onDeviceStatusFinished() {
-        guard let statusInfoCallback else { return }
-        statusInfoCallback()
-        deviceInfoRequested = true
-        self.statusInfoCallback = nil
+        if let deviceStatusTask, !deviceStatusTask.isCancelled {
+            deviceInfoUpToDate = true
+        }
+        deviceStatusTask = nil
     }
 }
  
@@ -472,7 +463,7 @@ extension BaseViewController: PeripheralDelegate {
             startObservability(for: peripheral)
         case .disconnecting, .disconnected:
             // Set to false, because a DFU update might change things if that's what happened.
-            deviceInfoRequested = false
+            deviceInfoUpToDate = false
         default:
             // Nothing to do here.
             break
@@ -480,13 +471,21 @@ extension BaseViewController: PeripheralDelegate {
     }
 }
 
-// MARK: log(_:)
-
 extension BaseViewController {
+ 
+    // MARK: log(_:)
     
     func log(_ string: String) {
         guard #available(iOS 14.0, *) else { return }
         let log = NordicLog(self, subsystem: Constant.bundleName(forBundleWithClass: Self.self))
         log.debug(string)
+    }
+    
+    // MARK: error(_:)
+    
+    func logError(_ string: String) {
+        guard #available(iOS 14.0, *) else { return }
+        let log = NordicLog(self, subsystem: Constant.bundleName(forBundleWithClass: Self.self))
+        log.error(string)
     }
 }

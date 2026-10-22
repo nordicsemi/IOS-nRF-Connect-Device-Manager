@@ -369,7 +369,7 @@ extension McuMgrBleTransport: McuMgrTransport {
     
     internal func attemptToImproveThroughputOnWaitAndRetry() {
         if numberOfParallelWrites > 1 {
-            // Disable pipelining to improve throughput and cause less retries.
+            // Reduce pipelining to improve throughput and cause less retries.
             numberOfParallelWrites -= 1
             log(msg: "[!!] Detected possible packet drop from target device. Reducing pipeline depth (from \(numberOfParallelWrites + 1) to \(numberOfParallelWrites)) in an attempt to improve throughput.", atLevel: .warning)
         } else { // if already on single pipeline
