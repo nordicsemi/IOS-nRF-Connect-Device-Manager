@@ -335,7 +335,7 @@ extension ImageController {
     // MARK: @objc checkForUpdates(_:)
     
     @objc func checkForUpdates(_ sender: UIButton) {
-        guard let baseController = parent as? BaseViewController else { return }
+        guard let baseController else { return }
         
         otaManager = OTAManager()
         baseController.onDeviceStatusReady { [unowned self] in
@@ -364,7 +364,7 @@ extension ImageController {
                 tableView.reloadSections(IndexSet([Section.sharedUpload.rawValue]), with: .none)
             })
         }
-        (parent as? BaseViewController)?.present(alertController, addingCancelAction: true)
+        baseController?.present(alertController, addingCancelAction: true)
     }
     
     // MARK: @objc setPipelineDepth()
@@ -380,7 +380,7 @@ extension ImageController {
                 tableView.reloadSections(IndexSet([Section.sharedUpload.rawValue]), with: .none)
             })
         }
-        (parent as? BaseViewController)?.present(alertController, addingCancelAction: true)
+        baseController?.present(alertController, addingCancelAction: true)
     }
     
     // MARK: @objc setByteAlignment()
@@ -395,7 +395,7 @@ extension ImageController {
                 tableView.reloadSections(IndexSet([Section.sharedUpload.rawValue]), with: .none)
             })
         }
-        (parent as? BaseViewController)?.present(alertController, addingCancelAction: true)
+        baseController?.present(alertController, addingCancelAction: true)
     }
     
     // MARK: @objc updateEraseApplicationSettings(_:)
@@ -435,7 +435,7 @@ extension ImageController {
             
             uploadActionButton.setTitle("Pause", for: .normal)
         } else {
-            (parent as? BaseViewController)?.onDeviceStatusReady { [unowned self] in
+            baseController?.onDeviceStatusReady { [unowned self] in
                 if advancedMode {
                     if let envelope = package?.envelope {
                         // SUIT has "no mode" to select
@@ -497,7 +497,7 @@ internal extension ImageController {
                 self.startFirmwareUpgrade(package: package)
             })
         }
-        (parent as? BaseViewController)?.present(alertController, addingCancelAction: true)
+        baseController?.present(alertController, addingCancelAction: true)
     }
     
     // MARK: selectBootloaderImage(for:)
@@ -512,7 +512,7 @@ internal extension ImageController {
                 self?.startFirmwareUpgrade(images: [image])
             })
         }
-        (parent as? BaseViewController)?.present(alertController, animated: true)
+        baseController?.present(alertController, animated: true)
     }
     
     // MARK: startFirmwareUpgrade
@@ -630,7 +630,7 @@ internal extension ImageController {
             let key = ProjectKey(keyString)
             requestLatestReleaseInfo(for: deviceInfo, using: key)
         })
-        (parent as? BaseViewController)?.present(alertController, addingCancelAction: true)
+        baseController?.present(alertController, addingCancelAction: true)
     }
     
     // MARK: requestLatestReleaseInfo(for:using:)
@@ -651,7 +651,7 @@ internal extension ImageController {
                 alertController.addAction(UIAlertAction(title: "Download", style: .default) { [unowned self] action in
                     download(release: resultInfo)
                 })
-                (parent as? BaseViewController)?.present(alertController, addingCancelAction: true)
+                baseController?.present(alertController, addingCancelAction: true)
             case .failure(let otaError):
                 handleLatestReleaseError(otaError)
             }
@@ -662,15 +662,15 @@ internal extension ImageController {
         switch otaError {
         case .networkError:
             let alertController = UIAlertController(title: "Network Error", message: "Unable to reach the Network.", preferredStyle: .alert)
-            (parent as? BaseViewController)?.present(alertController, addingCancelAction: true, cancelActionTitle: "OK")
+            baseController?.present(alertController, addingCancelAction: true, cancelActionTitle: "OK")
         case .invalidProjectKey(let deviceInfo):
             setProjectKey(for: deviceInfo)
         case .deviceIsUpToDate:
             let alertController = UIAlertController(title: "Your device is up to date", message: "Your device is already using the latest firmware version available through nRF Cloud OTA.", preferredStyle: .alert)
-            (parent as? BaseViewController)?.present(alertController, addingCancelAction: true, cancelActionTitle: "OK")
+            baseController?.present(alertController, addingCancelAction: true, cancelActionTitle: "OK")
         default:
             let alertController = UIAlertController(title: "Error Requesting Update", message: otaError.localizedDescription, preferredStyle: .alert)
-            (parent as? BaseViewController)?.present(alertController, addingCancelAction: true, cancelActionTitle: "OK")
+            baseController?.present(alertController, addingCancelAction: true, cancelActionTitle: "OK")
         }
     }
     

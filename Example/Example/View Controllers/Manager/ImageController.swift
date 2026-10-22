@@ -130,6 +130,8 @@ final class ImageController: UITableViewController, ExtendedMcuMgrViewController
     internal var resetAdvName: UITextField?
     internal var resetButton: UIButton?
     
+    internal var baseController: BaseViewController? { parent as? BaseViewController }
+    
     // MARK: Logic Properties
     
     internal var advancedMode: Bool = false
@@ -145,9 +147,12 @@ final class ImageController: UITableViewController, ExtendedMcuMgrViewController
     internal var dfuManager: FirmwareUpgradeManager!
     internal var basicManager: BasicManager!
     internal var imageManager: ImageManager!
-    internal var defaultManager: DefaultManager!
     internal var settingsManager: SettingsManager!
     internal var suitManager: SuitManager!
+    
+    internal var defaultManager: DefaultManager! {
+        baseController?.defaultManager
+    }
     
     var transport: McuMgrTransport! {
         didSet {
@@ -157,8 +162,6 @@ final class ImageController: UITableViewController, ExtendedMcuMgrViewController
             basicManager.logDelegate = UIApplication.shared.delegate as? McuMgrLogDelegate
             imageManager = ImageManager(transport: transport)
             imageManager.logDelegate = UIApplication.shared.delegate as? McuMgrLogDelegate
-            defaultManager = DefaultManager(transport: transport)
-            defaultManager.logDelegate = UIApplication.shared.delegate as? McuMgrLogDelegate
             settingsManager = SettingsManager(transport: transport)
             settingsManager.logDelegate = UIApplication.shared.delegate as? McuMgrLogDelegate
             suitManager = SuitManager(transport: transport)
@@ -188,9 +191,8 @@ final class ImageController: UITableViewController, ExtendedMcuMgrViewController
         showModeSwitch()
         restoreBasicSettings()
         
-        let baseController: BaseViewController! = parent as? BaseViewController
-        baseController.deviceStatusDelegate = self
-        transport = baseController.transport
+        baseController?.deviceStatusDelegate = self
+        transport = baseController?.transport
     }
     
     override func viewWillDisappear(_ animated: Bool) {
