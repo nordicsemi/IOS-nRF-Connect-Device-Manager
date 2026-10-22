@@ -22,8 +22,7 @@ extension ImageController: FirmwareUpgradeDelegate {
         initialBytes = 0
         uploadImageSize = nil
         
-        guard let baseController = parent as? BaseViewController else { return }
-        baseController.stopObservability()
+        baseController?.stopObservability()
     }
     
     func upgradeStateDidChange(from previousState: FirmwareUpgradeState, to newState: FirmwareUpgradeState) {
@@ -133,8 +132,7 @@ extension ImageController: ImageUploadDelegate {
         uploadStateLabel?.text = "Starting"
         disableActionableButtons()
         
-        guard let baseController = parent as? BaseViewController else { return }
-        baseController.stopObservability()
+        baseController?.stopObservability()
     }
     
     func uploadDidFail(with error: Error) {
