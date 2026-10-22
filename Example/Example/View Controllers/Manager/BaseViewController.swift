@@ -65,6 +65,7 @@ final class BaseViewController: UITabBarController {
     
     // MARK: Private Properties
     
+    private(set) var defaultManager: DefaultManager!
     private var deviceStatusManager: DeviceStatusManager?
     private var observabilityStatusManager: ObservabilityStatusManager?
     
@@ -272,9 +273,8 @@ extension BaseViewController {
         }
         
         if deviceStatusManager == nil {
-            deviceStatusManager = DeviceStatusManager(
-                transport, logDelegate: UIApplication.shared.delegate as? McuMgrLogDelegate
-            )
+            defaultManager = DefaultManager(transport: transport)
+            deviceStatusManager = DeviceStatusManager(defaultManager, logDelegate: UIApplication.shared.delegate as? McuMgrLogDelegate)
         }
         guard let deviceStatusManager else { return }
         
@@ -301,8 +301,8 @@ extension BaseViewController {
         }
         
         if deviceStatusManager == nil {
-            deviceStatusManager = DeviceStatusManager(
-                transport, logDelegate: UIApplication.shared.delegate as? McuMgrLogDelegate
+            defaultManager = DefaultManager(transport: transport)
+            deviceStatusManager = DeviceStatusManager(defaultManager, logDelegate: UIApplication.shared.delegate as? McuMgrLogDelegate
             )
         }
         

@@ -102,7 +102,8 @@ final class DiagnosticsController: UITableViewController {
     // MARK: Private Properties
     
     private var statsManager: StatsManager!
-    private var osManager: DefaultManager!
+    
+    private var baseController: BaseViewController? { parent as? BaseViewController }
     
     // MARK: UIViewController
     
@@ -113,9 +114,6 @@ final class DiagnosticsController: UITableViewController {
         let transport: McuMgrTransport! = baseController.transport
         statsManager = StatsManager(transport: transport)
         statsManager.logDelegate = UIApplication.shared.delegate as? McuMgrLogDelegate
-        
-        osManager = DefaultManager(transport: transport)
-        osManager.logDelegate = UIApplication.shared.delegate as? McuMgrLogDelegate
     }
     
     // MARK: Section
@@ -454,6 +452,10 @@ private extension DiagnosticsController {
     func requestMemoryPool() {
         Task { @MainActor in
             do {
+                guard let osManager = baseController?.defaultManager else {
+                    throw OSManagerError.unknown
+                }
+                
                 memPoolLabel.text = ""
                 memPoolLabel.textColor = .primary
                 
