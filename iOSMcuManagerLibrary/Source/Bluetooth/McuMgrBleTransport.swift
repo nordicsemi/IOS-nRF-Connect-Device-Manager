@@ -620,13 +620,15 @@ extension McuMgrBleTransport: McuMgrTransport {
     // MARK: log(msg:atLevel:)
     
     internal func log(msg: @autoclosure () -> String, atLevel level: McuMgrLogLevel) {
-        guard let logDelegate, level >= logDelegate.minLogLevel() else { return }
-        
         #if DEBUG
         let pointerString = Unmanaged.passUnretained(self).toOpaque().debugDescription
-        let logMessage = "\(msg()) <\(pointerString)> "
-        logDelegate.log(logMessage, ofCategory: .transport, atLevel: level)
+        if let logDelegate, level >= logDelegate.minLogLevel() {
+            logDelegate.log("\(msg()) <\(pointerString)>", ofCategory: .transport, atLevel: level)
+        } else {
+            print("\(msg()) [McuMgrBleTransport <\(pointerString)>]")
+        }
         #else
+        guard let logDelegate, level >= logDelegate.minLogLevel() else { return }
         logDelegate.log(msg(), ofCategory: .transport, atLevel: level)
         #endif
     }

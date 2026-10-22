@@ -121,6 +121,16 @@ final class BaseViewController: UITabBarController {
         setupViewControllers()
     }
     
+    // MARK: viewWillDisappear(_:)
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        log(#function)
+        disconnect()
+    }
+    
+    // MARK: viewDidDisappear(_:)
+    
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
         log(#function)
@@ -142,12 +152,6 @@ final class BaseViewController: UITabBarController {
         diagnosticsViewController.tabBarItem = UITabBarItem(title: "Diagnostics", image: UIImage(systemName: "chart.bar.horizontal.page"), selectedImage: nil)
         
         viewControllers = [deviceViewController, imageViewController, filesViewController, diagnosticsViewController]
-    }
-    
-    // MARK: viewWillDisappear()
-    
-    override func viewWillDisappear(_ animated: Bool) {
-        disconnect()
     }
     
     // MARK: disconnect()
@@ -344,7 +348,7 @@ extension BaseViewController {
                 do {
                     try observabilityStatusManager.resumePendingUploads()
                 } catch {
-                    print("\(#function): RETRY Error \(error.localizedDescription)")
+                    log("\(#function): RETRY Error \(error.localizedDescription)")
                 }
             default:
                 disconnect()
@@ -424,15 +428,16 @@ extension BaseViewController {
             return // Already in Progress.
         }
         
+        log(#function)
         let peripheralUUID = peripheral.identifier
         Task { @MainActor in
             observabilityStatusManager = ObservabilityStatusManager(peripheralIdentifier: peripheralUUID)
             guard let stream = observabilityStatusManager?.startObservabilityTask() else { return }
-            print("\(#function): STARTED Listening to \(peripheralUUID) Observability Events.")
+            log("\(#function): STARTED Listening to \(peripheralUUID) Observability Events.")
             for await statusInfo in stream {
                 observabilityStatusInfo = statusInfo
             }
-            print("\(#function): STOPPED Listening to \(peripheralUUID) Observability Events.")
+            log("\(#function): STOPPED Listening to \(peripheralUUID) Observability Events.")
             
             guard let status = observabilityStatusInfo?.status, case ObservabilityStatus.receivedEvent = status else {
                 // No-op. Keep a "not normal" status as the last visible update for the user.
@@ -446,6 +451,7 @@ extension BaseViewController {
     }
     
     func stopObservability() {
+        log(#function)
         observabilityStatusManager?.stopObservabilityManagerAndTask()
         observabilityStatusManager = nil
     }
@@ -479,7 +485,7 @@ extension BaseViewController: PeripheralDelegate {
 extension BaseViewController {
     
     func log(_ string: String) {
-        guard  #available(iOS 14.0, *) else { return }
+        guard #available(iOS 14.0, *) else { return }
         let log = NordicLog(self, subsystem: Constant.bundleName(forBundleWithClass: Self.self))
         log.debug(string)
     }
