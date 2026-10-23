@@ -35,10 +35,13 @@ extension DeviceStatusManager {
     
     // MARK: requestStatusInfo
     
-    func requestStatusInfo() async -> DeviceStatusInfo {
-        let mcuMgrParametersResponse = try? await defaultManager?.params()
-        let appInfoResponse = try? await defaultManager?.applicationInfo(format: [.kernelName, .kernelVersion])
-        let bootloaderInfo = try? await defaultManager?.bootloaderInfo()
+    func requestStatusInfo() async throws -> DeviceStatusInfo {
+        // We bail out if one of them fails because they might fail due to
+        // disconnection. If we follow-up with the next, it might spurn the
+        // transport into reconnecting without this being the user's intention.
+        let mcuMgrParametersResponse = try await defaultManager?.params()
+        let appInfoResponse = try await defaultManager?.applicationInfo(format: [.kernelName, .kernelVersion])
+        let bootloaderInfo = try await defaultManager?.bootloaderInfo()
         
         var info = DeviceStatusInfo()
         if let mcuMgrParametersResponse {

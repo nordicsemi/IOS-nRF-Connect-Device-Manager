@@ -51,11 +51,17 @@ class DeviceController: UITableViewController, UITextFieldDelegate {
     }()
     
     private var baseController: BaseViewController? { parent as? BaseViewController }
+    private var sendTask: Task<Void, Never>?
     
     // MARK: UIViewController API
     
     override func viewDidAppear(_ animated: Bool) {
         baseController?.deviceStatusDelegate = self
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        sendTask?.cancel()
     }
     
     // MARK: UITableView
@@ -256,9 +262,11 @@ class DeviceController: UITableViewController, UITextFieldDelegate {
     
     @objc func sendTapped(_ sender: UIResponder) {
         sender.resignFirstResponder()
-        guard let baseViewController = parent as? BaseViewController else { return }
         let text = message.text ?? ""
-        baseViewController.onDeviceStatusReady { [unowned self] in
+        sendTask = Task { @MainActor in
+            weak let baseViewController = parent as? BaseViewController
+            await baseViewController?.onDeviceStatusReady()
+            guard !Task.isCancelled else { return }
             send(message: text)
         }
     }
@@ -273,10 +281,10 @@ class DeviceController: UITableViewController, UITextFieldDelegate {
         messageReceivedBackground.isHidden = true
         
         baseController?.defaultManager.echo(message, callback: sendCallback)
+        sendTask = nil
     }
     
     private lazy var sendCallback: McuMgrCallback<McuMgrEchoResponse> = { [weak self] (response: McuMgrEchoResponse?, error: Error?) in
-        
         if let response, let messageReceived = self?.messageReceived {
             self?.messageReceived?.text = response.response
             // Do not ask. I do not know wtf this only works if we make this call.
