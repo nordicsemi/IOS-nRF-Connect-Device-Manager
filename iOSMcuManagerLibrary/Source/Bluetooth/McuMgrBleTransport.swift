@@ -280,16 +280,17 @@ extension McuMgrBleTransport: McuMgrTransport {
                     let waitInterval = min(timeout, McuMgrBleTransportConstant.WAIT_AND_RETRY_INTERVAL_S)
                     sleep(UInt32(waitInterval))
                     
-                    guard self != nil else {
-                        // Wake-up from sleep retry after the Transport has been de-allocated.
+                    guard let self, modePeripherals[mode]?.state == .connected else {
                         // This happens if the user cancels an operation whilst we sleep and then
-                        // we wake up here.
+                        // we wake up here or, the disconnected unexpectedly.
+                        let seqNumber = (try? McuMgrHeader(data: data))?.sequenceNumber
+                        self?.log(msg: "× [Seq: \(seqNumber)] Dropping retry due to unexpected disconnection / user cancelled operation.", atLevel: .debug)
                         return
                     }
                     if let header = try? McuMgrHeader(data: data) {
-                        self?.log(msg: "↷ [Seq: \(header.sequenceNumber)] Retry \(i + 1)", atLevel: .info)
+                        log(msg: "↷ [Seq: \(header.sequenceNumber)] Retry \(i + 1)", atLevel: .info)
                     } else {
-                        self?.log(msg: "↷ [Seq: ?] Retry \(i + 1) (Unknown Header Type)", atLevel: .info)
+                        log(msg: "↷ [Seq: ?] Retry \(i + 1) (Unknown Header Type)", atLevel: .info)
                     }
                     continue // retry
                 case .failure(McuMgrTransportError.peripheralNotReadyForWriteWithoutResponse):
