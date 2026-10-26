@@ -70,7 +70,6 @@ final class BaseViewController: UITabBarController {
     private var observabilityStatusManager: ObservabilityStatusManager?
     
     private var deviceStatusTask: Task<Void, Never>?
-    private var deviceInfoUpToDate: Bool = false
     
     private var peripheralState: PeripheralState? {
         didSet {
@@ -271,14 +270,12 @@ extension BaseViewController {
     // MARK: onDeviceStatusReady(_:)
     
     func onDeviceStatusReady(_ callback: @escaping () -> Void) {
-        guard !deviceInfoUpToDate else {
-            callback()
-            return
+        if let deviceStatusTask {
+            deviceStatusTask.cancel()
         }
-        
         deviceStatusTask = Task { @MainActor in
             await onDeviceStatusReady()
-            guard !Task.isCancelled, deviceInfoUpToDate else { return }
+            guard !Task.isCancelled else { return }
             callback()
         }
     }
@@ -290,7 +287,6 @@ extension BaseViewController {
             onDeviceStatusFinished()
         }
         
-        guard !deviceInfoUpToDate else { return }
         if deviceStatusManager == nil {
             defaultManager = DefaultManager(transport: transport)
             deviceStatusManager = DeviceStatusManager(defaultManager, logDelegate: UIApplication.shared.delegate as? McuMgrLogDelegate
@@ -315,9 +311,6 @@ extension BaseViewController {
     // MARK: onDeviceStatusFinished()
     
     private func onDeviceStatusFinished() {
-        if let deviceStatusTask, !deviceStatusTask.isCancelled {
-            deviceInfoUpToDate = true
-        }
         deviceStatusTask = nil
     }
 }
@@ -462,8 +455,8 @@ extension BaseViewController: PeripheralDelegate {
             // on MDS Service Instead.
             startObservability(for: peripheral)
         case .disconnecting, .disconnected:
-            // Set to false, because a DFU update might change things if that's what happened.
-            deviceInfoUpToDate = false
+            // Removing it clears previous state.
+            deviceStatusManager = nil
         default:
             // Nothing to do here.
             break
