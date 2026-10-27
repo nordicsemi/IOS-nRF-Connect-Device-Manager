@@ -29,13 +29,13 @@ The library provides a transport agnostic implementation of the McuManager proto
 
 The naming of the iOSMcuManagerLibrary Package reflects its original goal, which is to be an interface for the SMP protocol over Bluetooth LE. However, we're now extending the scope of the library to encompass all device management capabilities that Nordic has to offer. As such, DFU / McuManager and related activities will remain at the forefront of our attention. But we're now also adding Over-The-Air (OTA) device update as well as [device monitoring (Observability)](https://memfault.com/webinars/remotely-debug-monitor-and-update-nordic-iot-devices-with-memfault/) via [nRF Cloud powered by Memfault](https://www.youtube.com/watch?v=2rinXVgX6a0) services:
 
-- `iOSMcuManagerLibrary` (SPM Package):
+- `iOSMcuManagerLibrary` (Package):
 
-  - `iOSMcuManagerLibrary` (Cocoapods / SPM Library): SMP Protocol / McuManager / SUIT / DFU.
+  - `iOSMcuManagerLibrary`: SMP Protocol / McuManager / SUIT / DFU.
   
-  - `iOSOtaLibrary` (**SPM Library Only**): Observability (previously [iOS-Memfault-Library](https://github.com/nordicsemi/IOS-Memfault-Library)) API as well as OTA capabilities. For OTA, iOSOtaLibrary will fetch the DFU package Over-the-Air as its name implies, but DFU is up to the user. Of course, it is fully compatible with piping in OTA-obtained DFU package into iOSMcuManagerLibrary for seamless OTA DFU. The project's Example app (nRF Connect Device Manager) shows these capabilities.
+  - `iOSOtaLibrary`: Observability (previously [iOS-Memfault-Library](https://github.com/nordicsemi/IOS-Memfault-Library)) API as well as OTA capabilities. For OTA, iOSOtaLibrary will fetch the DFU package Over-the-Air as its name implies, but DFU is up to the user. Of course, it is fully compatible with piping in OTA-obtained DFU package into iOSMcuManagerLibrary for seamless OTA DFU. The project's Example app (nRF Connect Device Manager) shows these capabilities.
 
-> [!Note]
+> [!IMPORTANT]
 > You may keep using only the iOSMcuManagerLibrary from the iOSMcuManagerLibrary Package. That is to say, the addition of 'OTA' capabilities does not make one library dependent on the other. They're both intended to be independent if desired, but they can also be used in conjunction, as the Example app (nRF Connect Device Manager) clearly shows.
 
 ## Compatible Devices
@@ -44,13 +44,13 @@ The naming of the iOSMcuManagerLibrary Package reflects its original goal, which
 | :---: | :----: | :---: | :---: |
 | ![](nRF52-Series-small.png) | ![](nRF53-Series-small.png) | ![](nRF54-Series-small.png) | ![](nRF91-Series-small.png) |
 
-*iOSMcuManagerLibrary* is designed to work with the SMP Transport over Bluetooth LE. It is implemented and maintained by Nordic Semiconductor, but it should work on any devices communicating via SMP Protocol. **If you encounter an issue communicating with a device using any chip, not just Nordic, please file an Issue**.
+- `iOSMcuManagerLibrary` is designed to work with the SMP Transport over Bluetooth LE. It is implemented and maintained by Nordic Semiconductor, but it should work on any devices communicating via SMP Protocol. **If you encounter an issue communicating with a device using any chip, not just Nordic, please file an Issue**.
 
-*iOSOtaLibrary* is designed to work with any device compatible with [nRF Cloud powered by Memfault](https://memfault.com/webinars/remotely-debug-monitor-and-update-nordic-iot-devices-with-memfault/). It can communicate with devices using Bluetooth LE to obtain identification & authorisation tokens for the nRF Cloud backend, but like with iOSMcuManagerLibrary, there are no restrictions on the specific hardware powering the device. Unlike iOSMcuManagerLibrary, network availability is essential for all features to work as expected, but it's not a requirement.
+- `iOSOtaLibrary` is designed to work with any device compatible with [nRF Cloud powered by Memfault](https://memfault.com/webinars/remotely-debug-monitor-and-update-nordic-iot-devices-with-memfault/). It can communicate with devices using Bluetooth LE to obtain identification & authorisation tokens for the nRF Cloud backend, but like with `iOSMcuManagerLibrary`, there are no restrictions on the specific hardware powering the device. Unlike `iOSMcuManagerLibrary`, network availability is essential for all features to work as expected, but it's not a requirement.
 
-## Library Adoption into an Existing Project (Install)
+## Library Adoption into an Existing Project
 
-### SPM or Swift Package Manager (Recommended)
+### SPM or Swift Package Manager (Install)
 
 In Xcode, open your root Project file. Then, switch to the *Package Dependencies* Tab, and hit the *+* button underneath your list of added Packages. A new modal window will pop-up. On the upper-right corner of this new window, there's a search box. Paste the URL for this GitHub project `https://github.com/nordicsemi/IOS-nRF-Connect-Device-Manager` and the *Add Package* button should enable.
 
@@ -58,11 +58,6 @@ In Xcode, open your root Project file. Then, switch to the *Package Dependencies
 
 After Xcode fetches your new project dependency, you should now be able to add `import iOSMcuManagerLibrary` and/or `import iOSOtaLibrary` to the Swift files from where you'd like to call upon this library. And you're good to go.
 
-### CocoaPods
-
-```
-pod 'iOSMcuManagerLibrary'
-```
 
 > [!Note]
 > What follows is documentation for *iOSMcuManagerLibrary*. If you're more interested in *iOSOtaLibrary*, [click here](#iosotalibrary).
@@ -85,7 +80,7 @@ McuManager is organized by functionality into command groups. In _mcumgr-ios_, c
 * **`FileSystemManager`**: Download/upload files from the device file system.
 * **`BasicManager`**: Send 'Erase App Settings' command to the device.
 * **`ShellManager`**: Send McuMgr Shell commands to the device.
-* **`SuitManager`**: Send SUIT (Software Update for Internet of Things)-specific commands to the device. This applies to devices running SUIT as their bootloader.
+* **`SuitManager`**: [[**DEPRECATED**](#tell-me-about-suit)] Send SUIT (Software Update for Internet of Things)-specific commands to the device. This applies to devices running SUIT as their bootloader.
 
 > [!CAUTION]
 > **Always make your API calls from the Main Thread**. For DFU, FileSystem, etc. Unless calls from background threads are explicitly mentioned as allowed. This requirement has its roots in programming invariants written into the library since its *Inception*.
@@ -231,7 +226,10 @@ Usually, when performing Multi-Image DFU, and even SUIT updates, the delivery fo
 
 To bridge the gap between the Custom Image Upload API and the output from our Zephyr build system, we wrote `McuMgrPackage`, which takes a `URL` in its `init()` function. Because of the JSON Manifest Parsing nature of the `McuMgrPackage` method, you might encounter corner cases / crashes. If you find these, please report them back to us. But regardless, the McuMgrPackage shortcut is a wrapper that initialises the aforementioned `[ImageManager.Image]` array API. So you can always fallback to that.
 
-### Tell me about SUIT
+### Tell me about [SUIT](https://youtu.be/5cvUj9dVb_g)
+
+> [!IMPORTANT]  
+> SUIT is no longer officially supported. Existing SUIT functionality will remain for the moment. And to the extent we're able to, we will fix any issues that are reported. As it stands, our capacity to verify working SUIT is severely limited as well.
 
 SUIT, unlike McuManager, places a lot of the logic (read: [blame](https://git-scm.com/docs/git-blame)) for firmware update onto the target device rather than the sender (aka 'you', the API user). This simplifies the internal process, but also makes parsing the raw Data and its contents much more complicated. For example, we can't ascertain the proper Hash signature of every component (file) sent to the firmware because rather than a fixed binary for each Slot or Core, SUIT is designed to represent a sequence of instructions for the bootloader to execute. This means the hashes for the final binaries to be flashed change on-the-fly during the firmware update on the target device's end.
 
@@ -241,7 +239,7 @@ From the sender's perspective, we only need to send "the Data" in full, and allo
 > **Resources don't need to have a valid Hash attached to them** since, as explained above, only the target device knows the proper Hash. **But the Envelope's Hash is required**, and it supports different Modes, also known as Types or Algorithms.
 
 > [!WARNING]  
-> According to specification, officially supported list of hashing Algorithms includes SHA256, SHAKE128, SHA384, SHA512 and SHAKE256. However, **iOSMcuManagerLibrary only supports SHA256**. Further development in this area is neither planned nor expected.
+> **iOSMcuManagerLibrary only supports SHA256** from the officially supported list of hashing Algorithms.
 
 #### SUIT Upgrade Example via `ImageManager.Image` API
 
@@ -293,6 +291,9 @@ McuManager firmware upgrades can be performed following slightly different proce
 * **`.testOnly`**: This mode is useful if you want to run tests on the new image running before confirming it manually as the primary boot image. The process for this mode is `upload`, `test`, `reset`.
 
 * **`.uploadOnly`**: This is a very particular mode. It does not listen or acknowledge Bootloader Info, and plows through the upgrade process with just `upload` followed by `reset`. That's it. **It is up to the user, since this is not a default, to decide this is the right mode to use**.
+
+> [!NOTE]  
+> An internal flag by the name of **`lowThroughputMode`** exists in the code. If it is flipped on by the `McuMgrBleTransport`'s internal logic, it will be noted in the logs. What is it? It is a patch intended for scenarios where the target device doest not reply to requests sent by the library. The fix is to delay sending more Data by a small time, essentially blocking higher levels of logic, to provide extra time to the target device to clear its buffers. There is a connection between older versions of the nRF Connect SDK, such as v2.5.1 (circa [December 2023](https://github.com/nrfconnect/sdk-nrf/releases/tag/v2.5.1)), as well as flag that is turned off by default in the SDK called `CONFIG_BT_ATT_SENT_CB_AFTER_TX`. As of this writing, we do not consider these uses cases as normal behaviour. However, we aim for DFU to succeed as much as possible when you call us to do so, and this added element should improve reliability accross the board, as well as this specific use case.
 
 nRF Connect Device Manager allows allows direct control of the entire DFU process via the Advanced Tab on the upper-right corner. You can also see the implementation of sending specific commands such as List (Read), Test, Confirm, Erase and so on from [ImagesViewController.swift](Example/Example/View%20Controllers/Manager/Widgets/ImagesViewController.swift) and [SettingsViewController.swift](Example/Example/View%20Controllers/Manager/SettingsViewController.swift).
 
