@@ -40,9 +40,11 @@ The naming of the iOSMcuManagerLibrary Package reflects its original goal, which
 
 ## Compatible Devices
 
-| nRF52 Series | nRF53 Series | nRF54 Series | nRF91 Series |
-| :---: | :----: | :---: | :---: |
-| ![](nRF52-Series-small.png) | ![](nRF53-Series-small.png) | ![](nRF54-Series-small.png) | ![](nRF91-Series-small.png) |
+| nRF52 Series | nRF53 Series | nRF54 Series | nRF7x Series | nRF9x Series |
+| :---: | :---: | :---: | :---: | :---: |
+| ![](nRF52-Series-small.png) | ![](nRF53-Series-small.png) | ![](nRF54-Series-small.png) | ![](nRF71-Series-small.png) | ![](nRF93-Series-small.png) |
+
+_* nRF7x (Wi-Fi) and nRF9x (4G LTE) Series require a companion Bluetooth LE chip, such as 52xx, 5340 or 54xx, to be updated using this library._
 
 - `iOSMcuManagerLibrary` is designed to work with the SMP Transport over Bluetooth LE. It is implemented and maintained by Nordic Semiconductor, but it should work on any devices communicating via SMP Protocol. **If you encounter an issue communicating with a device using any chip, not just Nordic, please file an Issue**.
 
