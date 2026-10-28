@@ -561,6 +561,14 @@ This is useful for example when providing the user an actionable item to trigger
 
 As is the case with *iOSMcuManagerLibrary*, you may open Pull Requests or provide feedback on how to improve these APIs, or what you're missing from them.
 
+## Special Thanks
+
+On behalf of Nordic and all the maintainers of this repo, we'd like to [thank all contributors](https://github.com/nordicsemi/IOS-nRF-Connect-Device-Manager/graphs/contributors) for all of their contributions throughout these years. This project took off far more than any of us could've predicted.
+
+<a href="https://github.com/nordicsemi/IOS-nRF-Connect-Device-Manager/graphs/contributors">
+  <img src="https://contributors-img.web.app/image?repo=nordicsemi/IOS-nRF-Connect-Device-Manager" />
+</a>
+
 # Related Projects
 
 We've heard demand from developers for a single McuMgr DFU library to target multiple platforms. So we've made available [a Flutter library](https://pub.dev/packages/mcumgr_flutter) that acts as a wrapper for both Android and iOS.
