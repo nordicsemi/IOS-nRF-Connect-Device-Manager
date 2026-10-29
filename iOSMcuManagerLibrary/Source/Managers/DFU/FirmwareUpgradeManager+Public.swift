@@ -93,7 +93,7 @@ public extension FirmwareUpgradeManager {
     
     func cancel() {
         objc_sync_enter(self)
-        if state == .upload {
+        if state.isInProgress() {
             if bootloader == .suit {
                 suitManager.cancel()
             } else {
@@ -108,7 +108,7 @@ public extension FirmwareUpgradeManager {
     
     func pause() {
         objc_sync_enter(self)
-        if state.isInProgress() && !paused {
+        if state.isInProgress() && !isPaused() {
             paused = true
             if state == .upload {
                 if bootloader == .suit {
