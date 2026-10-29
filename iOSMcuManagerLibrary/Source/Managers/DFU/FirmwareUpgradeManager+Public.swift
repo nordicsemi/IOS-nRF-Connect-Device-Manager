@@ -56,7 +56,7 @@ public extension FirmwareUpgradeManager {
         }
         
         self.imageManager.verifyOnMainThread()
-        guard state == .none else {
+        guard !isInProgress() else {
             log(msg: "Firmware upgrade is already in progress", atLevel: .warning)
             return
         }
@@ -101,6 +101,7 @@ public extension FirmwareUpgradeManager {
             }
             paused = false
         }
+        state = .cancelled
         objc_sync_exit(self)
     }
     
@@ -125,7 +126,7 @@ public extension FirmwareUpgradeManager {
     
     func resume() {
         objc_sync_enter(self)
-        if paused {
+        if isPaused() {
             paused = false
             resumeFromCurrentState()
         }
@@ -135,7 +136,7 @@ public extension FirmwareUpgradeManager {
     // MARK: isPaused()
     
     func isPaused() -> Bool {
-        return paused
+        return paused && state != .cancelled
     }
     
     // MARK: isInProgress()

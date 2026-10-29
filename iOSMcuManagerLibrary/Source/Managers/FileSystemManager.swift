@@ -129,7 +129,7 @@ public class FileSystemManager: McuManager {
         // Make sure two uploads cant start at once.
         objc_sync_enter(self)
         // If upload is already in progress or paused, do not continue.
-        if transferState == .none {
+        if transferState == .none || transferState == .cancelled {
             // Set downloading flag to true.
             transferState = .downloading
         } else {
@@ -179,7 +179,7 @@ public class FileSystemManager: McuManager {
         objc_sync_enter(self)
         // If upload is already in progress or paused, do not continue.
         if transferState != .none {
-            log(msg: "A file transfer is already in progress", atLevel: .warning)
+            log(msg: "A file transfer is already in progress or has been cancelled", atLevel: .warning)
             objc_sync_exit(self)
             return false
         }
@@ -285,6 +285,7 @@ public class FileSystemManager: McuManager {
         case uploading        = 2
         case downloading      = 3
         case paused           = 4
+        case cancelled        = 5
     }
     
     // MARK: Private Properties
@@ -376,7 +377,7 @@ public class FileSystemManager: McuManager {
                 // else
                 // Transfer will be cancelled after the next notification is received.
             }
-            transferState = .none
+            transferState = .cancelled
         }
         objc_sync_exit(self)
     }
@@ -387,12 +388,17 @@ public class FileSystemManager: McuManager {
     /// happens.
     public func pauseTransfer() {
         objc_sync_enter(self)
-        if transferState == .none {
+        switch transferState {
+        case .none:
             log(msg: "Transfer is not in progress and therefore cannot be paused",
                 atLevel: .warning)
-        } else {
+        case .mcuMgrParameters, .uploading, .downloading:
             log(msg: "Transfer paused", atLevel: .application)
             transferState = .paused
+        case .paused:
+            log(msg: "Transfer already paused", atLevel: .warning)
+        case .cancelled:
+            log(msg: "Transfer is cancelled", atLevel: .warning)
         }
         objc_sync_exit(self)
     }
@@ -404,7 +410,7 @@ public class FileSystemManager: McuManager {
     public func continueTransfer() {
         objc_sync_enter(self)
         if transferState == .paused {
-            log(msg: "Continuing transfer", atLevel: .application)
+            log(msg: "Resuming transfer", atLevel: .application)
             if let _ = downloadDelegate {
                 transferState = .downloading
                 download(name: fileName!, offset: UInt(offset), callback: downloadCallback)
@@ -413,7 +419,7 @@ public class FileSystemManager: McuManager {
                 upload(name: fileName!, data: fileData!, offset: UInt(offset), callback: uploadCallback)
             }
         } else {
-            log(msg: "Transfer is not paused", atLevel: .warning)
+            log(msg: "Transfer is not in paused state", atLevel: .warning)
         }
         objc_sync_exit(self)
     }
@@ -437,11 +443,9 @@ public class FileSystemManager: McuManager {
     
     private lazy var uploadCallback: McuMgrCallback<McuMgrFsUploadResponse> = {
         [weak self] (response: McuMgrFsUploadResponse?, error: Error?) in
-        // Ensure the manager is not released.
-        guard let self else {
-            return
-        }
-        // Check for an error.
+        
+        guard let self else { return }
+        
         if let error {
             if case let McuMgrTransportError.insufficientMtu(newMtu) = error {
                 do {
@@ -456,12 +460,6 @@ public class FileSystemManager: McuManager {
             return
         }
         
-        // Make sure the file data is set.
-        guard let fileName, let fileData else {
-            self.cancelTransfer(error: FileTransferError.invalidData)
-            return
-        }
-        
         // Make sure the response is not nil.
         guard let response else {
             self.cancelTransfer(error: FileTransferError.invalidPayload)
@@ -471,6 +469,22 @@ public class FileSystemManager: McuManager {
         // Check for an error return code.
         if let error = response.getError() {
             self.cancelTransfer(error: error)
+            return
+        }
+        
+        if self.transferState == .cancelled {
+            self.log(msg: "Upload cancelled", atLevel: .application)
+            self.resetTransfer()
+            self.uploadDelegate?.uploadDidCancel()
+            self.uploadDelegate = nil
+            // Release cyclic reference.
+            self.cyclicReferenceHolder = nil
+            return
+        }
+        
+        // Make sure the file data is set.
+        guard let fileName, let fileData else {
+            self.cancelTransfer(error: FileTransferError.invalidData)
             return
         }
         
@@ -487,16 +501,6 @@ public class FileSystemManager: McuManager {
             self.uploadDelegate?.uploadProgressDidChange(bytesSent: Int(offset),
                                                          fileSize: fileData.count,
                                                          timestamp: Date())
-            
-            if self.transferState == .none {
-                self.log(msg: "Upload cancelled", atLevel: .application)
-                self.resetTransfer()
-                self.uploadDelegate?.uploadDidCancel()
-                self.uploadDelegate = nil
-                // Release cyclic reference.
-                self.cyclicReferenceHolder = nil
-                return
-            }
             
             // Check if the upload has completed.
             if offset >= fileData.count {
@@ -528,7 +532,7 @@ public class FileSystemManager: McuManager {
         guard let self else {
             return
         }
-        // Check for an error.
+        
         if let error {
             if case let McuMgrTransportError.insufficientMtu(newMtu) = error {
                 do {
@@ -542,16 +546,27 @@ public class FileSystemManager: McuManager {
             self.cancelTransfer(error: error)
             return
         }
-        // Make sure the response is not nil.
+        
         guard let response else {
             self.cancelTransfer(error: FileTransferError.invalidPayload)
             return
         }
-        // Check for an error return code.
+        
         if let error = response.getError() {
             self.cancelTransfer(error: error)
             return
         }
+        
+        if self.transferState == .cancelled {
+            self.log(msg: "Download cancelled", atLevel: .application)
+            self.resetTransfer()
+            self.downloadDelegate?.downloadDidCancel()
+            self.downloadDelegate = nil
+            // Release cyclic reference.
+            self.cyclicReferenceHolder = nil
+            return
+        }
+        
         // Get the offset from the response.
         if let offset = response.off, let data = response.data {
             // The first packet contains the file length.
@@ -570,16 +585,6 @@ public class FileSystemManager: McuManager {
             self.downloadDelegate?.downloadProgressDidChange(bytesDownloaded: Int(self.offset),
                                                              fileSize: self.fileSize!,
                                                              timestamp: Date())
-            
-            if self.transferState == .none {
-                self.log(msg: "Download cancelled", atLevel: .application)
-                self.resetTransfer()
-                self.downloadDelegate?.downloadDidCancel()
-                self.downloadDelegate = nil
-                // Release cyclic reference.
-                self.cyclicReferenceHolder = nil
-                return
-            }
             
             // Check if the upload has completed.
             if self.offset >= self.fileSize! {
@@ -673,6 +678,10 @@ private extension FileSystemManager {
     
     func finishedMcuMgrParametersRequest() {
         defaultManager = nil
+        guard transferState == .mcuMgrParameters else {
+            log(msg: "Upload state does not match expectations. Will not proceed to upload.", atLevel: .warning)
+            return
+        }
         let fileName: String! = fileName
         let fileData: Data! = fileData
         log(msg: "Uploading \(fileName) (\(fileData.count) bytes)...", atLevel: .application)
@@ -682,19 +691,15 @@ private extension FileSystemManager {
     // MARK: sendNext(from:)
     
     func sendNext(from offset: UInt) {
-        if transferState != .uploading {
-            return
-        }
-        upload(name: fileName!, data: fileData!, offset: offset, callback: uploadCallback)
+        guard transferState == .uploading, let fileName, let fileData else { return }
+        upload(name: fileName, data: fileData, offset: offset, callback: uploadCallback)
     }
     
     // MARK: requestNext(from:)
     
     func requestNext(from offset: UInt) {
-        if transferState != .downloading {
-            return
-        }
-        download(name: fileName!, offset: offset, callback: downloadCallback)
+        guard transferState == .downloading, let fileName else { return }
+        download(name: fileName, offset: offset, callback: downloadCallback)
     }
     
     // MARK: resetTransfer
@@ -719,10 +724,10 @@ private extension FileSystemManager {
     private func restartTransfer() {
         objc_sync_enter(self)
         transferState = .none
-        if let uploadDelegate = uploadDelegate {
+        if let uploadDelegate {
             _ = upload(name: fileName!, data: fileData!,
                        using: uploadConfiguration, delegate: uploadDelegate)
-        } else if let downloadDelegate = downloadDelegate {
+        } else if let downloadDelegate {
             _ = download(name: fileName!, delegate: downloadDelegate)
         }
         objc_sync_exit(self)
