@@ -23,13 +23,38 @@ final class DeviceInfoManager {
     
     // MARK: Properties
     
-    internal let peripheralUUID: UUID
     internal var ble = CentralManager()
+    
+    internal let peripheralUUID: UUID
+    private var peripheral: Peripheral?
     
     // MARK: init
     
     init(_ peripheralUUID: UUID) {
         self.peripheralUUID = peripheralUUID
+    }
+    
+    // MARK: getPeripheral()
+    
+    @MainActor
+    func getPeripheral() async throws -> Peripheral {
+        if let peripheral {
+            // "Cache" hit.
+            return peripheral
+        }
+        
+        try await ble.isPoweredOn()
+        guard let cbPeripheral = ble.retrievePeripherals(withIdentifiers: [peripheralUUID]).first else {
+            throw DeviceInfoManagerError.peripheralNotFound
+        }
+        
+        // If there's an error, it'll be thrown (fingers crossed) and handled by the caller.
+        let _ = try await ble.connect(cbPeripheral)
+            .firstValue
+        
+        let peripheral = Peripheral(peripheral: cbPeripheral, delegate: ReactivePeripheralDelegate())
+        self.peripheral = peripheral
+        return peripheral
     }
     
     // MARK: logError
@@ -79,17 +104,7 @@ extension DeviceInfoManager {
      */
     func getDeviceInfoToken() async throws -> DeviceInfoToken {
         do {
-            try await ble.isPoweredOn()
-            
-            guard let cbPeripheral = ble.retrievePeripherals(withIdentifiers: [peripheralUUID])
-                .first else {
-                throw DeviceInfoManagerError.peripheralNotFound
-            }
-            
-            let _ = try await ble.connect(cbPeripheral)
-                .firstValue
-            
-            let peripheral = Peripheral(peripheral: cbPeripheral, delegate: ReactivePeripheralDelegate())
+            let peripheral = try await getPeripheral()
             let discoveredServices = try await peripheral.discoverServices(serviceUUIDs: nil)
                 .timeout(5, scheduler: DispatchQueue.main)
                 .firstValue
@@ -196,17 +211,7 @@ extension DeviceInfoManager {
      */
     func getProjectKey() async throws -> ProjectKey {
         do {
-            try await ble.isPoweredOn()
-            
-            guard let cbPeripheral = ble.retrievePeripherals(withIdentifiers: [peripheralUUID])
-                .first else {
-                throw DeviceInfoManagerError.peripheralNotFound
-            }
-            
-            let _ = try await ble.connect(cbPeripheral)
-                .firstValue
-            
-            let peripheral = Peripheral(peripheral: cbPeripheral, delegate: ReactivePeripheralDelegate())
+            let peripheral = try await getPeripheral()
             let discoveredServices = try await peripheral.discoverServices(serviceUUIDs: nil)
                 .timeout(5, scheduler: DispatchQueue.main)
                 .firstValue
