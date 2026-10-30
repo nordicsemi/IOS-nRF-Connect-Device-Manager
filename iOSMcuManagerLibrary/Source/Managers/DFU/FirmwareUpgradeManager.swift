@@ -69,6 +69,12 @@ public class FirmwareUpgradeManager: FirmwareUpgradeController, ConnectionObserv
     
     private func objc_sync_setState(_ state: FirmwareUpgradeState) {
         objc_sync_enter(self)
+        // Protect against against upload proceeding to further stages after cancellation.
+        guard self.state != .cancelled || (state == .none || state == .requestMcuMgrParameters) else {
+            log(msg: "Rejecting setState(\(state)) call due to cancelled firmware upgrade.", atLevel: .debug)
+            delegate?.upgradeDidCancel(state: state)
+            return
+        }
         let previousState = self.state
         self.state = state
         if state != previousState {
@@ -81,7 +87,7 @@ public class FirmwareUpgradeManager: FirmwareUpgradeController, ConnectionObserv
     
     internal func requestMcuMgrParameters() {
         objc_sync_setState(.requestMcuMgrParameters)
-        if !paused {
+        if isInProgress() {
             log(msg: "Requesting McuMgr Parameters...", atLevel: .verbose)
             defaultManager.params(callback: mcuManagerParametersCallback)
         }
@@ -89,7 +95,7 @@ public class FirmwareUpgradeManager: FirmwareUpgradeController, ConnectionObserv
     
     private func bootloaderInfo() {
         objc_sync_setState(.bootloaderInfo)
-        if !paused {
+        if isInProgress() {
             log(msg: "Requesting Bootloader Info...", atLevel: .verbose)
             defaultManager.bootloaderInfo(query: .name, callback: bootloaderInfoCallback)
         }
@@ -97,7 +103,7 @@ public class FirmwareUpgradeManager: FirmwareUpgradeController, ConnectionObserv
     
     private func bootloaderMode() {
         objc_sync_setState(.bootloaderInfo)
-        if !paused {
+        if isInProgress() {
             log(msg: "Requesting Bootloader Mode...", atLevel: .verbose)
             defaultManager.bootloaderInfo(query: .mode, callback: bootloaderModeCallback)
         }
@@ -107,7 +113,7 @@ public class FirmwareUpgradeManager: FirmwareUpgradeController, ConnectionObserv
     
     private func validate() {
         objc_sync_setState(.validate)
-        if !paused {
+        if isInProgress() {
             log(msg: "Sending Image List command...", atLevel: .verbose)
             imageManager.list(callback: listCallback)
         }
@@ -117,7 +123,7 @@ public class FirmwareUpgradeManager: FirmwareUpgradeController, ConnectionObserv
     
     private func upload() {
         objc_sync_setState(.upload)
-        if !paused {
+        if isInProgress() {
             let imagesToUpload = images
                 .filter { !$0.uploaded }
                 .map { ImageManager.Image($0) }
@@ -144,7 +150,7 @@ public class FirmwareUpgradeManager: FirmwareUpgradeController, ConnectionObserv
     
     private func test(_ image: FirmwareUpgradeImage) {
         objc_sync_setState(.test)
-        if !paused {
+        if isInProgress() {
             log(msg: "Sending Image Test command for image \(image.image) (slot: \(image.slot))...", atLevel: .verbose)
             imageManager.test(hash: [UInt8](image.hash), callback: testCallback)
         }
@@ -154,7 +160,7 @@ public class FirmwareUpgradeManager: FirmwareUpgradeController, ConnectionObserv
     
     private func confirm(_ image: FirmwareUpgradeImage) {
         objc_sync_setState(.confirm)
-        if !paused {
+        if isInProgress() {
             log(msg: "Sending Image Confirm command to image \(image.image) (slot \(image.slot))...", atLevel: .verbose)
             log(msg: "confirm(hash: \(image.hash.prefix(12).hexEncodedString(options: [.prepend0x])))", atLevel: .application)
             imageManager.confirm(hash: [UInt8](image.hash), callback: confirmCallback)
@@ -165,16 +171,18 @@ public class FirmwareUpgradeManager: FirmwareUpgradeController, ConnectionObserv
     
     private func confirmAsSUIT() {
         objc_sync_setState(.confirm)
-        if !paused {
-            log(msg: "Sending single Confirm command for SUIT upload (no Hash) via McuBoot...", atLevel: .verbose)
-            imageManager.confirm(hash: nil, callback: confirmCallback)
-        }
+        guard isInProgress() else { return }
+        
+        log(msg: "Sending single Confirm command for SUIT upload (no Hash) via McuBoot...", atLevel: .verbose)
+        imageManager.confirm(hash: nil, callback: confirmCallback)
     }
     
     // MARK: eraseAppSettings
     
     private func eraseAppSettings() {
         objc_sync_setState(.eraseAppSettings)
+        guard isInProgress() else { return }
+        
         log(msg: "Erasing app settings...", atLevel: .verbose)
         basicManager.eraseAppSettings(callback: eraseAppSettingsCallback)
     }
@@ -183,7 +191,7 @@ public class FirmwareUpgradeManager: FirmwareUpgradeController, ConnectionObserv
     
     private func reset() {
         objc_sync_setState(.reset)
-        if !paused {
+        if isInProgress() {
             log(msg: "Sending Reset command...", atLevel: .verbose)
             defaultManager.transport.addObserver(self)
             defaultManager.reset(callback: resetCallback)
@@ -330,7 +338,8 @@ public class FirmwareUpgradeManager: FirmwareUpgradeController, ConnectionObserv
         defer {
             objc_sync_exit(self)
         }
-        if !paused {
+        
+        if isInProgress() {
             switch state {
             case .requestMcuMgrParameters:
                 requestMcuMgrParameters()
@@ -944,7 +953,7 @@ public class FirmwareUpgradeManager: FirmwareUpgradeController, ConnectionObserv
     // MARK: Erase App Settings Callback
     
     private lazy var eraseAppSettingsCallback: McuMgrCallback<McuMgrResponse> = { [weak self] response, error in
-        guard let self = self else { return }
+        guard let self else { return }
         
         if let error = error as? McuMgrTransportError {
             // Some devices will not even reply to Erase App Settings. So just move on.
@@ -956,7 +965,7 @@ public class FirmwareUpgradeManager: FirmwareUpgradeController, ConnectionObserv
             return
         }
         
-        guard let response = response else {
+        guard let response else {
             self.fail(error: FirmwareUpgradeError.unknown("Erase app settings response is nil."))
             return
         }
@@ -986,15 +995,15 @@ public class FirmwareUpgradeManager: FirmwareUpgradeController, ConnectionObserv
     /// poller will be started after a 3 second delay.
     private lazy var resetCallback: McuMgrCallback<McuMgrResponse> = { [weak self] response, error in
         // Ensure the manager is not released.
-        guard let self = self else {
+        guard let self else {
             return
         }
         // Check for an error.
-        if let error = error {
+        if let error {
             self.fail(error: error)
             return
         }
-        guard let response = response else {
+        guard let response else {
             self.fail(error: FirmwareUpgradeError.unknown("Reset response is nil."))
             return
         }
@@ -1173,12 +1182,13 @@ extension FirmwareUpgradeManager: ImageUploadDelegate {
     }
     
     public func uploadDidCancel() {
-        DispatchQueue.main.async { [weak self] in
-            self?.delegate?.upgradeDidCancel(state: .none)
-        }
-        state = .none
+        state = .cancelled
         // Release cyclic reference.
         cyclicReferenceHolder = nil
+        
+        DispatchQueue.main.async { [weak self] in
+            self?.delegate?.upgradeDidCancel(state: .cancelled)
+        }
     }
     
     public func uploadDidFinish() {
@@ -1278,6 +1288,7 @@ public enum FirmwareUpgradeState: CustomStringConvertible {
     case upload, success
     case validate, test, confirm, reset
     case resetIntoFirmwareLoader
+    case cancelled
     
     // MARK: description
     
@@ -1305,13 +1316,15 @@ public enum FirmwareUpgradeState: CustomStringConvertible {
             return "Resetting"
         case .success:
             return "Upload Complete"
+        case .cancelled:
+            return "Cancelled"
         }
     }
     
     // MARK: isInProgress()
     
     func isInProgress() -> Bool {
-        return self != .none
+        return self != .none && self != .cancelled
     }
 }
 

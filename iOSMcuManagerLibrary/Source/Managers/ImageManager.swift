@@ -233,7 +233,7 @@ public class ImageManager: McuManager {
         }
         
         // If upload is already in progress or paused, do not continue.
-        if uploadState == .none {
+        if uploadState == .none || uploadState == .cancelled {
             // Set upload flag to true.
             uploadState = .uploading
         } else {
@@ -350,6 +350,7 @@ public class ImageManager: McuManager {
         case none      = 0
         case uploading = 1
         case paused    = 2
+        case cancelled = 3
     }
     
     /// State of the image upload.
@@ -394,23 +395,21 @@ public class ImageManager: McuManager {
             if let error {
                 resetUploadVariables()
                 uploadDelegate?.uploadDidFail(with: error)
-                uploadDelegate = nil
                 log(msg: "Upload cancelled due to error: \(error)", atLevel: .error)
-                // Release cyclic reference.
-                cyclicReferenceHolder = nil
             } else {
                 if uploadState == .paused {
                     log(msg: "Upload paused", atLevel: .application)
                 } else {
                     resetUploadVariables()
                     uploadDelegate?.uploadDidCancel()
-                    log(msg: "Upload cancelled", atLevel: .application)
                 }
-                uploadDelegate = nil
-                // Release cyclic reference.
-                cyclicReferenceHolder = nil
             }
-            uploadState = .none
+            
+            uploadDelegate = nil
+            // Release cyclic reference.
+            cyclicReferenceHolder = nil
+            uploadState = .cancelled
+            log(msg: "Upload cancelled", atLevel: .application)
         }
         objc_sync_exit(self)
     }
@@ -419,11 +418,16 @@ public class ImageManager: McuManager {
     /// happens.
     public func pauseUpload() {
         objc_sync_enter(self)
-        if uploadState == .none {
+        switch uploadState {
+        case .none:
             log(msg: "Upload is not in progress and therefore cannot be paused", atLevel: .warning)
-        } else {
+        case .uploading:
             uploadState = .paused
             log(msg: "Upload paused", atLevel: .application)
+        case .paused:
+            log(msg: "Upload alredy paused.", atLevel: .warning)
+        case .cancelled:
+            log(msg: "Upload is cancelled.", atLevel: .warning)
         }
         objc_sync_exit(self)
     }
@@ -482,6 +486,16 @@ public class ImageManager: McuManager {
             return
         }
         
+        guard self.uploadState != .cancelled else {
+            self.log(msg: "Upload cancelled", atLevel: .application)
+            self.resetUploadVariables()
+            self.uploadDelegate?.uploadDidCancel()
+            self.uploadDelegate = nil
+            // Release cyclic reference.
+            self.cyclicReferenceHolder = nil
+            return
+        }
+        
         // Make sure the image data is set.
         guard let currentImageData = self.imageData, let images = self.uploadImages else {
             self.cancelUpload(error: ImageUploadError.invalidData)
@@ -501,18 +515,7 @@ public class ImageManager: McuManager {
         if let offset = response.off {
             self.uploadLastOffset = offset
             self.uploadPipeline.receivedData(with: offset)
-            
             self.uploadDelegate?.uploadProgressDidChange(bytesSent: Int(self.uploadLastOffset), imageSize: currentImageData.count, timestamp: Date())
-            
-            if self.uploadState == .none {
-                self.log(msg: "Upload cancelled", atLevel: .application)
-                self.resetUploadVariables()
-                self.uploadDelegate?.uploadDidCancel()
-                self.uploadDelegate = nil
-                // Release cyclic reference.
-                self.cyclicReferenceHolder = nil
-                return
-            }
             
             guard self.uploadState == .uploading else { return }
             

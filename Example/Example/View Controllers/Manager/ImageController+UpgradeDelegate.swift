@@ -141,7 +141,7 @@ extension ImageController: ImageUploadDelegate {
     }
     
     func uploadDidCancel() {
-        upgradeStateDidChange(from: .upload, to: .none)
+        upgradeStateDidChange(from: .upload, to: .cancelled)
         upgradeDidCancel(state: .upload)
     }
     
