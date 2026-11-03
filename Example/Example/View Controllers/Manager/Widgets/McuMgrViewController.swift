@@ -51,6 +51,11 @@ protocol ExtendedMcuMgrViewController: McuMgrViewController, UIViewController {
 extension ExtendedMcuMgrViewController where Self: UIViewController {
     
     func requestBootloaderIfNecessary() async -> BootloaderInfoResponse.Bootloader {
+        if defaultManager == nil {
+            weak let baseViewController = parent as? BaseViewController
+            await baseViewController?.onDeviceStatusReady()
+        }
+        
         guard let bootloader else {
             self.bootloader = (try? await defaultManager.bootloaderInfo().bootloader) ?? .mcuboot
             return self.bootloader ?? .mcuboot
