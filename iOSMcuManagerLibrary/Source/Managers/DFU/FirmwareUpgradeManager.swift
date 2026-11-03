@@ -1254,6 +1254,14 @@ extension FirmwareUpgradeManager: ImageUploadDelegate {
                     mark(firstUnconfirmedImage, as: \.confirmSent)
                     return
                 }
+            } else if configuration.upgradeMode == FirmwareUpgradeMode.testOnly {
+                // If we reach here, we marked as .tested everything that needed to be.
+                guard images.first(where: { $0.uploaded && $0.tested }) == nil else {
+                    // In this case, something is in .test (aka 'pending'), so a reset() is needed.
+                    reset()
+                    return
+                }
+                // Nothing uploaded is in .test / .pending state. Proceed to success().
             }
         case .uploadOnly:
             // Nothing to do in SUIT since it does not support RESET Command and will
