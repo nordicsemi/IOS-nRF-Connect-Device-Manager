@@ -202,6 +202,8 @@ public class FirmwareUpgradeManager: FirmwareUpgradeController, ConnectionObserv
     
     /**
      Test and Confirm uploads desired images, and then marks them all as 'Tested' (which looks like 'pending' from McuMgr perspective) before Reset. Upon Reset, the previously tested Image will have switched image (core) due to image swap, so there's our mismatch between our tracking of (image, slot) and the status on the target device. Here, we match them, before proceeding to ``testAndConfirmAfterReset()``.
+     
+     Before that, every image to be confirmed must be running. If one isn't, the upgrade fails and no image is confirmed.
      */
     private func listAfterUploadReset() {
         log(msg: "Updating Image List after Upload phase Reset...", atLevel: .verbose)
@@ -227,6 +229,23 @@ public class FirmwareUpgradeManager: FirmwareUpgradeController, ConnectionObserv
             
             guard let responseImages = response.images, responseImages.count > 0 else {
                 self.fail(error: FirmwareUpgradeError.invalidResponse(response))
+                return
+            }
+            
+            // An image that failed its test boot was reverted, or erased, by MCUboot.
+            // Confirming its hash would make it permanent.
+            for image in images where image.uploaded && !image.confirmed {
+                let slots = responseImages.filter {
+                    $0.image == image.image && Data($0.hash) == image.hash
+                }
+                guard !slots.contains(where: { $0.active }) else { continue }
+                if slots.isEmpty {
+                    self.log(msg: "Image \(image.image) was not found after the reset, it will not be confirmed. Possible reason: the bootloader erased it", atLevel: .warning)
+                    self.fail(error: FirmwareUpgradeError.uploadedImageNotFound(image: image.image, slot: image.slot))
+                } else {
+                    self.log(msg: "Image \(image.image) is not active after the reset, it will not be confirmed", atLevel: .warning)
+                    self.fail(error: FirmwareUpgradeError.uploadedImageNotActive(image: image.image, slot: image.slot))
+                }
                 return
             }
             
