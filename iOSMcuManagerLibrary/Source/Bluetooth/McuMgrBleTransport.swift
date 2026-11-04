@@ -265,6 +265,8 @@ extension McuMgrBleTransport: McuMgrTransport {
     
     public func send<T: McuMgrResponse>(data: Data, timeout: Int, autoRetry: Bool, callback: @escaping McuMgrCallback<T>) {
         operationQueue.addOperation { [weak self] in
+            // Override to improve reliability in Low Throughput Mode ONLY.
+            let overrideAutoRetry = (self?.lowThroughputMode ?? false) ? true : autoRetry
             let retryCount = autoRetry ? McuMgrBleTransportConstant.MAX_RETRIES : 1
             for i in 0..<retryCount {
                 switch self?._send(data: data, timeoutInSeconds: timeout) {
