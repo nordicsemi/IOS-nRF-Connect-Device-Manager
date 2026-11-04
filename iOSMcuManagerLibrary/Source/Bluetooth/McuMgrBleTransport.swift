@@ -265,18 +265,32 @@ extension McuMgrBleTransport: McuMgrTransport {
     
     public func send<T: McuMgrResponse>(data: Data, timeout: Int, autoRetry: Bool, callback: @escaping McuMgrCallback<T>) {
         operationQueue.addOperation { [weak self] in
+            
+            let seqNumberStr: String = data.readMcuMgrHeaderSequenceString()
             // Override to improve reliability in Low Throughput Mode ONLY.
-            let overrideAutoRetry = (self?.lowThroughputMode ?? false) ? true : autoRetry
-            let retryCount = autoRetry ? McuMgrBleTransportConstant.MAX_RETRIES : 1
-            for i in 0..<retryCount {
+            let overridenAutoRetry = (self?.lowThroughputMode ?? false) ? true : autoRetry
+            let sendAttempts = overridenAutoRetry ? McuMgrBleTransportConstant.MAX_SEND_ATTEMPTS : 1
+            
+            var i = 0
+            while i < sendAttempts {
                 switch self?._send(data: data, timeoutInSeconds: timeout) {
                 case .failure(McuMgrTransportError.waitAndRetry):
-                    self?.attemptToImproveThroughputOnWaitAndRetry()
+                    // Is Low Throughput Mode enabled?
+                    if !(self?.lowThroughputMode ?? false) && !overridenAutoRetry {
+                        self?.attemptToImproveThroughputOnWaitAndRetry()
+                        // Retry if Low Throughput Mode was not enabled already.
+                        continue
+                        // Yes, no wait interval here! And it works!? By accident!?
+                    }
+                    
+                    i += 1
+                    guard i < sendAttempts else {
+                        self?.log(msg: "× [Seq: \(seqNumberStr)] Failed to receive any response.", atLevel: .debug)
+                        continue  // McuMgrTransportError.sendFailed will be thrown outside the for-lop.
+                    }
                     
                     #if DEBUG
-                    if let header = try? McuMgrHeader(data: data) {
-                        self?.log(msg: "⌚ [Seq: \(header.sequenceNumber)] Transport Error: Sleeping before Retry.", atLevel: .info)
-                    }
+                    self?.log(msg: "⌚ [Seq: \(seqNumberStr)] Transport Error: Sleeping before Retry.", atLevel: .info)
                     #endif
                     
                     let waitInterval = min(timeout, McuMgrBleTransportConstant.WAIT_AND_RETRY_INTERVAL_S)
@@ -285,20 +299,22 @@ extension McuMgrBleTransport: McuMgrTransport {
                     guard let self, modePeripherals[mode]?.state == .connected else {
                         // This happens if the user cancels an operation whilst we sleep and then
                         // we wake up here or, the disconnected unexpectedly.
-                        let seqNumber = (try? McuMgrHeader(data: data))?.sequenceNumber
-                        self?.log(msg: "× [Seq: \(seqNumber)] Dropping retry due to unexpected disconnection / user cancelled operation.", atLevel: .debug)
+                        self?.log(msg: "× [Seq: \(seqNumberStr)] Dropping retry due to unexpected disconnection / user cancelled operation.", atLevel: .debug)
                         return
                     }
-                    if let header = try? McuMgrHeader(data: data) {
-                        log(msg: "↷ [Seq: \(header.sequenceNumber)] Retry \(i + 1)", atLevel: .info)
-                    } else {
-                        log(msg: "↷ [Seq: ?] Retry \(i + 1) (Unknown Header Type)", atLevel: .info)
-                    }
+                    log(msg: "↷ [Seq: \(seqNumberStr)] Retry \(i)", atLevel: .info)
                     continue // retry
                 case .failure(McuMgrTransportError.peripheralNotReadyForWriteWithoutResponse):
-                    if let header = try? McuMgrHeader(data: data) {
-                        self?.log(msg: "(Retry \(i + 1)) Peripheral not ready for write without response. Attempting to wait or send seq: \(header.sequenceNumber)", atLevel: .debug)
+                    guard (i + 1) < sendAttempts else {
+                        self?.log(msg: "× (No retries left) [Seq: \(seqNumberStr)] Peripheral not ready for Write without Response.", atLevel: .debug)
+                        DispatchQueue.main.async {
+                            callback(nil, McuMgrTransportError.peripheralNotReadyForWriteWithoutResponse)
+                        }
+                        return // EXIT
                     }
+                    
+                    i += 1
+                    self?.log(msg: "(Retry \(i)) Peripheral not ready for write without response. Attempting to wait or send seq: \(seqNumberStr)", atLevel: .debug)
                     continue // try to send again or wait for a response
                 case .failure(let error):
                     // Don't call back if self has been deallocated.
@@ -307,7 +323,7 @@ extension McuMgrBleTransport: McuMgrTransport {
                     DispatchQueue.main.async {
                         callback(nil, error)
                     }
-                    return
+                    return // EXIT
                 case .success(let responseData):
                     // Don't call back if self has been deallocated.
                     guard let self else { return }
@@ -322,15 +338,16 @@ extension McuMgrBleTransport: McuMgrTransport {
                             callback(nil, error)
                         }
                     }
-                    return
+                    return  // EXIT
                 case .none:
                     // De-allocated self. Perhaps user cancelled.
-                    return
+                    return  // EXIT
                 }
             }
             
             // Out of for-loop. No callback call was made.
             // If we made it here, all retries failed.
+            self?.log(msg: "× [Seq: \(seqNumberStr)] Send failed.", atLevel: .debug)
             DispatchQueue.main.async {
                 callback(nil, McuMgrTransportError.sendFailed)
             }
@@ -371,15 +388,10 @@ extension McuMgrBleTransport: McuMgrTransport {
     // MARK: attemptToImproveThroughputOnWaitAndRetry()
     
     internal func attemptToImproveThroughputOnWaitAndRetry() {
-        if numberOfParallelWrites > 1 {
-            // Reduce pipelining to improve throughput and cause less retries.
-            numberOfParallelWrites -= 1
-            log(msg: "[!!] Detected possible packet drop from target device. Reducing pipeline depth (from \(numberOfParallelWrites + 1) to \(numberOfParallelWrites)) in an attempt to improve throughput.", atLevel: .warning)
-        } else { // if already on single pipeline
-            guard !lowThroughputMode else { return }
-            lowThroughputMode = true
-            log(msg: "[!!!] Detected possible packet drop from target device at minimum pipeline depth. Enabling Low Throughput Mode.", atLevel: .warning)
-        }
+        guard !lowThroughputMode else { return } // Nothing to do if it's already enabled.
+        lowThroughputMode = true
+        numberOfParallelWrites = 1
+        log(msg: "[!!!] Detected possible packet drop from target device. Disabling pipelining and Enabling Low Throughput Mode.", atLevel: .warning)
     }
     
     // MARK: notifyStateChanged(_:)
@@ -641,7 +653,7 @@ extension McuMgrBleTransport: McuMgrTransport {
 
 public enum McuMgrBleTransportConstant {
     /// Max number of retries until the transaction is failed.
-    internal static let MAX_RETRIES = 3
+    internal static let MAX_SEND_ATTEMPTS = 3
     /// The interval to wait before attempting a transaction again in seconds.
     internal static let WAIT_AND_RETRY_INTERVAL_S = 4
     /// In Low Throughput Mode to fix NCS's 2.5.1 (maybe older and newer) issue which
