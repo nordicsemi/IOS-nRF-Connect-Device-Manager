@@ -137,6 +137,8 @@ extension ImageController {
     private func callReset(with mode: DefaultManager.ResetBootMode) {
         Task {
             disableActionableButtons()
+            await (parent as? BaseViewController)?.onDeviceStatusReady()
+            
             guard mode == .bootloader else {
                 do {
                     _ = try await defaultManager.reset(bootMode: mode)
