@@ -298,13 +298,10 @@ extension BaseViewController {
             
             guard !Task.isCancelled, let peripheral = peripheral?.basePeripheral else { return }
             otaStatus = await deviceStatusManager?.requestOTAStatus(for: peripheral.identifier)
-        } catch let error as McuMgrBleTransportError {
-            // Covers use cases such as missing SMP Service, Characteristic, etc.
-            logError("Status Info returned error: \(error.localizedDescription). Marking OTA as unsupported as well.")
-            otaStatus = .unsupported(error)
         } catch {
             // Covers McuMgrTransportError, such as disconnection, retry, etc.
-            logError("Unable to complete \(#function) due to error: \(error.localizedDescription)")
+            logError("Unable to complete \(#function) due to error: \(error.localizedDescription). Marking OTA as unsupported as well.")
+            otaStatus = .unsupported(error)
         }
     }
     
