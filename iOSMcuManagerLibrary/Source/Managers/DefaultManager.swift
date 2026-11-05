@@ -15,6 +15,12 @@ public class DefaultManager: McuManager {
     
     // MARK: Constants
 
+    /// When starting DFU or connecting to a Device, multiple requests from ``DefaultManager``
+    /// are sent. This can have the unintended consequences of making it easier for the target
+    /// device to drop packets (see ``McuMgrBleTransport``), which stalls the startup sequence
+    /// let's say. By shortening the timeout, we can recover faster.
+    private static let INFO_TIMEOUT: Measurement<UnitDuration> = Measurement(value: 1, unit: .seconds)
+    
     enum ID: UInt8 {
         case echo = 0
         case consoleEchoControl = 1
@@ -198,7 +204,7 @@ public class DefaultManager: McuManager {
             payload = ["format": CBOR.utf8String(format.map({$0.rawValue}).joined(separator: ""))]
         }
         send(op: .read, commandId: ID.applicationInfo, payload: payload,
-             timeout: McuManager.FAST_TIMEOUT_SECONDS, callback: callback)
+             timeout: Int(Self.INFO_TIMEOUT.converted(to: .seconds).value), callback: callback)
     }
     
     // MARK: Bootloader Info
@@ -217,7 +223,7 @@ public class DefaultManager: McuManager {
             payload = ["query": CBOR.utf8String(query.rawValue)]
         }
         send(op: .read, commandId: ID.bootloaderInformation, payload: payload,
-             timeout: McuManager.FAST_TIMEOUT_SECONDS, callback: callback)
+             timeout: Int(Self.INFO_TIMEOUT.converted(to: .seconds).value), callback: callback)
     }
 }
 
