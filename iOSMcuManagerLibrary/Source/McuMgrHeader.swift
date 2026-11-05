@@ -113,6 +113,11 @@ public enum McuMgrHeaderParseError: Error, LocalizedError {
 
 internal extension Data {
     
+    func readMcuMgrHeaderSequenceString() -> String {
+        guard let number = readMcuMgrHeaderSequenceNumber() else { return "ERR" }
+        return "\(number)"
+    }
+    
     func readMcuMgrHeaderSequenceNumber() -> McuSequenceNumber? {
         guard count >= McuMgrHeader.HEADER_LENGTH else { return nil }
         return read(offset: 6) as McuSequenceNumber
