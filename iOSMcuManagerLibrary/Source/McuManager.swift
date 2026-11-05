@@ -264,7 +264,10 @@ open class McuManager: NSObject {
         }
         
         let remainingBytes = UInt64(data.count) - offset
-        let maxPacketSize = max(configuration.reassemblyBufferSize, UInt64(transport.mtu))
+        // Don't do reassembly when an Upload starts to improve reliability.
+        let maxPacketSize = offset > 0
+            ? max(configuration.reassemblyBufferSize, UInt64(transport.mtu))
+            : UInt64(transport.mtu)
         let overhead = UInt64(packetOverhead)
         guard maxPacketSize > overhead else {
             // We can't send anything if the overhead is larger than max packet size.
