@@ -279,6 +279,7 @@ extension McuMgrBleTransport: McuMgrTransport {
                     if !(self?.lowThroughputMode ?? false) && !overridenAutoRetry {
                         self?.attemptToImproveThroughputOnWaitAndRetry()
                         // Retry if Low Throughput Mode was not enabled already.
+                        self?.log(msg: "↷ [Seq: \(seqNumberStr)] Retry \(i) (Low Throughput Mode Enable)", atLevel: .info)
                         continue
                         // Yes, no wait interval here! And it works!? By accident!?
                     }
