@@ -242,8 +242,7 @@ public class SuitManager: McuManager {
             "off": CBOR.unsignedInt(0),
             "len": CBOR.unsignedInt(0)
         ]
-        send(op: .write, commandId: SuitID.envelopeUpload, payload: payload,
-             timeout: McuManager.DEFAULT_SEND_TIMEOUT_SECONDS, callback: callback)
+        send(op: .write, commandId: SuitID.envelopeUpload, payload: payload, timeout: Int(Self.UPLOAD_OFFSET_ZERO_TIMEOUT.converted(to: .seconds).value), callback: callback)
     }
     
     // MARK: processUploadedEnvelopeCallback
@@ -279,13 +278,13 @@ public class SuitManager: McuManager {
     // MARK: upload(_:deferInstall:delegate)
     
     private func upload(_ data: Data, deferInstall: Bool = false, at offset: UInt64) {
-        var uploadTimeoutInSeconds: Int
+        var uploadTimeout: TimeUnit
         if offset == 0 {
             // When uploading offset 0, we might trigger an erase on the firmware's end.
             // Hence, the longer timeout.
-            uploadTimeoutInSeconds = McuManager.DEFAULT_SEND_TIMEOUT_SECONDS
+            uploadTimeout = Self.UPLOAD_OFFSET_ZERO_TIMEOUT
         } else {
-            uploadTimeoutInSeconds = McuManager.FAST_TIMEOUT_SECONDS
+            uploadTimeout = Self.FAST_TIMEOUT
         }
         
         let commandID: SuitID
@@ -293,7 +292,7 @@ public class SuitManager: McuManager {
             commandID = .uploadCache
             // Device will probably restart itself in preparation for .cacheUpload,
             // so we need to retry quickly.
-            uploadTimeoutInSeconds = McuManager.FAST_TIMEOUT_SECONDS
+            uploadTimeout = Self.FAST_TIMEOUT
         } else if sessionID != nil {
             commandID = .uploadResource
         } else {
@@ -303,7 +302,7 @@ public class SuitManager: McuManager {
         let packetLength = maxDataPacketLengthFor(data: data, offset: offset)
         let payload = buildPayload(for: data, at: offset, with: packetLength)
         send(op: .write, commandId: commandID, payload: payload,
-             timeout: uploadTimeoutInSeconds, autoRetry: true, callback: uploadCallback)
+             timeout: Int(uploadTimeout.converted(to: .seconds).value), autoRetry: true, callback: uploadCallback)
     }
     
     // MARK: uploadCallback

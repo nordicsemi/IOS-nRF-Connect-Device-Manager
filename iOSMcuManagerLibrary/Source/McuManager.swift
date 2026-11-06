@@ -44,10 +44,10 @@ open class McuManager: NSObject {
     /// If a specific Timeout is not set, the number of seconds that will be
     /// allowed to elapse before a send request is considered to have failed
     /// due to a timeout if no response is received.
-    public static let DEFAULT_SEND_TIMEOUT_SECONDS = 40
+    public static let UPLOAD_OFFSET_ZERO_TIMEOUT: TimeUnit = Measurement(value: 40, unit: .seconds)
     /// This is the default time to wait for a command to be sent, executed
     /// and received (responded to) by the firmware on the other end.
-    public static let FAST_TIMEOUT_SECONDS = 8
+    public static let FAST_TIMEOUT: TimeUnit = Measurement(value: 2, unit: .seconds)
     /**
      When encountering a ``McuMgrReturnCode/busy`` value during an Upload,
      instead of responding with an Error and cancelling the Upload, we can
@@ -57,7 +57,10 @@ open class McuManager: NSObject {
      by the target firmware having external flash memory it needs to write to
      during DFU. This external memory is, of course, slower.
      */
-    public static let BUSY_WAIT_DELAY_MS: TimeInterval = 0.1
+    public static let BUSY_WAIT_DELAY: TimeUnit = Measurement(value: 0.1, unit: .seconds)
+    
+    /// Instead of adding _S or _MS to constants.
+    public typealias TimeUnit = Measurement<UnitDuration>
     
     //**************************************************************************
     // MARK: Properties
@@ -139,7 +142,7 @@ open class McuManager: NSObject {
     // MARK: send
     
     public func send<T: McuMgrResponse, R: RawRepresentable>(op: McuMgrOperation, commandId: R, payload: [String:CBOR]?,
-                                                             timeout: Int = DEFAULT_SEND_TIMEOUT_SECONDS,
+                                                             timeout: Int = Int(FAST_TIMEOUT.converted(to: .seconds).value),
                                                              autoRetry: Bool = false,
                                                              callback: @escaping McuMgrCallback<T>) where R.RawValue == UInt8 {
         return send(op: op, flags: 0, commandId: commandId, payload: payload, timeout: timeout,
@@ -148,7 +151,7 @@ open class McuManager: NSObject {
     
     public func send<T: McuMgrResponse, R: RawRepresentable>(op: McuMgrOperation, flags: UInt8,
                                                              commandId: R, payload: [String:CBOR]?,
-                                                             timeout: Int = DEFAULT_SEND_TIMEOUT_SECONDS,
+                                                             timeout: Int = Int(FAST_TIMEOUT.converted(to: .seconds).value),
                                                              autoRetry: Bool,
                                                              callback: @escaping McuMgrCallback<T>) where R.RawValue == UInt8 {
         let packetSequenceNumber = getNextPacketSequenceNumber()

@@ -155,7 +155,7 @@ public class ImageManager: McuManager {
         let chunkEnd = min(chunkOffset + payloadLength, UInt64(data.count))
         var payload: [String:CBOR] = ["data": CBOR.byteString([UInt8](data[chunkOffset..<chunkEnd])),
                                       "off": CBOR.unsignedInt(chunkOffset)]
-        let uploadTimeoutInSeconds: Int
+        let uploadTimeout: TimeUnit
         if chunkOffset == 0 {
             // 0 is Default behavior, so we can ignore adding it and
             // the firmware will do the right thing.
@@ -168,11 +168,12 @@ public class ImageManager: McuManager {
             
             // When uploading offset 0, we might trigger an erase on the firmware's end.
             // Hence, the longer timeout.
-            uploadTimeoutInSeconds = McuManager.DEFAULT_SEND_TIMEOUT_SECONDS
+            uploadTimeout = Self.UPLOAD_OFFSET_ZERO_TIMEOUT
         } else {
-            uploadTimeoutInSeconds = McuManager.FAST_TIMEOUT_SECONDS
+            uploadTimeout = Self.FAST_TIMEOUT
         }
-        send(op: .write, commandId: ImageID.upload, payload: payload, timeout: uploadTimeoutInSeconds,
+        send(op: .write, commandId: ImageID.upload, payload: payload,
+             timeout: Int(uploadTimeout.converted(to: .seconds).value),
              autoRetry: true, callback: callback)
     }
     
@@ -572,7 +573,7 @@ public class ImageManager: McuManager {
         if case let McuMgrError.returnCode(.busy) = error {
             log(msg: "Received 'busy' Error from Device. Will try again after a short day.", atLevel: .debug)
             if let offset = response.off {
-                Timer.scheduledTimer(withTimeInterval: McuManager.BUSY_WAIT_DELAY_MS, repeats: false) { [weak self] timer in
+                Timer.scheduledTimer(withTimeInterval: McuManager.BUSY_WAIT_DELAY.value, repeats: false) { [weak self] timer in
                     self?.sendNext(from: offset)
                 }
                 return // prevent Upload Cancellation.
