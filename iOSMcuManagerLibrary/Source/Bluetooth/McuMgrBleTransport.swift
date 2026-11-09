@@ -294,7 +294,7 @@ extension McuMgrBleTransport: McuMgrTransport {
                     self?.log(msg: "⌚ [Seq: \(seqNumberStr)] Transport Error: Sleeping before Retry.", atLevel: .info)
                     #endif
                     
-                    usleep(UInt32(McuManager.BUSY_WAIT_DELAY.converted(to: .microseconds).value))
+                    usleep(useconds_t(McuManager.BUSY_WAIT_DELAY.converted(to: .microseconds).value))
                     
                     guard let self, modePeripherals[mode]?.state == .connected else {
                         // This happens if the user cancels an operation whilst we sleep and then
@@ -626,7 +626,7 @@ extension McuMgrBleTransport: McuMgrTransport {
             }
             log(msg: "<- [Seq: \(sequenceNumber)] \(returnData.hexEncodedString(options: [.upperCase, .twoByteSpacing])) (\(returnData.count) bytes)", atLevel: .debug)
             if lowThroughputMode {
-                usleep(useconds_t(McuMgrBleTransportConstant.LOW_THROUGHPUT_MODE_WAIT_MS * 1000))
+                usleep(useconds_t(McuMgrBleTransportConstant.LOW_THROUGHPUT_MODE_WAIT.converted(to: .microseconds).value))
             }
             return .success(returnData)
         }
@@ -658,7 +658,7 @@ public enum McuMgrBleTransportConstant {
     /// drops packets and kills DFU, we artificially delay returning the transport's
     /// callback to slow down the writes. This might be a threading or buffer issue on
     /// the side of NCS. But it's not a library issue.
-    internal static let LOW_THROUGHPUT_MODE_WAIT_MS = 40
+    internal static let LOW_THROUGHPUT_MODE_WAIT: McuManager.TimeUnit = Measurement(value: 70.0, unit: .milliseconds)
     /// Connection timeout in seconds.
     internal static let CONNECTION_TIMEOUT = 20
 }
