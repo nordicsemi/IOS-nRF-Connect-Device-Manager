@@ -294,8 +294,7 @@ extension McuMgrBleTransport: McuMgrTransport {
                     self?.log(msg: "⌚ [Seq: \(seqNumberStr)] Transport Error: Sleeping before Retry.", atLevel: .info)
                     #endif
                     
-                    let waitInterval = min(timeout, McuMgrBleTransportConstant.WAIT_AND_RETRY_INTERVAL_S)
-                    sleep(UInt32(waitInterval))
+                    usleep(UInt32(McuManager.BUSY_WAIT_DELAY.converted(to: .microseconds).value))
                     
                     guard let self, modePeripherals[mode]?.state == .connected else {
                         // This happens if the user cancels an operation whilst we sleep and then
@@ -655,8 +654,6 @@ extension McuMgrBleTransport: McuMgrTransport {
 public enum McuMgrBleTransportConstant {
     /// Max number of retries until the transaction is failed.
     internal static let MAX_SEND_ATTEMPTS = 3
-    /// The interval to wait before attempting a transaction again in seconds.
-    internal static let WAIT_AND_RETRY_INTERVAL_S = 4
     /// In Low Throughput Mode to fix NCS's 2.5.1 (maybe older and newer) issue which
     /// drops packets and kills DFU, we artificially delay returning the transport's
     /// callback to slow down the writes. This might be a threading or buffer issue on

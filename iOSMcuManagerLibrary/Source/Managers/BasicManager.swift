@@ -20,6 +20,8 @@ public class BasicManager: McuManager {
 
     public static let MAX_ECHO_MESSAGE_SIZE_BYTES = 2475
     
+    public static let ERASE_TIMEOUT: TimeUnit = Measurement(value: 8, unit: .seconds)
+    
     enum ID: UInt8 {
         case reset = 0
     }
@@ -36,7 +38,7 @@ public class BasicManager: McuManager {
     ///
     /// - parameter callback: The response callback with a ``McuMgrResponse``.
     public func eraseAppSettings(callback: @escaping McuMgrCallback<McuMgrResponse>) {
-        send(op: .write, commandId: ID.reset, payload: [:], timeout: McuManager.FAST_TIMEOUT_SECONDS, callback: callback)
+        send(op: .write, commandId: ID.reset, payload: [:], timeout: Int(BasicManager.ERASE_TIMEOUT.converted(to: .seconds).value), callback: callback)
     }
 }
 
