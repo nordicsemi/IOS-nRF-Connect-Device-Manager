@@ -90,7 +90,7 @@ final class ImageController: UITableViewController, ExtendedMcuMgrViewController
     
     internal lazy var uploadSpeedLabel: UILabel = {
         let label = UILabel()
-        label.text = "SPEED"
+        label.text = "Starting..."
         label.textColor = .secondary
         label.font = .preferredFont(forTextStyle: .footnote)
         label.isHidden = true
@@ -175,9 +175,11 @@ final class ImageController: UITableViewController, ExtendedMcuMgrViewController
         estimatedSwapTime: 10.0, eraseAppSettings: false, pipelineDepth: 3, byteAlignment: .fourByte)
     internal var dfuState: FirmwareUpgradeState?
     internal var dfuError: (any Error)?
-    internal var initialBytes: Int = 0
     internal var uploadImageSize: Int!
-    internal var uploadTimestamp: Date!
+    internal var lastBytesSentTimestamp: Date!
+    internal var lastBytesSent: Int = 0
+    internal var uploadStartTimestamp: Date!
+    internal var uploadStartBytesSent: Int = 0
     
     internal var bootloader: BootloaderInfoResponse.Bootloader?
     internal var readImagesResponse: McuMgrImageStateResponse?

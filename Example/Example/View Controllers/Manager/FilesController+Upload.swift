@@ -295,8 +295,10 @@ extension FilesController: FileUploadDelegate {
         
         switch uploadState {
         case .ready, .inProgress:
-            // Date.timeIntervalSince1970 returns seconds
-            let msSinceUploadBegan = max((timestamp.timeIntervalSince1970 - uploadTimestamp.timeIntervalSince1970) * 1000, 1)
+            // Date.timeIntervalSince1970 returns (fractional) seconds as Double
+            let msSinceUploadBegan = max(
+                (timestamp.timeIntervalSince1970 - uploadTimestamp.timeIntervalSince1970) * 1000.0, 1.0
+            )
             let speedInKiloBytesPerSecond: Double
             if bytesSent < fileSize {
                 let bytesSentSinceUploadBegan = bytesSent - uploadBytesSent
