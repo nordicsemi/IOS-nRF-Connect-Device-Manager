@@ -19,7 +19,10 @@ extension ImageController: FirmwareUpgradeDelegate {
         uploadActionButton.setTitle("Pause", for: .normal)
 
         dfuError = nil
-        initialBytes = 0
+        lastBytesSent = 0
+        lastBytesSentTimestamp = nil
+        uploadStartTimestamp = nil
+        uploadStartBytesSent = 0
         uploadImageSize = nil
         
         baseController?.stopObservability()
@@ -72,32 +75,52 @@ extension ImageController: FirmwareUpgradeDelegate {
         uploadSpeedLabel.isHidden = false
 
         let percentage = Float(bytesSent) / Float(imageSize)
+        let bytesSentSinceLastCallback: Int
         if uploadImageSize == nil || uploadImageSize != imageSize {
-            uploadTimestamp = timestamp
             uploadImageSize = imageSize
-            initialBytes = bytesSent
+            uploadStartTimestamp = timestamp
+            uploadStartBytesSent = bytesSent
+            
+            lastBytesSent = bytesSent
+            lastBytesSentTimestamp = timestamp
+            bytesSentSinceLastCallback = bytesSent
             uploadProgressView.setProgress(percentage, animated: false)
         } else {
+            bytesSentSinceLastCallback = bytesSent - lastBytesSent
             uploadProgressView.setProgress(percentage, animated: true)
         }
         
         if isDFUinProgress() {
-            uploadStateLabel?.text = "\(FirmwareUpgradeState.upload.description) (\(String(format: "%.0f%", percentage * 100.0))%)"
             uploadStateLabel?.textColor = FirmwareUpgradeState.upload.associatedColor
         }
         
-        // Date.timeIntervalSince1970 returns seconds
-        let msSinceUploadBegan = max((timestamp.timeIntervalSince1970 - uploadTimestamp.timeIntervalSince1970) * 1000, 1)
-        
         guard bytesSent < imageSize else {
-            let averageSpeedInKiloBytesPerSecond = Double(imageSize - initialBytes) / msSinceUploadBegan
-            uploadSpeedLabel.text = "\(imageSize) bytes sent (avg \(String(format: "%.2f kB/s", averageSpeedInKiloBytesPerSecond)))"
+            // Date.timeIntervalSince1970 returns (fractional) seconds as Double
+            let msSinceUploadBegan = max((timestamp.timeIntervalSince1970 - uploadStartTimestamp.timeIntervalSince1970) * 1000.0, 1.0)
+            let averageSpeedInKiloBytesPerSecond = Double(imageSize - uploadStartBytesSent) / msSinceUploadBegan
+            
+            if #available(iOS 16.0, macCatalyst 16.0, macOS 13.0, *) {
+                let fileSizeMeasurement = Measurement<UnitInformationStorage>(value: Double(imageSize), unit: .bytes)
+                uploadSpeedLabel.text = "\(fileSizeMeasurement.formatted(.byteCount(style: .file))) sent (avg \(String(format: "%.2f kB/s", averageSpeedInKiloBytesPerSecond)))"
+            } else {
+                uploadSpeedLabel.text = "\(imageSize) bytes sent (avg \(String(format: "%.2f kB/s", averageSpeedInKiloBytesPerSecond)))"
+            }
             return
         }
         
-        let bytesSentSinceUploadBegan = bytesSent - initialBytes
+        // Date.timeIntervalSince1970 returns (fractional) seconds as Double
+        let msSinceLastCallback = max(
+            (timestamp.timeIntervalSince1970 - lastBytesSentTimestamp.timeIntervalSince1970) * 1000.0, 1.0
+        )
+        
+        // Don't update UI too quickly. Also resolves first callback (msSinceLastCallback == 1)
+        // (Alternative: Timer that averages speed within the firing window, like green robot does.)
+        guard msSinceLastCallback > 125.0 else { return }
+        lastBytesSentTimestamp = timestamp
+        lastBytesSent = bytesSent
+        
         // bytes / ms = kB/s
-        let speedInKiloBytesPerSecond = Double(bytesSentSinceUploadBegan) / msSinceUploadBegan
+        let speedInKiloBytesPerSecond = Double(bytesSentSinceLastCallback) / msSinceLastCallback
         uploadSpeedLabel.text = String(format: "%.2f kB/s", speedInKiloBytesPerSecond)
         uploadSpeedLabel.textColor = .secondary
     }
@@ -126,7 +149,12 @@ extension ImageController: ImageUploadDelegate {
 
         uploadCancelButton.isHidden = false
         dfuError = nil
-        initialBytes = 0
+        
+        lastBytesSent = 0
+        lastBytesSentTimestamp = nil
+        uploadStartTimestamp = nil
+        uploadStartBytesSent = 0
+        
         uploadImageSize = nil
         
         uploadStateLabel?.text = "Starting"

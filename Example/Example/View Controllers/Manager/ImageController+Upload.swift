@@ -423,8 +423,10 @@ extension ImageController {
             uploadActionButton.setTitle("Resume", for: .normal)
         } else if dfuManager.isPaused() || imageManager.isPaused() {
             // Resume
-            uploadTimestamp = nil
+            lastBytesSentTimestamp = nil
+            uploadStartTimestamp = nil
             uploadImageSize = nil
+            
             if imageManager.isPaused() {
                 imageManager.continueUpload()
             } else if dfuManager.isPaused() {
