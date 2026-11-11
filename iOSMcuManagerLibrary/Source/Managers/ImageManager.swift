@@ -265,7 +265,7 @@ public class ImageManager: McuManager {
         uploadConfiguration = configuration
         // Don't exceed UInt16.max payload size.
         uploadConfiguration.reassemblyBufferSize = min(uploadConfiguration.reassemblyBufferSize, UInt64(UInt16.max))
-        uploadPipeline = McuMgrUploadPipeline(adopting: uploadConfiguration, over: transport)
+        uploadPipeline = McuMgrUploadPipeline(adopting: uploadConfiguration, over: transport, logDelegate: logDelegate)
         
         log(msg: "Uploading Image \(firstImage.image) with Target Slot \(firstImage.slot) (\(firstImage.data.count) bytes)...", atLevel: .verbose)
         upload(data: firstImage.data, image: firstImage.image, offset: 0,

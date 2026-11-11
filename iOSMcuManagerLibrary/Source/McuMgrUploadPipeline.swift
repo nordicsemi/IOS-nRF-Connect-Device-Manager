@@ -11,31 +11,63 @@ import Foundation
 
 public struct McuMgrUploadPipeline {
     
-    // MARK: Properties
+    // MARK: Private Properties
     
-    let depth: Int
-    
+    private var phase: Phase
     private let bufferSize: UInt64
     private var lastReceivedOffset: UInt64
     private var expectedReturnOffsets: [UInt64] = []
     
+    private weak var transport: McuMgrTransport?
+    private weak var logDelegate: McuMgrLogDelegate?
+    
+    // MARK: Internal Properties
+    
+    enum Phase {
+        case start
+        case rampUp(_ depth: Int)
+        case stable(_ depth: Int)
+        case throttled(_ depth: Int)
+        
+        var depth: Int {
+            switch self {
+            case .start:
+                return 1
+            case .rampUp(let depth):
+                return depth
+            case .stable(let depth):
+                return depth
+            case .throttled(let depth):
+                return depth
+            }
+        }
+    }
+    
+    let maxDepth: Int
+    
     // MARK: init
     
-    public init(adopting configuration: FirmwareUpgradeConfiguration, over transport: McuMgrTransport) {
-        self.depth = max(1, configuration.pipelineDepth)
+    public init(adopting configuration: FirmwareUpgradeConfiguration, over transport: McuMgrTransport,
+                logDelegate: McuMgrLogDelegate?) {
+        self.maxDepth = max(1, configuration.pipelineDepth)
         self.bufferSize = configuration.reassemblyBufferSize
         self.lastReceivedOffset = 0
+        self.transport = transport
+        self.logDelegate = logDelegate
+        self.phase = .start
+        phaseChangeTo(.start)
         
         if let bleTransport = transport as? McuMgrBleTransport {
-            bleTransport.numberOfParallelWrites = depth
+            bleTransport.numberOfParallelWrites = phase.depth
             bleTransport.chunkSendDataToMtuSize = bufferSize != 0 // && bufferSize > mtu ?
+//            bleTransport.chunkSendDataToMtuSize = bufferSize != 0 && bufferSize > transport.mtu
         }
     }
     
     // MARK: pipelinedSend(ofSize:using:)
     
     mutating public func pipelinedSend(ofSize imageSize: Int, using sendFrom: @escaping (_ offset: UInt64) -> UInt64) {
-        for _ in 0..<(depth - expectedReturnOffsets.count) {
+        for _ in 0..<(phase.depth - expectedReturnOffsets.count) {
             let offset = expectedReturnOffsets.last ?? lastReceivedOffset
             guard offset < imageSize else {
                 return
@@ -48,8 +80,24 @@ public struct McuMgrUploadPipeline {
     // MARK: receivedData(with:)
     
     mutating public func receivedData(with offset: UInt64) {
-        // We expect In-Order Responses.
         if expectedReturnOffsets.contains(offset) {
+            switch phase {
+            case .start, .rampUp:
+                // We expect In-Order Responses during good ramp-up.
+                if let firstExpectedOffset = expectedReturnOffsets.first, firstExpectedOffset == offset {
+                    if phase.depth < maxDepth {
+                        phaseChangeTo(.rampUp(phase.depth + 1))
+                    } else {
+                        phaseChangeTo(.stable(maxDepth))
+                    }
+                }
+            case .throttled(let depth):
+                // If throttled, DON'T ramp up again. Stability / Reliability > Speed.
+                phaseChangeTo(.stable(depth))
+            case .stable(let depth):
+                break // Nothing to do here.
+            }
+            
             lastReceivedOffset = max(lastReceivedOffset, UInt64(offset))
         } else {
             // Offset Mismatch.
@@ -72,5 +120,30 @@ public struct McuMgrUploadPipeline {
     
     public func allPacketsReceived() -> Bool {
         return expectedReturnOffsets.isEmpty
+    }
+}
+
+// MARK: - Internal
+
+extension McuMgrUploadPipeline {
+    
+    mutating func phaseChangeTo(_ newPhase: Phase) {
+        phase = newPhase
+        switch newPhase {
+        case .start:
+            log("Pipeline start (depth = \(newPhase.depth)) with a max. depth of \(maxDepth)")
+        case .rampUp(let depth):
+            log("Pipeline ramping up (new depth = \(depth))")
+            (transport as? McuMgrBleTransport)?.numberOfParallelWrites = phase.depth
+        case .throttled(let depth):
+            log("Pipeline throttling down (reduced depth = \(depth))")
+            (transport as? McuMgrBleTransport)?.numberOfParallelWrites = phase.depth
+        case .stable(let depth):
+            log("Pipeline stabilised at depth \(depth)")
+        }
+    }
+    
+    func log(_ message: String) {
+        logDelegate?.log(message, ofCategory: .transport, atLevel: .debug)
     }
 }

@@ -199,11 +199,7 @@ public class FileSystemManager: McuManager {
         // can't predict how many bytes the firmware will accept in each chunk.
         uploadConfiguration = configuration
         uploadConfiguration.reassemblyBufferSize = min(uploadConfiguration.reassemblyBufferSize, UInt64(UInt16.max))
-        uploadPipeline = McuMgrUploadPipeline(adopting: uploadConfiguration, over: transport)
-        if let bleTransport = transport as? McuMgrBleTransport {
-            bleTransport.numberOfParallelWrites = uploadPipeline.depth
-            bleTransport.chunkSendDataToMtuSize = uploadConfiguration.reassemblyBufferSize > bleTransport.mtu
-        }
+        uploadPipeline = McuMgrUploadPipeline(adopting: uploadConfiguration, over: transport, logDelegate: logDelegate)
         
         // Grab a strong reference to something holding a strong reference to self.
         cyclicReferenceHolder = { return self }
@@ -665,9 +661,8 @@ private extension FileSystemManager {
         if let bufferCount = response.bufferCount, uploadConfiguration.pipelineDepth >= bufferCount {
             log(msg: "Target pipeline depth of \(bufferCount - 1) is smaller than upload configuration of \(uploadConfiguration.pipelineDepth).", atLevel: .warning)
             uploadConfiguration.pipelineDepth = Int(bufferCount - 1)
-            uploadPipeline = McuMgrUploadPipeline(adopting: uploadConfiguration, over: transport)
-            bleTransport.numberOfParallelWrites = uploadPipeline.depth
-            log(msg: "Pipeline depth set to \(uploadPipeline.depth).", atLevel: .debug)
+            uploadPipeline = McuMgrUploadPipeline(adopting: uploadConfiguration, over: transport, logDelegate: logDelegate)
+            log(msg: "Maximum pipeline depth set to \(uploadPipeline.maxDepth).", atLevel: .debug)
         }
         
         if bufferSize > bleTransport.mtu, !bleTransport.chunkSendDataToMtuSize {
