@@ -17,6 +17,7 @@ public struct McuMgrUploadPipeline {
     private let bufferSize: UInt64
     private var lastReceivedOffset: UInt64
     private var expectedReturnOffsets: [UInt64] = []
+    private var pendingUnflushedCallbacks: Int
     
     private weak var transport: McuMgrTransport?
     private weak var logDelegate: McuMgrLogDelegate?
@@ -41,9 +42,22 @@ public struct McuMgrUploadPipeline {
                 return depth
             }
         }
+        
+        func throttledDown() -> Phase? {
+            switch self {
+            case .start:
+                return nil
+            case .rampUp(let depth), .stable(let depth), .throttled(let depth):
+                guard depth - 1 >= 1 else { return nil }
+                return .throttled(depth - 1)
+            }
+        }
     }
     
     let maxDepth: Int
+    
+    var inFlight: Int { expectedReturnOffsets.count }
+    var availablePipelineSlots: Int { phase.depth - inFlight }
     
     // MARK: init
     
@@ -52,6 +66,7 @@ public struct McuMgrUploadPipeline {
         self.maxDepth = max(1, configuration.pipelineDepth)
         self.bufferSize = configuration.reassemblyBufferSize
         self.lastReceivedOffset = 0
+        self.pendingUnflushedCallbacks = 0
         self.transport = transport
         self.logDelegate = logDelegate
         self.phase = .start
@@ -67,7 +82,14 @@ public struct McuMgrUploadPipeline {
     // MARK: pipelinedSend(ofSize:using:)
     
     mutating public func pipelinedSend(ofSize imageSize: Int, using sendFrom: @escaping (_ offset: UInt64) -> UInt64) {
-        for _ in 0..<(phase.depth - expectedReturnOffsets.count) {
+        for i in 0..<availablePipelineSlots {
+            let maxUnflushedCallbacks = 0 // constant
+            guard pendingUnflushedCallbacks <= maxUnflushedCallbacks else {
+                // Throttling down.
+                // Don't call sendFrom() or we will be sending offsets out of sync with target device.
+                return
+            }
+            
             let offset = expectedReturnOffsets.last ?? lastReceivedOffset
             guard offset < imageSize else {
                 return
@@ -92,6 +114,9 @@ public struct McuMgrUploadPipeline {
                     }
                 }
             case .throttled(let depth):
+                #if DEBUG
+                assert(pendingUnflushedCallbacks == 0, "pendingUnflushedCallbacks is \(pendingUnflushedCallbacks) instead of expected value of 0.")
+                #endif
                 // If throttled, DON'T ramp up again. Stability / Reliability > Speed.
                 phaseChangeTo(.stable(depth))
             case .stable(let depth):
@@ -101,11 +126,43 @@ public struct McuMgrUploadPipeline {
             lastReceivedOffset = max(lastReceivedOffset, UInt64(offset))
         } else {
             // Offset Mismatch.
-            lastReceivedOffset = offset
+            // (the offset / Data sent to the device does not match the response)
             
+            assert(expectedReturnOffsets.count <= phase.depth)
             if !expectedReturnOffsets.isEmpty {
                 expectedReturnOffsets.removeFirst()
             }
+            
+            guard pendingUnflushedCallbacks == 0 else {
+                pendingUnflushedCallbacks -= 1
+                // When a pipeline flush is needed, it usually involved a dropped packet from the
+                // target device (aka 'DFU ghosting' event), so our autoRetry will kick in after
+                // the timeout and it might advance th offset on ocassion. That's why we watch
+                // out for this scenario within a pipeline flush event.
+                lastReceivedOffset = max(lastReceivedOffset, offset)
+                return
+            }
+            
+            // Check firmware update offsets are advancing.
+            let isPipelineFlushNeeded = offset == lastReceivedOffset
+            if isPipelineFlushNeeded {
+                pendingUnflushedCallbacks = expectedReturnOffsets.count
+                
+                // We need to clear our current offsets and start over.
+                // If we don't do this, the next call on pipelinedSend() will start from a wrong
+                // offset far above what the device is going to reply with, causing an endless
+                // loop of us sending Data from the wrong starting (offset) point.
+                expectedReturnOffsets.removeAll()
+                
+                // Throttle down if possible to improve reliability.
+                // A likely cause for needing this pipeline flush even is that the target device
+                // cannot handle so many writes in parallel.
+                if let throttledState = phase.throttledDown() {
+                    phaseChangeTo(throttledState)
+                }
+            }
+            
+            lastReceivedOffset = offset
             
             // All of our previous 'sends' are invalid.
             // Wait for all of them to return and then continue.
