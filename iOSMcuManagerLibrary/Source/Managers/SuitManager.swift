@@ -222,7 +222,7 @@ public class SuitManager: McuManager {
         resetUploadVariables()
         uploadData = images[uploadIndex].data
         uploadDelegate = delegate
-        uploadPipeline = McuMgrUploadPipeline(adopting: configuration, over: transport)
+        uploadPipeline = McuMgrUploadPipeline(adopting: configuration, over: transport, logDelegate: logDelegate)
         state = .uploadingEnvelope
         upload(uploadData, deferInstall: deferInstall, at: offset)
     }

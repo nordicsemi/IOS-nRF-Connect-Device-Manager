@@ -13,6 +13,8 @@ import OSLog
 
 extension McuMgrBleTransport: CBPeripheralDelegate {
     
+    // MARK: peripheral(_:didDiscoverServices:)
+    
     public func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
         // Check for error.
         guard error == nil else {
@@ -46,6 +48,8 @@ extension McuMgrBleTransport: CBPeripheralDelegate {
         }
         connectionLock.open(McuMgrBleTransportError.missingService)
     }
+    
+    // MARK: peripheral(_:didDiscoverCharacteristicsFor:error:)
     
     public func peripheral(_ peripheral: CBPeripheral,
                            didDiscoverCharacteristicsFor service: CBService,
@@ -83,6 +87,8 @@ extension McuMgrBleTransport: CBPeripheralDelegate {
         connectionLock.open(McuMgrBleTransportError.missingCharacteristic)
     }
     
+    // MARK: peripheral(_:didUpdateNotificationStateFor:error:)
+    
     public func peripheral(_ peripheral: CBPeripheral,
                            didUpdateNotificationStateFor characteristic: CBCharacteristic,
                            error: Error?) {
@@ -107,6 +113,8 @@ extension McuMgrBleTransport: CBPeripheralDelegate {
         connectionLock.open(key: McuMgrBleTransportKey.discoveringSmpCharacteristic.rawValue)
     }
     
+    // MARK: peripheral(_:didUpdateValueFor:error:)
+    
     public func peripheral(_ peripheral: CBPeripheral,
                            didUpdateValueFor characteristic: CBCharacteristic,
                            error: Error?) {
@@ -114,7 +122,7 @@ extension McuMgrBleTransport: CBPeripheralDelegate {
             return
         }
         
-        if let error = error {
+        if let error {
             writeState.onError(error)
             return
         }
@@ -128,7 +136,7 @@ extension McuMgrBleTransport: CBPeripheralDelegate {
         
         // Check that we've received all the data for the Sequence Number of the
         // previous received Data.
-        if let previousUpdateNotificationSequenceNumber = previousUpdateNotificationSequenceNumber,
+        if let previousUpdateNotificationSequenceNumber,
            !writeState.isChunkComplete(for: previousUpdateNotificationSequenceNumber) {
             
             // Add Data to the previous Sequence Number.
@@ -145,6 +153,8 @@ extension McuMgrBleTransport: CBPeripheralDelegate {
         previousUpdateNotificationSequenceNumber = sequenceNumber
         writeState.received(sequenceNumber: sequenceNumber, data: data)
     }
+    
+    // MARK: peripheralIsReady(toSendWriteWithoutResponse:) {
     
     public func peripheralIsReady(toSendWriteWithoutResponse peripheral: CBPeripheral) {
         // Restart any paused writes due to Peripheral not being ready for more writes.
