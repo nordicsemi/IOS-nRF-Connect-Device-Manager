@@ -16,6 +16,7 @@ public enum FirmwareUpgradeError: Error, LocalizedError {
     case invalidResponse(McuMgrResponse)
     case connectionFailedAfterReset
     case uploadedImageNotFound(image: Int, slot: Int)
+    case uploadedImageNotActive(image: Int, slot: Int)
     case untestedImageFound(image: Int, slot: Int)
     case resetIntoBootloaderModeNeeded
     
@@ -27,8 +28,10 @@ public enum FirmwareUpgradeError: Error, LocalizedError {
             return "Invalid response: \(response)"
         case .connectionFailedAfterReset:
             return "Connection failed after reset"
-        case .uploadedImageNotFound(let image, let slot):
-            return "Uploaded Image \(image) to slot: \(slot) not found after Reset."
+        case .uploadedImageNotFound(let image, _):
+            return "The new image was not found after the reset (image \(image))"
+        case .uploadedImageNotActive(let image, _):
+            return "The new image is not active after the reset (image \(image))"
         case .untestedImageFound(let image, let slot):
             return "Image \(image) (slot: \(slot)) found to be not Tested after Reset"
         case .resetIntoBootloaderModeNeeded:
