@@ -22,7 +22,7 @@ let package = Package(
         ),
         .package(
             url: "https://github.com/weichsel/ZIPFoundation.git",
-            .exact("0.9.20")
+            .exact("0.9.21")
         ),
         .package(
             url: "https://github.com/nordicsemi/IOS-BLE-Library",
