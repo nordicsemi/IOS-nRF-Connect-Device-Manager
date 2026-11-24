@@ -57,7 +57,16 @@ public struct McuMgrUploadPipeline {
     let maxDepth: Int
     
     var inFlight: Int { expectedReturnOffsets.count }
-    var availablePipelineSlots: Int { phase.depth - inFlight }
+    
+    var availablePipelineSlots: Int {
+        let maxUnflushedCallbacks = 0 // constant
+        guard pendingUnflushedCallbacks <= maxUnflushedCallbacks else {
+            // If we're trying to flush the pipeline, we have no slots available to send more Data.
+            return 0
+        }
+        
+        return phase.depth - inFlight
+    }
     
     // MARK: init
     
@@ -82,14 +91,9 @@ public struct McuMgrUploadPipeline {
     // MARK: pipelinedSend(ofSize:using:)
     
     mutating public func pipelinedSend(ofSize imageSize: Int, using sendFrom: @escaping (_ offset: UInt64) -> UInt64) {
+        // availablePipelineSlots will be zero under 'pipeline flushing'
+        // (aka pendingUnflushedCallbacks != 0) scenario.
         for i in 0..<availablePipelineSlots {
-            let maxUnflushedCallbacks = 0 // constant
-            guard pendingUnflushedCallbacks <= maxUnflushedCallbacks else {
-                // Throttling down.
-                // Don't call sendFrom() or we will be sending offsets out of sync with target device.
-                return
-            }
-            
             let offset = expectedReturnOffsets.last ?? lastReceivedOffset
             guard offset < imageSize else {
                 return
