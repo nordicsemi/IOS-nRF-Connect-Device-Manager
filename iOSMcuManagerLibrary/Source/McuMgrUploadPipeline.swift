@@ -128,7 +128,11 @@ public struct McuMgrUploadPipeline {
             // Offset Mismatch.
             // (the offset / Data sent to the device does not match the response)
             
+            #if DEBUG
             assert(expectedReturnOffsets.count <= phase.depth)
+            #endif
+            // A callback was received. Whether it matches an expected value or or not,
+            // there's one offset less that we're expecting now.
             if !expectedReturnOffsets.isEmpty {
                 expectedReturnOffsets.removeFirst()
             }
