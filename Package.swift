@@ -48,6 +48,11 @@ let package = Package(
                 .product(name: "iOSCommonLibraries", package: "IOS-Common-Libraries")
             ],
             path: "iOSOtaLibrary/Source"
+        ),
+        .testTarget(
+            name: "iOSMcuManagerLibraryTests",
+            dependencies: ["iOSMcuManagerLibrary", "SwiftCBOR"],
+            path: "iOSMcuManagerLibrary/Tests"
         )
     ]
 )
